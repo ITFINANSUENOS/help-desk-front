@@ -2,23 +2,62 @@ import { api } from './api';
 import type { Ticket, TicketFilter, TicketListResponse, CreateTicketDto, TicketStatus, TicketPriority, TicketDetail, TicketTimelineItem } from '../interfaces/Ticket';
 
 // Interface for the raw backend response (Spanish fields)
+interface RawUser {
+    id: number;
+    nombre: string;
+    apellido: string;
+    email: string;
+    // ... add more if needed
+}
+
+interface RawCategory {
+    id: number;
+    nombre: string;
+    descripcion?: string;
+    // ...
+}
+
+interface RawSubcategory {
+    id: number;
+    nombre: string;
+    // ...
+}
+
+interface RawPriority {
+    id: number;
+    nombre: string;
+    // ...
+}
+
+interface RawWorkflowStep {
+    id: number;
+    nombre: string;
+    descripcion: string;
+    // ...
+}
+
 interface RawTicket {
     id: number;
     titulo: string;
-    creadorNombre?: string;
-    estado: string;
-    prioridadUsuario?: string;
-    prioridadDefecto?: string;
+    descripcion: string;
+    ticketEstado: string; // "Abierto"
+    errorProceso: number;
     fechaCreacion: string;
 
-    // Detailed fields (might be optional in list view)
-    descripcion?: string;
-    categoria?: string | { nombre: string }; // Can be object or string based on previous debugging
-    subcategoria?: string | { nombre: string };
-    pasoActual?: string | { nombre: string };
-    pasoActualId?: number;
-    usuarioAsignado?: string;
-    usuarioAsignadoId?: number;
+    // Nested objects
+    usuario?: RawUser;
+    categoria?: RawCategory;
+    subcategoria?: RawSubcategory;
+    prioridad?: RawPriority;
+    pasoActual?: RawWorkflowStep;
+
+    usuarioAsignadoIds?: number[];
+
+    // Legacy/List fields fallback (if list endpoint uses different structure)
+    creadorNombre?: string;
+    estado?: string;
+    prioridadUsuario?: string;
+    prioridadDefecto?: string;
 }
 
 interface RawTimelineItem {
@@ -57,18 +96,25 @@ export const ticketService = {
         params.limit = filter.limit || 10;
 
         // NOTE: This endpoint is defined in API.md as GET /tickets/list
+        // IMPORTANT: We need to handle potential differences between List and Detail DTOs.
+        // For now, we assume List might still return flatter structure or we map carefully.
+        // To satisfy lint, we define a loose shape for list items or reuse RawTicket if we are confident.
+        // Given we don't have list JSON, we'll try to use a union or Partial<RawTicket> but 'any' was flagged.
+        // Let's use a temporary interface locally or just safely cast.
+
         const response = await api.get<{ data: RawTicket[], meta: TicketListResponse['meta'] }>('/tickets/list', { params });
 
-        // Adapter: Map Backend/Spanish response to Frontend/English interface
         const rawData = response.data.data || [];
         const mappedTickets: Ticket[] = rawData.map((t: RawTicket) => ({
             id: t.id,
             subject: t.titulo,
-            customer: t.creadorNombre || 'Unknown',
-            customerInitials: (t.creadorNombre || 'U').split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase(),
-            status: mapStatus(t.estado),
-            priority: mapPriority(t.prioridadUsuario || t.prioridadDefecto || 'Media'),
-            lastUpdated: new Date(t.fechaCreacion).toLocaleDateString() // Simple formatting
+            customer: t.creadorNombre || (t.usuario ? `${t.usuario.nombre} ${t.usuario.apellido}` : 'Unknown'),
+            customerInitials: (t.creadorNombre || (t.usuario ? `${t.usuario.nombre}` : 'U')).split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase(),
+            // Map status. The backend might return 'ticketEstado' OR 'estado' (int or string).
+            status: mapStatus(t.ticketEstado || t.estado || 'Abierto'),
+            // Map priority.
+            priority: mapPriority(t.prioridad ? t.prioridad.nombre : (t.prioridadUsuario || 'Media')),
+            lastUpdated: new Date(t.fechaCreacion).toLocaleDateString()
         }));
 
         return {
@@ -80,14 +126,13 @@ export const ticketService = {
     async createTicket(data: CreateTicketDto): Promise<Ticket> {
         const response = await api.post<RawTicket>('/tickets', data);
         const t = response.data;
-        // Map single ticket response
         return {
             id: t.id,
             subject: t.titulo,
-            customer: t.creadorNombre || 'Me', // When creating, it might not return creator name immediately
+            customer: 'Me',
             customerInitials: 'ME',
-            status: mapStatus(t.estado),
-            priority: mapPriority(t.prioridadUsuario || 'Media'),
+            status: mapStatus(t.ticketEstado || t.estado || 'Abierto'), // Fallback
+            priority: mapPriority('Media'), // Backend usually sets default
             lastUpdated: new Date().toLocaleDateString()
         };
     },
@@ -95,31 +140,34 @@ export const ticketService = {
     async getTicket(id: number): Promise<TicketDetail> {
         const response = await api.get<RawTicket>(`/tickets/${id}`);
         const t = response.data;
+
+        // Safe access helpers in case of nulls
+        const customerName = t.usuario ? `${t.usuario.nombre} ${t.usuario.apellido}` : (t.creadorNombre || 'Unknown');
+        const categoryName = t.categoria ? t.categoria.nombre : 'General';
+        const subcategoryName = t.subcategoria ? t.subcategoria.nombre : '';
+        const priorityName = t.prioridad ? t.prioridad.nombre : (t.prioridadUsuario || 'Media');
+        const stepName = t.pasoActual ? t.pasoActual.nombre : 'Procesamiento';
+        const stepId = t.pasoActual ? t.pasoActual.id : 0;
+
         return {
             id: t.id,
             subject: t.titulo,
-            customer: t.creadorNombre || 'Unknown',
-            customerInitials: (t.creadorNombre || 'U').split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase(),
-            status: mapStatus(t.estado),
-            priority: mapPriority(t.prioridadUsuario || t.prioridadDefecto || 'Media'),
+            customer: customerName,
+            customerInitials: customerName.split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase(),
+            status: mapStatus(t.ticketEstado || t.estado),
+            priority: mapPriority(priorityName),
             lastUpdated: new Date(t.fechaCreacion).toLocaleDateString(),
 
             // Detail specific
             description: t.descripcion || '',
-            category: typeof t.categoria === 'object' && t.categoria !== null && 'nombre' in t.categoria
-                ? t.categoria.nombre
-                : (typeof t.categoria === 'string' ? t.categoria : 'General'),
-            subcategory: typeof t.subcategoria === 'object' && t.subcategoria !== null && 'nombre' in t.subcategoria
-                ? t.subcategoria.nombre
-                : (typeof t.subcategoria === 'string' ? t.subcategoria : ''),
+            category: categoryName,
+            subcategory: subcategoryName,
             createdDate: t.fechaCreacion,
-            creatorName: t.creadorNombre || 'Unknown',
-            workflowStep: typeof t.pasoActual === 'object' && t.pasoActual !== null && 'nombre' in t.pasoActual
-                ? t.pasoActual.nombre
-                : (typeof t.pasoActual === 'string' ? t.pasoActual : 'Review'),
-            workflowStepId: t.pasoActualId || 0,
-            assignedTo: t.usuarioAsignado,
-            assignedToId: t.usuarioAsignadoId
+            creatorName: customerName,
+            workflowStep: stepName,
+            workflowStepId: stepId,
+            assignedTo: 'Unknown', // Not explicitly in JSON top level
+            assignedToId: (t.usuarioAsignadoIds && t.usuarioAsignadoIds.length > 0) ? t.usuarioAsignadoIds[0] : 0
         };
     },
 
@@ -151,28 +199,64 @@ export const ticketService = {
 };
 
 // Helper mappers
-function mapStatus(estado: string): TicketStatus {
+function mapStatus(estado: string | number | undefined): TicketStatus {
+    // If it's a number, map it to a string if we knew the mapping. 
+    // For now, default to Abierto if unknown.
+    if (typeof estado === 'number') {
+        const statusMap: Record<number, TicketStatus> = {
+            1: 'Abierto',
+            2: 'Pausado',
+            3: 'Cerrado'
+            // Add other numeric maps if discovered
+        };
+        return statusMap[estado] || 'Abierto';
+    }
+
+    if (!estado) return 'Abierto';
+
+    // Normalize string
+    const valid: TicketStatus[] = ['Abierto', 'Pausado', 'Cerrado'];
+    if (valid.includes(estado as TicketStatus)) {
+        return estado as TicketStatus;
+    }
+
+    // Map legacy or English status to new Spanish types
     const map: Record<string, TicketStatus> = {
-        'Abierto': 'Open',
-        'En Proceso': 'In Progress',
-        'Pausado': 'In Progress', // Mapping Pausado to In Progress for now
-        'Resuelto': 'Resolved',
-        'Cerrado': 'Closed'
+        'Open': 'Abierto',
+        'Abierto': 'Abierto',
+        'In Progress': 'Pausado', // Mapping "In Progress" to "Pausado" as per user request/code? Or "Abierto"? User used "Pausado".
+        'En Proceso': 'Pausado',
+        'Pausado': 'Pausado',
+        'Resolved': 'Cerrado',
+        'Resuelto': 'Cerrado',
+        'Closed': 'Cerrado',
+        'Cerrado': 'Cerrado'
     };
-    return map[estado] || 'Open';
+    return map[estado] || 'Abierto';
 }
 
 function mapPriority(prioridad: string): TicketPriority {
+    if (!prioridad) return 'Media';
+
+    const valid: TicketPriority[] = ['Alta', 'Media', 'Baja'];
+    if (valid.includes(prioridad as TicketPriority)) {
+        return prioridad as TicketPriority;
+    }
+
     const map: Record<string, TicketPriority> = {
-        'Alta': 'High',
-        'Media': 'Medium',
-        'Baja': 'Low',
-        'Critica': 'High'
+        'High': 'Alta',
+        'Alta': 'Alta',
+        'Critica': 'Alta',
+        'Medium': 'Media',
+        'Media': 'Media',
+        'Low': 'Baja',
+        'Baja': 'Baja'
     };
-    return map[prioridad] || 'Medium';
+    return map[prioridad] || 'Media';
 }
 
 function mapTimelineType(tipo: string): TicketTimelineItem['type'] {
+    if (!tipo) return 'comment';
     const normalize = tipo.toLowerCase();
     const map: Record<string, TicketTimelineItem['type']> = {
         'comentario': 'comment',

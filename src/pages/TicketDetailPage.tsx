@@ -37,28 +37,27 @@ export default function TicketDetailPage() {
 
     const getStatusColor = (status: TicketStatus) => {
         switch (status) {
-            case 'Open': return 'bg-cyan-50 text-brand-teal ring-brand-teal/20';
-            case 'In Progress': return 'bg-blue-50 text-brand-accent ring-brand-accent/20';
-            case 'Resolved': return 'bg-green-50 text-green-600 ring-green-600/20';
-            case 'Closed': return 'bg-gray-100 text-gray-600 ring-gray-600/20';
+            case 'Abierto': return 'bg-cyan-50 text-brand-teal ring-brand-teal/20';
+            case 'Pausado': return 'bg-blue-50 text-brand-accent ring-brand-accent/20';
+            case 'Cerrado': return 'bg-gray-100 text-gray-600 ring-gray-600/20';
             default: return 'bg-gray-100 text-gray-600 ring-gray-600/20';
         }
     };
 
     const getPriorityColor = (priority: TicketPriority) => {
         switch (priority) {
-            case 'High': return 'bg-red-50 text-brand-red ring-brand-red/20';
-            case 'Medium': return 'bg-orange-50 text-orange-600 ring-orange-600/20';
-            case 'Low': return 'bg-green-50 text-green-600 ring-green-600/20';
+            case 'Alta': return 'bg-red-50 text-brand-red ring-brand-red/20';
+            case 'Media': return 'bg-orange-50 text-orange-600 ring-orange-600/20';
+            case 'Baja': return 'bg-green-50 text-green-600 ring-green-600/20';
             default: return 'bg-gray-50 text-gray-600 ring-gray-600/20';
         }
     };
 
     if (loading) {
         return (
-            <DashboardLayout title="Ticket Details">
+            <DashboardLayout title="Detalle del Ticket">
                 <div className="flex h-64 items-center justify-center">
-                    <p className="text-gray-500">Loading ticket details...</p>
+                    <p className="text-gray-500">Cargando detalle del ticket...</p>
                 </div>
             </DashboardLayout>
         );
@@ -66,11 +65,11 @@ export default function TicketDetailPage() {
 
     if (!ticket) {
         return (
-            <DashboardLayout title="Ticket Not Found">
+            <DashboardLayout title="Ticket No Encontrado">
                 <div className="flex flex-col items-center justify-center h-64 gap-4">
-                    <p className="text-gray-500">The requested ticket could not be found.</p>
+                    <p className="text-gray-500">El ticket solicitado no pudo ser encontrado.</p>
                     <Button variant="secondary" onClick={() => navigate('/tickets')}>
-                        Back to Tickets
+                        Volver a Tickets
                     </Button>
                 </div>
             </DashboardLayout>
@@ -92,32 +91,32 @@ export default function TicketDetailPage() {
                             {ticket.status}
                         </span>
                         <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-bold ring-1 ring-inset ${getPriorityColor(ticket.priority)}`}>
-                            {ticket.priority} Priority
+                            {ticket.priority}
                         </span>
                     </div>
                     <div className="flex items-center gap-6 text-sm text-gray-500 pl-9">
                         <span className="flex items-center gap-1.5">
                             <span className="material-symbols-outlined text-[18px]">calendar_today</span>
-                            Created: {new Date(ticket.createdDate).toLocaleDateString()}
+                            Creado: {new Date(ticket.createdDate).toLocaleDateString()}
                         </span>
                         <span className="flex items-center gap-1.5">
                             <span className="material-symbols-outlined text-[18px]">person</span>
-                            Customer: {ticket.customer}
+                            Cliente: {ticket.customer}
                         </span>
                         <span className="flex items-center gap-1.5">
                             <span className="material-symbols-outlined text-[18px]">folder</span>
-                            Category: {ticket.category}
+                            Categoría: {ticket.category}
                         </span>
                     </div>
                 </div>
                 <div className="flex gap-3">
                     <Button variant="secondary">
                         <span className="material-symbols-outlined mr-2">print</span>
-                        Print
+                        Imprimir
                     </Button>
                     <Button variant="brand">
                         <span className="material-symbols-outlined mr-2">edit</span>
-                        Edit Ticket
+                        Editar Ticket
                     </Button>
                 </div>
             </div>
@@ -127,11 +126,11 @@ export default function TicketDetailPage() {
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
                 <div className="lg:col-span-3 space-y-6">
                     <div className="flex items-center justify-between">
-                        <h3 className="text-lg font-bold text-gray-900">Activity Timeline</h3>
+                        <h3 className="text-lg font-bold text-gray-900">Actividad Reciente</h3>
                         <div className="flex gap-2">
-                            <button className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50">All Activity</button>
-                            <button className="rounded-lg border border-transparent px-3 py-1.5 text-xs font-medium text-gray-500 hover:text-gray-700">Comments Only</button>
-                            <button className="rounded-lg border border-transparent px-3 py-1.5 text-xs font-medium text-gray-500 hover:text-gray-700">History</button>
+                            <button className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50">Toda la Actividad</button>
+                            <button className="rounded-lg border border-transparent px-3 py-1.5 text-xs font-medium text-gray-500 hover:text-gray-700">Comentarios</button>
+                            <button className="rounded-lg border border-transparent px-3 py-1.5 text-xs font-medium text-gray-500 hover:text-gray-700">Historial</button>
                         </div>
                     </div>
 

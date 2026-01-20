@@ -49,7 +49,7 @@ export function TicketTimeline({ items }: TicketTimelineProps) {
                         {item.type === 'status_change' ? (
                             <div className="flex items-center gap-3">
                                 <span className="text-sm font-medium text-gray-900">
-                                    Status updated to <span className="text-brand-teal">{item.metadata?.newStatus || 'Unknown'}</span>
+                                    Estado actualizado a <span className="text-brand-teal">{item.metadata?.newStatus || 'Desconocido'}</span>
                                 </span>
                             </div>
                         ) : (

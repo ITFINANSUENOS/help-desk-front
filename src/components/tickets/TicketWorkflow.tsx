@@ -8,19 +8,19 @@ export function TicketWorkflow({ ticket }: TicketWorkflowProps) {
     // This is a simplified view. Ideally, we should fetch the full workflow definition.
     // For now, we mock steps based on common status progression.
     const steps = [
-        { id: 1, name: 'Request Created', status: 'completed' },
-        { id: 2, name: 'Triage', status: 'completed' },
-        { id: 3, name: 'Processing', status: ticket.status === 'In Progress' ? 'current' : (ticket.status === 'Resolved' || ticket.status === 'Closed' ? 'completed' : 'pending') },
-        { id: 4, name: 'Resolution', status: ticket.status === 'Resolved' || ticket.status === 'Closed' ? 'completed' : 'pending' },
-        { id: 5, name: 'Closure', status: ticket.status === 'Closed' ? 'completed' : 'pending' },
+        { id: 1, name: 'Solicitud Creada', status: 'completed' },
+        { id: 2, name: 'Triaje', status: 'completed' },
+        { id: 3, name: 'Procesamiento', status: ticket.status === 'Pausado' ? 'current' : (ticket.status === 'Cerrado' ? 'completed' : 'pending') },
+        { id: 4, name: 'Resolución', status: ticket.status === 'Cerrado' ? 'completed' : 'pending' },
+        { id: 5, name: 'Cierre', status: ticket.status === 'Cerrado' ? 'completed' : 'pending' },
     ];
 
     // Override active step based on API field if available
-    const activeStepName = ticket.workflowStep || 'Processing';
+    const activeStepName = ticket.workflowStep || 'Procesamiento';
 
     return (
         <div className="mb-8 rounded-xl border border-brand-accent/20 bg-white p-6 shadow-sm">
-            <h3 className="mb-6 text-sm font-bold uppercase tracking-wider text-gray-500">Workflow Progress</h3>
+            <h3 className="mb-6 text-sm font-bold uppercase tracking-wider text-gray-500">Progreso del Flujo</h3>
             <div className="relative">
                 {/* Progress Bar Background */}
                 <div className="absolute left-0 top-1/2 h-1 w-full -translate-y-1/2 bg-gray-100 rounded-full"></div>
@@ -54,9 +54,9 @@ export function TicketWorkflow({ ticket }: TicketWorkflowProps) {
             </div>
 
             <div className="mt-8 rounded-lg bg-sky-50 p-4 border border-sky-100">
-                <h4 className="text-sm font-bold text-brand-accent mb-1">Current Step: {activeStepName}</h4>
+                <h4 className="text-sm font-bold text-brand-accent mb-1">Paso Actual: {activeStepName}</h4>
                 <p className="text-sm text-gray-600">
-                    Task Description: {ticket.description || 'No description available for this step.'}
+                    Descripción de la Tarea: {ticket.description || 'No hay descripción disponible para este paso.'}
                 </p>
             </div>
         </div>

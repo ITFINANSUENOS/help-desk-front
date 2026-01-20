@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '../layout/DashboardLayout';
 import { ticketService } from '../services/ticket.service';
 import type { Ticket, TicketStatus, TicketPriority } from '../interfaces/Ticket';
@@ -6,6 +7,7 @@ import { Button } from '../components/ui/Button';
 import { CreateTicketModal } from '../components/tickets/CreateTicketModal';
 
 export default function TicketsPage() {
+    const navigate = useNavigate();
     const [tickets, setTickets] = useState<Ticket[]>([]);
     const [loading, setLoading] = useState(true);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -41,19 +43,18 @@ export default function TicketsPage() {
 
     const getStatusColor = (status: TicketStatus) => {
         switch (status) {
-            case 'Open': return 'bg-cyan-50 text-brand-teal';
-            case 'In Progress': return 'bg-blue-50 text-brand-accent';
-            case 'Resolved': return 'bg-green-50 text-green-600';
-            case 'Closed': return 'bg-gray-100 text-gray-600';
+            case 'Abierto': return 'bg-cyan-50 text-brand-teal';
+            case 'Pausado': return 'bg-blue-50 text-brand-accent';
+            case 'Cerrado': return 'bg-gray-100 text-gray-600';
             default: return 'bg-gray-100 text-gray-600';
         }
     };
 
     const getPriorityColor = (priority: TicketPriority) => {
         switch (priority) {
-            case 'High': return 'bg-brand-red';
-            case 'Medium': return 'bg-orange-400';
-            case 'Low': return 'bg-green-500';
+            case 'Alta': return 'bg-brand-red';
+            case 'Media': return 'bg-orange-400';
+            case 'Baja': return 'bg-green-500';
             default: return 'bg-gray-400';
         }
     };
@@ -129,10 +130,9 @@ export default function TicketsPage() {
                                 onChange={(e) => setStatusFilter(e.target.value as TicketStatus | 'All Statuses')}
                             >
                                 <option>All Statuses</option>
-                                <option>Open</option>
-                                <option>In Progress</option>
-                                <option>Resolved</option>
-                                <option>Closed</option>
+                                <option>Abierto</option>
+                                <option>Pausado</option>
+                                <option>Cerrado</option>
                             </select>
                             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
                                 <span className="material-symbols-outlined text-lg">expand_more</span>
@@ -145,9 +145,9 @@ export default function TicketsPage() {
                                 onChange={(e) => setPriorityFilter(e.target.value as TicketPriority | 'All Priorities')}
                             >
                                 <option>All Priorities</option>
-                                <option>High</option>
-                                <option>Medium</option>
-                                <option>Low</option>
+                                <option>Alta</option>
+                                <option>Media</option>
+                                <option>Baja</option>
                             </select>
                             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
                                 <span className="material-symbols-outlined text-lg">expand_more</span>
@@ -190,7 +190,11 @@ export default function TicketsPage() {
                                 </tr>
                             ) : (
                                 tickets.map((ticket) => (
-                                    <tr key={ticket.id} className="group hover:bg-gray-50 transition-colors">
+                                    <tr
+                                        key={ticket.id}
+                                        className="group hover:bg-gray-50 transition-colors cursor-pointer"
+                                        onClick={() => navigate(`/tickets/${ticket.id}`)}
+                                    >
                                         <td className="px-6 py-4 font-mono font-medium text-gray-900">#TK-{ticket.id}</td>
                                         <td className="px-6 py-4">
                                             <p className="font-medium text-gray-900">{ticket.subject}</p>
@@ -217,7 +221,10 @@ export default function TicketsPage() {
                                         </td>
                                         <td className="px-6 py-4 text-gray-500">{ticket.lastUpdated}</td>
                                         <td className="px-6 py-4 text-right">
-                                            <button className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-brand-blue">
+                                            <button className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-brand-blue" onClick={(e) => {
+                                                e.stopPropagation(); // Prevent row click
+                                                // TODO: Add dropdown menu logic
+                                            }}>
                                                 <span className="material-symbols-outlined">more_vert</span>
                                             </button>
                                         </td>
