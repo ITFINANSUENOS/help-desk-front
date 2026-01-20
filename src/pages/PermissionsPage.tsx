@@ -16,6 +16,7 @@ export default function PermissionsPage() {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
     // Form state
+    const [nombre, setNombre] = useState('');
     const [subject, setSubject] = useState('');
     const [action, setAction] = useState('read');
     const [description, setDescription] = useState('');
@@ -48,10 +49,11 @@ export default function PermissionsPage() {
         e.preventDefault();
         setFormLoading(true);
         try {
-            await rbacService.createPermission({ subject, action, descripcion: description });
+            await rbacService.createPermission({ nombre, subject, action, descripcion: description });
             await fetchPermissions();
             setIsCreateModalOpen(false);
             // Reset form
+            setNombre('');
             setSubject('');
             setAction('read');
             setDescription('');
@@ -112,6 +114,7 @@ export default function PermissionsPage() {
                         <thead className="bg-gray-50 text-xs font-semibold uppercase text-gray-500">
                             <tr>
                                 <th className="px-6 py-4">ID</th>
+                                <th className="px-6 py-4">Nombre</th>
                                 <th className="px-6 py-4">Subject (Recurso)</th>
                                 <th className="px-6 py-4">Action (Acción)</th>
                                 <th className="px-6 py-4">Descripción</th>
@@ -121,13 +124,13 @@ export default function PermissionsPage() {
                         <tbody className="divide-y divide-gray-100">
                             {loading ? (
                                 <tr>
-                                    <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+                                    <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
                                         Cargando permisos...
                                     </td>
                                 </tr>
                             ) : permissions.length === 0 ? (
                                 <tr>
-                                    <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+                                    <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
                                         No hay permisos definidos.
                                     </td>
                                 </tr>
@@ -135,7 +138,8 @@ export default function PermissionsPage() {
                                 permissions.map((perm) => (
                                     <tr key={perm.id} className="hover:bg-gray-50 transition-colors">
                                         <td className="px-6 py-4 font-mono text-xs text-gray-400">#{perm.id}</td>
-                                        <td className="px-6 py-4 font-medium text-gray-900">{perm.subject}</td>
+                                        <td className="px-6 py-4 font-medium text-gray-900">{perm.nombre}</td>
+                                        <td className="px-6 py-4 text-gray-600">{perm.subject}</td>
                                         <td className="px-6 py-4">
                                             <span className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${perm.action === 'delete' ? 'bg-red-50 text-red-700 ring-red-600/10' :
                                                 perm.action === 'update' ? 'bg-yellow-50 text-yellow-800 ring-yellow-600/20' :
@@ -171,6 +175,13 @@ export default function PermissionsPage() {
                 title="Nueva Definición de Permiso"
             >
                 <form onSubmit={handleCreatePermission} className="space-y-4">
+                    <Input
+                        label="Nombre"
+                        placeholder="Ej. users:read"
+                        value={nombre}
+                        onChange={(e) => setNombre(e.target.value)}
+                        required
+                    />
                     <div className="space-y-1">
                         <label className="text-sm font-medium text-gray-700">Subject (Recurso)</label>
                         <select

@@ -223,7 +223,7 @@ export default function RoleDetailPage() {
                                                     onChange={() => handlePermissionChange(perm.id)}
                                                 />
                                                 <div>
-                                                    <div className="font-medium text-gray-900 capitalize">{perm.action}</div>
+                                                    <div className="font-medium text-gray-900">{perm.nombre} <span className="text-xs text-gray-500 font-normal">({perm.action})</span></div>
                                                     <div className="text-xs text-gray-500">{perm.descripcion}</div>
                                                 </div>
                                             </label>

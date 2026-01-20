@@ -20,6 +20,7 @@ export type PermissionSubject = typeof PERMISSION_SUBJECTS[number];
  */
 export interface Permission {
     id: number;
+    nombre: string;
     action: PermissionAction;
     subject: PermissionSubject;
     descripcion: string;
@@ -29,6 +30,7 @@ export interface Permission {
  * DTO para crear o definir un nuevo permiso.
  */
 export interface CreatePermissionDto {
+    nombre: string;
     action: string;
     subject: string;
     descripcion?: string;
