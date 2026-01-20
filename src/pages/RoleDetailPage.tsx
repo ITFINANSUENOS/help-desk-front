@@ -2,7 +2,9 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '../layout/DashboardLayout';
-import { rbacService, type Role, type Permission } from '../lib/rbac';
+import { rbacService } from '../services/rbac.service';
+import type { Role } from '../interfaces/Role';
+import type { Permission } from '../interfaces/Permission';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { InfoModal } from '../components/ui/InfoModal';

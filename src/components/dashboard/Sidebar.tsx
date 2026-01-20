@@ -2,7 +2,7 @@
 import { Link } from 'react-router-dom';
 import { cn } from '../../lib/utils';
 import { useAuth } from '../../context/useAuth';
-import type { PermissionSubject } from '../../lib/rbac';
+import type { PermissionSubject } from '../../interfaces/Permission';
 
 interface SidebarProps {
     isCollapsed: boolean;

@@ -2,7 +2,8 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { DashboardLayout } from '../layout/DashboardLayout';
-import { rbacService, type Role } from '../lib/rbac';
+import { rbacService } from '../services/rbac.service';
+import type { Role } from '../interfaces/Role';
 import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
 import { ConfirmationModal } from '../components/ui/ConfirmationModal';

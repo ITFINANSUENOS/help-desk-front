@@ -1,7 +1,9 @@
 
 import { useEffect, useState } from 'react';
 import { DashboardLayout } from '../layout/DashboardLayout';
-import { rbacService, type Permission, PERMISSION_SUBJECTS, PERMISSION_ACTIONS } from '../lib/rbac';
+import { rbacService } from '../services/rbac.service';
+import type { Permission } from '../interfaces/Permission';
+import { PERMISSION_SUBJECTS, PERMISSION_ACTIONS } from '../interfaces/Permission';
 import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
 import { ConfirmationModal } from '../components/ui/ConfirmationModal';

@@ -1,6 +1,6 @@
-
-import { createContext, useContext } from 'react';
-import type { User, LoginCredentials } from '../lib/auth';
+import { useContext, createContext } from 'react';
+import type { User } from '../interfaces/User';
+import type { LoginCredentials } from '../interfaces/Auth';
 
 export interface AuthContextType {
     user: User | null;
