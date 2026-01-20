@@ -4,9 +4,16 @@ import type { Permission, CreatePermissionDto } from '../interfaces/Permission';
 
 /**
  * Service for handling Role-Based Access Control (RBAC) operations.
+ * Centraliza la gestión de roles, permisos y asignaciones.
  */
 export const rbacService = {
     // 1. Gestión de Roles
+
+    /**
+     * Obtiene una lista paginada de roles.
+     * @param params Filtros opcionales (paginación, búsqueda).
+     * @returns Lista de roles.
+     */
     async getRoles(params?: { page?: number; limit?: number; search?: string }): Promise<Role[]> {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const response = await api.get<any>('/roles', { params });
@@ -34,6 +41,12 @@ export const rbacService = {
     },
 
     // 2. Asignación de Permisos a Roles
+
+    /**
+     * Obtiene los permisos asignados a un rol específico.
+     * @param roleId ID del rol.
+     * @returns Lista de permisos asignados.
+     */
     async getRolePermissions(roleId: number): Promise<Permission[]> {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const response = await api.get<any>(`/permissions/role/${roleId}`);
@@ -46,6 +59,11 @@ export const rbacService = {
     },
 
     // 3. Gestión de Definiciones de Permisos (Catálogo)
+
+    /**
+     * Obtiene el catálogo completo de permisos disponibles en el sistema.
+     * @returns Lista de todos los permisos definidos.
+     */
     async getPermissions(): Promise<Permission[]> {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const response = await api.get<any>('/permissions');

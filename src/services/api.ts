@@ -4,6 +4,14 @@ import { responseErrorHandler, responseSuccessHandler } from '../lib/interceptor
 
 /**
  * Instancia global de Axios configurada para la API.
+ * 
+ * Configurada con:
+ * - `baseURL`: URL base desde variables de entorno.
+ * - `Content-Type`: application/json por defecto.
+ * 
+ * Utiliza interceptores para:
+ * - Inyectar el token de autenticación en cada petición.
+ * - Manejar respuestas exitosas y errores globales (401, etc.).
  */
 export const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL || '',

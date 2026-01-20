@@ -1,6 +1,12 @@
+/**
+ * Lista de acciones permitidas para los permisos.
+ */
 export const PERMISSION_ACTIONS = ['manage', 'create', 'read', 'update', 'delete'] as const;
 export type PermissionAction = typeof PERMISSION_ACTIONS[number];
 
+/**
+ * Lista de entidades (subjects) sobre las que se aplican permisos.
+ */
 export const PERMISSION_SUBJECTS = [
     'User', 'Ticket', 'Category', 'Subcategoria', 'Department',
     'Role', 'Profile', 'Regional', 'Company', 'Permission',
@@ -10,7 +16,7 @@ export const PERMISSION_SUBJECTS = [
 export type PermissionSubject = typeof PERMISSION_SUBJECTS[number];
 
 /**
- * Represents a single permission definition in the system.
+ * Representa la definición de un permiso en el catálogo del sistema.
  */
 export interface Permission {
     id: number;
@@ -19,6 +25,9 @@ export interface Permission {
     descripcion: string;
 }
 
+/**
+ * DTO para crear o definir un nuevo permiso.
+ */
 export interface CreatePermissionDto {
     action: string;
     subject: string;

@@ -1,6 +1,14 @@
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
 
+/**
+ * Componente de protección de rutas.
+ * 
+ * Verifica si el usuario está autenticado:
+ * - Si está cargando, muestra un spinner.
+ * - Si no hay usuario, redirige a `/login`.
+ * - Si hay usuario, renderiza el contenido de la ruta (`Outlet`).
+ */
 export const AuthGuard = () => {
     const { user, loading } = useAuth();
 

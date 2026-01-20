@@ -5,6 +5,16 @@ import type { User } from '../interfaces/User';
 import type { LoginCredentials } from '../interfaces/Auth';
 import { AuthContext } from './useAuth';
 
+/**
+ * Proveedor de Autenticación.
+ * 
+ * Envuelve la aplicación (o parte de ella) y gestiona:
+ * - El estado del usuario actual (`user`).
+ * - El estado de carga inicial (`loading`).
+ * - Métodos de login/logout expuestos vía Context.
+ * 
+ * @param props.children Componentes hijos que tendrán acceso al contexto.
+ */
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
