@@ -58,7 +58,7 @@ export function LoginLayout({ children }: LoginLayoutProps) {
                 {/* Bottom Metadata */}
                 <div className="absolute bottom-8 left-0 z-10 flex w-full items-end justify-between px-12 text-xs font-medium uppercase tracking-wider text-white/50">
                     <div className="flex flex-col gap-1 text-left">
-                        <span>© 2026 DeskFlow Inc.</span>
+                        <span>© 2026 sistemas arpesod sas</span>
                         <div className="flex gap-3 normal-case tracking-normal opacity-80">
                             <a href="#" className="hover:text-white transition-colors underline-offset-2 hover:underline">Privacidad</a>
                             <span>•</span>
