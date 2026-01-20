@@ -1,16 +1,37 @@
+import { useNavigate } from 'react-router-dom';
+import { authService } from '../lib/auth';
+import { useState } from 'react';
+import { AxiosError } from 'axios';
 import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
 import { LoginLayout } from '../layout/LoginLayout';
-import { useState } from 'react';
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [error, setError] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        console.log('Login attempt:', { email, password });
-        // TODO: Implement actual API call
+        setError(null);
+        setLoading(true);
+
+        try {
+            const response = await authService.login({ email, password });
+            localStorage.setItem('token', response.accessToken);
+            navigate('/'); // Redirect to dashboard
+        } catch (err) {
+            console.error('Login failed:', err);
+            if (err instanceof AxiosError && err.response?.status === 401) {
+                setError('Credenciales inválidas. Por favor, intente de nuevo.');
+            } else {
+                setError('Ocurrió un error al iniciar sesión. Intente más tarde.');
+            }
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -41,6 +62,11 @@ export default function LoginPage() {
 
                 {/* Form */}
                 <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
+                    {error && (
+                        <div className="rounded-lg bg-red-50 p-4 text-sm text-red-800">
+                            {error}
+                        </div>
+                    )}
                     {/* Email Field */}
                     <Input
                         id="email"
@@ -85,8 +111,14 @@ export default function LoginPage() {
                     </div>
 
                     {/* Sign In Button */}
-                    <Button variant="brand" size="xl" className="w-full mt-2" type="submit">
-                        Iniciar Sesión
+                    <Button
+                        variant="brand"
+                        size="xl"
+                        className="w-full mt-2"
+                        type="submit"
+                        disabled={loading}
+                    >
+                        {loading ? 'Iniciando Sesión...' : 'Iniciar Sesión'}
                     </Button>
 
                     {/* Footer Link */}
