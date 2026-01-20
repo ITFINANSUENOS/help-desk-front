@@ -91,16 +91,40 @@ Retorna datos del usuario autenticado.
 
 **Headers:** `Authorization: Bearer <token>`
 
-**Response (200):**
+#### Respuesta Exitosa (200 OK)
 ```json
 {
   "usu_id": 1,
-  "usu_correo": "usuario@example.com",
-  "rol_id": 2,
+  "usu_correo": "admin@helpdesk.com",
+  "rol_id": 1,
   "reg_id": 1,
   "car_id": 1,
-  "dp_id": null,
-  "es_nacional": false
+  "dp_id": 1,
+  "es_nacional": true,
+  "nombre": "Alexander",
+  "apellido": "Pardo",
+  "permissions": [
+    {
+      "action": "manage",
+      "subject": "all"
+    }
+  ],
+  "role": {
+    "id": 1,
+    "nombre": "Admin"
+  },
+  "cargo": {
+    "id": 1,
+    "nombre": "Desarrollador"
+  },
+  "regional": {
+    "id": 1,
+    "nombre": "Bogotá"
+  },
+  "departamento": {
+    "id": 1,
+    "nombre": "Sistemas"
+  }
 }
 ```
 
@@ -238,11 +262,24 @@ Gestión de permisos dinámica (RBAC almacenado en BD y cacheado en memoria).
 | `GET`  | `/permissions` | Catálogo completo | `read Permission` |
 | `GET`  | `/permissions/role/:rolId` | Permisos de un rol | `read Permission` |
 | `PUT`  | `/permissions/role/:rolId` | Sincronizar permisos | `update Permission` |
+| `POST` | `/permissions` | Crear definición permiso | `create Permission` |
+| `PUT` | `/permissions/:id` | Editar definición permiso | `update Permission` |
+| `DELETE` | `/permissions/:id` | Eliminar definición permiso | `delete Permission` |
 
-#### `SyncRolePermissionsDto` (para PUT)
+#### `SyncRolePermissionsDto` (para Sincronizar Rol)
 ```json
 {
   "permisoIds": [1, 2, 3]  // IDs de los permisos a asignar
+}
+```
+
+#### `CreatePermissionDto` (para Crear Permiso)
+```json
+{
+  "nombre": "Crear Reportes",
+  "action": "create",
+  "subject": "Reports",
+  "descripcion": "Puede crear reportes"
 }
 ```
 
