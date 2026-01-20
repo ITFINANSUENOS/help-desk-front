@@ -1,5 +1,9 @@
 
+import { useAuth } from '../../context/useAuth';
+
 export function Header() {
+    const { user, logout } = useAuth();
+
     return (
         <header className="flex h-20 items-center justify-between border-b border-gray-200 bg-white px-8 shadow-sm">
             <div>
@@ -15,12 +19,17 @@ export function Header() {
                 <div className="h-8 w-px bg-gray-200"></div>
                 <div className="flex items-center gap-3">
                     <div className="text-right">
-                        <p className="text-sm font-bold text-gray-800">Sarah Jenkins</p>
-                        <p className="text-xs text-gray-500">Support Lead</p>
+                        <p className="text-sm font-bold text-gray-800">{user?.usu_correo || 'Usuario'}</p>
+                        <p className="text-xs text-gray-500">Rol: {user?.rol_id || 'N/A'}</p>
                     </div>
-                    <div className="h-10 w-10 rounded-full border-2 border-white shadow-sm bg-cover bg-center"
-                        style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuBuL1Ae2a8vuc_EG-_LG-F5NQ6oUtVPu_NqlId53Wfah6UGW0WBh8eKo8aGYHzDwk86LHnXXCPdpuE43R1DfDsCDhkm5mkVAG4bGnADIMalxoyLIYNL9s7l96PVl5T3o4XdqsEtYcNDkU2vftY8W7t1Y2PE_ykhYYpqoPS2pu4K_VjdhQKVkFBghQe-3bjcPOMCrI4lsuiOlnhzUMfJCxZ4RPoAteEJsNCnX_bRXcGMoGxqcRSBHa8RgEX8_09H2Kg1y58HwqaNEw')" }}>
-                    </div>
+                    {/* Logout Button (Temporary location or interactive dropdown) */}
+                    <button
+                        onClick={logout}
+                        title="Cerrar Sesión"
+                        className="h-10 w-10 rounded-full border-2 border-white shadow-sm bg-brand-blue flex items-center justify-center text-white hover:bg-brand-red transition-colors"
+                    >
+                        <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>logout</span>
+                    </button>
                 </div>
             </div>
         </header>

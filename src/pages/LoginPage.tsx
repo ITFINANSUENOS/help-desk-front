@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { authService } from '../lib/auth';
+import { useAuth } from '../context/useAuth';
 import { useState } from 'react';
 import { AxiosError } from 'axios';
 import { Input } from '../components/ui/Input';
@@ -11,7 +11,7 @@ import { LoginLayout } from '../layout/LoginLayout';
  * 
  * Maneja:
  * - Estado del formulario (email, password).
- * - Llamada al servicio de autenticación.
+ * - Llamada al servicio de autenticación vía context.
  * - Redirección al Dashboard tras éxito.
  * - Manejo de errores visuales.
  */
@@ -22,16 +22,15 @@ export default function LoginPage() {
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+    const { login } = useAuth();
 
     const handleSubmit = async (e: React.FormEvent) => {
-        // ... (existing logic)
         e.preventDefault();
         setError(null);
         setLoading(true);
 
         try {
-            const response = await authService.login({ email, password });
-            localStorage.setItem('token', response.accessToken);
+            await login({ email, password });
             navigate('/'); // Redirect to dashboard
         } catch (err) {
             console.error('Login failed:', err);
