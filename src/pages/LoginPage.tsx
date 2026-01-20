@@ -18,11 +18,13 @@ import { LoginLayout } from '../layout/LoginLayout';
 export default function LoginPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
     const handleSubmit = async (e: React.FormEvent) => {
+        // ... (existing logic)
         e.preventDefault();
         setError(null);
         setLoading(true);
@@ -58,6 +60,7 @@ export default function LoginPage() {
                 <span className="text-lg font-bold text-brand-blue">DeskFlow</span>
             </div>
 
+            {/* Form */}
             <div className="mx-auto w-full max-w-[440px]">
                 {/* Header */}
                 <div className="mb-10">
@@ -69,7 +72,6 @@ export default function LoginPage() {
                     </p>
                 </div>
 
-                {/* Form */}
                 <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
                     {error && (
                         <div className="rounded-lg bg-red-50 p-4 text-sm text-red-800">
@@ -91,10 +93,11 @@ export default function LoginPage() {
                     {/* Password Field */}
                     <Input
                         id="password"
-                        type="password"
+                        type={showPassword ? 'text' : 'password'}
                         label="Contraseña"
                         placeholder="••••••••"
-                        icon="visibility_off"
+                        icon={showPassword ? 'visibility' : 'visibility_off'}
+                        onIconClick={() => setShowPassword(!showPassword)}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required

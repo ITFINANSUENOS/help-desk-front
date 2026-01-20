@@ -5,10 +5,12 @@ import { cn } from '../../lib/utils';
  * Propiedades del componente Input.
  * @property {string} [label] - Texto opcional para la etiqueta superior.
  * @property {string} [icon] - Nombre del ícono de Material Symbols a mostrar a la derecha.
+ * @property {() => void} [onIconClick] - Manejador de eventos para clic en el ícono.
  */
 export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
     label?: string;
     icon?: string; // Material symbol name
+    onIconClick?: () => void;
 }
 
 /**
@@ -16,7 +18,7 @@ export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
  * Incluye soporte para etiquetas, íconos y estilos de enfoque personalizados.
  */
 const Input = forwardRef<HTMLInputElement, InputProps>(
-    ({ className, type, label, icon, id, ...props }, ref) => {
+    ({ className, type, label, icon, onIconClick, id, ...props }, ref) => {
         return (
             <div className="flex flex-col gap-2">
                 {label && (
@@ -28,7 +30,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
                     <input
                         type={type}
                         className={cn(
-                            "form-input block w-full rounded-lg border border-gray-200 bg-white p-3 text-base text-[#121617] placeholder:text-gray-400 focus:border-brand-teal focus:outline-none focus:ring-1 focus:ring-brand-teal h-12 transition-all",
+                            "form-input block w-full rounded-lg border border-gray-200 bg-slate-50 p-3 text-base text-[#121617] placeholder:text-gray-400 focus:border-brand-teal focus:bg-white focus:outline-none focus:ring-1 focus:ring-brand-teal h-12 transition-all hover:bg-slate-100",
                             className
                         )}
                         ref={ref}
@@ -36,12 +38,17 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
                         {...props}
                     />
                     {icon && (
-                        <span
-                            className="material-symbols-outlined absolute right-3 top-3 text-gray-400 pointer-events-none select-none"
+                        <button
+                            type="button"
+                            onClick={onIconClick}
+                            className={cn(
+                                "material-symbols-outlined absolute right-3 top-3 text-gray-400 select-none transition-colors hover:text-brand-teal",
+                                onIconClick ? "cursor-pointer pointer-events-auto" : "pointer-events-none"
+                            )}
                             style={{ fontSize: '20px' }}
                         >
                             {icon}
-                        </span>
+                        </button>
                     )}
                 </div>
             </div>
