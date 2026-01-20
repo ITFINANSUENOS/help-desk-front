@@ -13,6 +13,7 @@ export default function TicketDetailPage() {
     const [ticket, setTicket] = useState<TicketDetail | null>(null);
     const [timeline, setTimeline] = useState<TicketTimelineItem[]>([]);
     const [loading, setLoading] = useState(true);
+    const [activeFilter, setActiveFilter] = useState<'all' | 'comments' | 'history'>('all');
 
     useEffect(() => {
         const fetchData = async () => {
@@ -52,6 +53,13 @@ export default function TicketDetailPage() {
             default: return 'bg-gray-50 text-gray-600 ring-gray-600/20';
         }
     };
+
+    const filteredItems = timeline.filter(item => {
+        if (activeFilter === 'all') return true;
+        if (activeFilter === 'comments') return item.type === 'comment';
+        if (activeFilter === 'history') return item.type !== 'comment';
+        return true;
+    });
 
     if (loading) {
         return (
@@ -128,13 +136,37 @@ export default function TicketDetailPage() {
                     <div className="flex items-center justify-between">
                         <h3 className="text-lg font-bold text-gray-900">Actividad Reciente</h3>
                         <div className="flex gap-2">
-                            <button className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50">Toda la Actividad</button>
-                            <button className="rounded-lg border border-transparent px-3 py-1.5 text-xs font-medium text-gray-500 hover:text-gray-700">Comentarios</button>
-                            <button className="rounded-lg border border-transparent px-3 py-1.5 text-xs font-medium text-gray-500 hover:text-gray-700">Historial</button>
+                            <button
+                                onClick={() => setActiveFilter('all')}
+                                className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${activeFilter === 'all'
+                                        ? 'border border-gray-200 bg-white text-gray-900 shadow-sm'
+                                        : 'border border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                                    }`}
+                            >
+                                Toda la Actividad
+                            </button>
+                            <button
+                                onClick={() => setActiveFilter('comments')}
+                                className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${activeFilter === 'comments'
+                                        ? 'border border-gray-200 bg-white text-gray-900 shadow-sm'
+                                        : 'border border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                                    }`}
+                            >
+                                Comentarios
+                            </button>
+                            <button
+                                onClick={() => setActiveFilter('history')}
+                                className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${activeFilter === 'history'
+                                        ? 'border border-gray-200 bg-white text-gray-900 shadow-sm'
+                                        : 'border border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                                    }`}
+                            >
+                                Historial
+                            </button>
                         </div>
                     </div>
 
-                    <TicketTimeline items={timeline} />
+                    <TicketTimeline items={filteredItems} />
                 </div>
             </div>
 

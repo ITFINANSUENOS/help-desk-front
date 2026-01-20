@@ -57,6 +57,26 @@ export function TicketTimeline({ items }: TicketTimelineProps) {
                                 {item.content}
                             </p>
                         )}
+
+                        {item.metadata?.attachments && item.metadata.attachments.length > 0 && (
+                            <div className="mt-4 border-t border-gray-100 pt-3">
+                                <h4 className="mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Adjuntos</h4>
+                                <div className="flex flex-wrap gap-2">
+                                    {item.metadata.attachments.map((att) => (
+                                        <a
+                                            key={att.id}
+                                            href={att.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-600 transition-colors hover:bg-white hover:text-brand-blue hover:shadow-sm"
+                                        >
+                                            <span className="material-symbols-outlined text-[18px]">description</span>
+                                            {att.nombre}
+                                        </a>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             ))}
