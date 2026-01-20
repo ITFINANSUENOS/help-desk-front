@@ -1,10 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import React from 'react';
 import LoginPage from "./pages/LoginPage";
-
-function Dashboard() {
-  return <h1>Bienvenido al Dashboard (Protegido)</h1>;
-}
+import DashboardPage from './pages/DashboardPage';
 
 function ProtectedRoute({ children }: { children: React.ReactElement }) {
   const token = localStorage.getItem('token');
@@ -23,7 +20,7 @@ function App() {
           path="/"
           element={
             <ProtectedRoute>
-              <Dashboard />
+              <DashboardPage />
             </ProtectedRoute>
           }
         />

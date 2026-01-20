@@ -1,15 +1,11 @@
 <!DOCTYPE html>
-
 <html class="light" lang="en">
 
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Help Desk Login</title>
+    <title>Help Desk Main Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;display=swap"
-        rel="stylesheet" />
-    <link
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
         rel="stylesheet" />
     <link
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
@@ -38,141 +34,271 @@
             },
         }
     </script>
-    <style>
-        /* Custom geometric pattern for the left panel */
-        .bg-pattern {
-            background-color: #2B378A;
-            background-image:
-                radial-gradient(circle at 2px 2px, rgba(255, 255, 255, 0.1) 1px, transparent 0),
-                linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-            background-size: 24px 24px, 48px 48px, 48px 48px;
-        }
-    </style>
 </head>
 
-<body class="font-display bg-background-light dark:bg-background-dark text-[#121617] antialiased">
-    <div class="flex min-h-screen w-full flex-row">
-        <!-- Left Panel: Brand Anchor -->
-        <!-- Hidden on mobile/tablet, visible on desktop (lg) -->
-        <div
-            class="hidden lg:flex lg:w-1/2 relative flex-col justify-between bg-pattern p-12 text-white overflow-hidden">
-            <!-- Decorative Circle for "Unexpected" feel -->
-            <div
-                class="absolute top-[-10%] right-[-10%] h-[400px] w-[400px] rounded-full bg-[#23468C] opacity-30 blur-3xl pointer-events-none">
-            </div>
-            <div
-                class="absolute bottom-[10%] left-[-5%] h-[300px] w-[300px] rounded-full bg-[#43BBCA] opacity-20 blur-3xl pointer-events-none">
-            </div>
-            <!-- Logo Area -->
-            <div class="relative z-10 flex items-center gap-3">
-                <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-white/10 backdrop-blur-sm">
-                    <span class="material-symbols-outlined text-white" style="font-size: 24px;">support_agent</span>
+<body class="font-display bg-background-light text-[#121617] antialiased overflow-hidden">
+    <div class="flex h-screen w-full flex-row">
+        <aside class="flex w-64 flex-col bg-brand-blue text-white transition-all duration-300">
+            <div class="flex h-20 items-center gap-3 border-b border-white/10 px-6">
+                <div class="flex h-8 w-8 items-center justify-center rounded bg-white/20 backdrop-blur-sm">
+                    <span class="material-symbols-outlined text-white" style="font-size: 20px;">support_agent</span>
                 </div>
                 <span class="text-xl font-bold tracking-wide">DeskFlow</span>
             </div>
-            <!-- Hero Content -->
-            <div class="relative z-10 max-w-md">
-                <h2 class="text-4xl font-bold leading-tight mb-6">Empowering Support,<br />Simplifying Solutions.</h2>
-                <div class="flex flex-col gap-4 border-l-2 border-white/20 pl-6">
-                    <p class="text-white/80 text-lg leading-relaxed">"The dashboard is intuitive, fast, and exactly what
-                        our IT team needed to scale operations securely."</p>
+            <nav class="flex-1 overflow-y-auto px-4 py-6">
+                <ul class="space-y-2">
+                    <li>
+                        <a class="group flex items-center gap-3 rounded-lg bg-brand-accent px-4 py-3 text-white transition-colors"
+                            href="#">
+                            <span class="material-symbols-outlined" style="font-size: 22px;">dashboard</span>
+                            <span class="font-semibold text-sm">Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="group flex items-center gap-3 rounded-lg px-4 py-3 text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+                            href="#">
+                            <span class="material-symbols-outlined" style="font-size: 22px;">confirmation_number</span>
+                            <span class="font-medium text-sm">Tickets</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="group flex items-center gap-3 rounded-lg px-4 py-3 text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+                            href="#">
+                            <span class="material-symbols-outlined" style="font-size: 22px;">group</span>
+                            <span class="font-medium text-sm">Customers</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="group flex items-center gap-3 rounded-lg px-4 py-3 text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+                            href="#">
+                            <span class="material-symbols-outlined" style="font-size: 22px;">bar_chart</span>
+                            <span class="font-medium text-sm">Reports</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="group flex items-center gap-3 rounded-lg px-4 py-3 text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+                            href="#">
+                            <span class="material-symbols-outlined" style="font-size: 22px;">settings</span>
+                            <span class="font-medium text-sm">Settings</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="border-t border-white/10 p-6">
+                <a class="flex items-center gap-3 text-sm text-white/60 hover:text-white" href="#">
+                    <span class="material-symbols-outlined" style="font-size: 20px;">help</span>
+                    <span>Support Center</span>
+                </a>
+            </div>
+        </aside>
+        <main class="flex flex-1 flex-col overflow-hidden bg-[#f6f8f8]">
+            <header class="flex h-20 items-center justify-between border-b border-gray-200 bg-white px-8 shadow-sm">
+                <div>
+                    <h1 class="text-xl font-bold text-gray-800">Dashboard Overview</h1>
+                </div>
+                <div class="flex items-center gap-6">
+                    <button
+                        class="relative rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 focus:outline-none">
+                        <span class="material-symbols-outlined text-2xl">notifications</span>
+                        <span
+                            class="absolute right-2 top-2 h-2.5 w-2.5 rounded-full border-2 border-white bg-brand-red"></span>
+                    </button>
+                    <div class="h-8 w-px bg-gray-200"></div>
                     <div class="flex items-center gap-3">
-                        <div class="h-10 w-10 rounded-full bg-cover bg-center"
-                            data-alt="Portrait of a smiling woman in business attire"
+                        <div class="text-right">
+                            <p class="text-sm font-bold text-gray-800">Sarah Jenkins</p>
+                            <p class="text-xs text-gray-500">Support Lead</p>
+                        </div>
+                        <div class="h-10 w-10 rounded-full border-2 border-white shadow-sm bg-cover bg-center"
                             style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBuL1Ae2a8vuc_EG-_LG-F5NQ6oUtVPu_NqlId53Wfah6UGW0WBh8eKo8aGYHzDwk86LHnXXCPdpuE43R1DfDsCDhkm5mkVAG4bGnADIMalxoyLIYNL9s7l96PVl5T3o4XdqsEtYcNDkU2vftY8W7t1Y2PE_ykhYYpqoPS2pu4K_VjdhQKVkFBghQe-3bjcPOMCrI4lsuiOlnhzUMfJCxZ4RPoAteEJsNCnX_bRXcGMoGxqcRSBHa8RgEX8_09H2Kg1y58HwqaNEw');">
                         </div>
-                        <div>
-                            <p class="text-sm font-semibold">Sarah Jenkins</p>
-                            <p class="text-xs text-white/60">CTO at TechGlobal</p>
+                    </div>
+                </div>
+            </header>
+            <div class="flex-1 overflow-y-auto p-8">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-gray-900">Welcome back, Sarah! 👋</h2>
+                    <p class="mt-1 text-gray-500">Here's an overview of your help desk performance today.</p>
+                </div>
+                <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+                    <div class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Total Tickets</p>
+                                <p class="mt-2 text-3xl font-bold text-gray-800">142</p>
+                            </div>
+                            <div
+                                class="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-50 text-brand-blue">
+                                <span class="material-symbols-outlined">folder</span>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-center text-xs font-medium text-green-600">
+                            <span class="material-symbols-outlined mr-1 text-sm">trending_up</span>
+                            <span>+8% from yesterday</span>
+                        </div>
+                    </div>
+                    <div class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Active Now</p>
+                                <p class="mt-2 text-3xl font-bold text-gray-800">28</p>
+                            </div>
+                            <div
+                                class="flex h-12 w-12 items-center justify-center rounded-lg bg-cyan-50 text-brand-teal">
+                                <span class="material-symbols-outlined">bolt</span>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-center text-xs font-medium text-gray-400">
+                            <span>Currently being handled</span>
+                        </div>
+                    </div>
+                    <div class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Pending</p>
+                                <p class="mt-2 text-3xl font-bold text-gray-800">14</p>
+                            </div>
+                            <div
+                                class="flex h-12 w-12 items-center justify-center rounded-lg bg-orange-50 text-orange-500">
+                                <span class="material-symbols-outlined">hourglass_top</span>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-center text-xs font-medium text-brand-red">
+                            <span class="material-symbols-outlined mr-1 text-sm">priority_high</span>
+                            <span>3 high priority</span>
+                        </div>
+                    </div>
+                    <div class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Resolved</p>
+                                <p class="mt-2 text-3xl font-bold text-gray-800">100</p>
+                            </div>
+                            <div
+                                class="flex h-12 w-12 items-center justify-center rounded-lg bg-green-50 text-green-600">
+                                <span class="material-symbols-outlined">check_circle</span>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-center text-xs font-medium text-green-600">
+                            <span class="material-symbols-outlined mr-1 text-sm">trending_up</span>
+                            <span>+12% completion rate</span>
                         </div>
                     </div>
                 </div>
-            </div>
-            <!-- Bottom Metadata -->
-            <div class="relative z-10 flex justify-between text-xs text-white/40 font-medium tracking-wider uppercase">
-                <span>© 2023 DeskFlow Inc.</span>
-                <span>System Status: <span class="text-green-400">Operational</span></span>
-            </div>
-        </div>
-        <!-- Right Panel: Login Form -->
-        <div class="flex w-full lg:w-1/2 flex-col justify-center bg-white px-6 py-12 lg:px-20 xl:px-32">
-            <!-- Mobile Logo (Visible only on smaller screens) -->
-            <div class="lg:hidden mb-8 flex items-center gap-2">
-                <div class="flex h-8 w-8 items-center justify-center rounded bg-brand-blue text-white">
-                    <span class="material-symbols-outlined" style="font-size: 20px;">support_agent</span>
+                <div class="mt-8 rounded-xl border border-gray-100 bg-white shadow-sm">
+                    <div class="flex items-center justify-between border-b border-gray-100 px-6 py-5">
+                        <h3 class="text-lg font-bold text-gray-800">Recent Active Tickets</h3>
+                        <a class="text-sm font-bold text-brand-teal hover:text-brand-accent" href="#">View All</a>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm text-gray-600">
+                            <thead class="bg-gray-50 text-xs font-semibold uppercase text-gray-500">
+                                <tr>
+                                    <th class="px-6 py-4">ID</th>
+                                    <th class="px-6 py-4">Subject</th>
+                                    <th class="px-6 py-4">Customer</th>
+                                    <th class="px-6 py-4">Status</th>
+                                    <th class="px-6 py-4">Priority</th>
+                                    <th class="px-6 py-4 text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 font-mono font-medium text-gray-900">#TK-2049</td>
+                                    <td class="px-6 py-4 font-medium text-gray-800">Login authentication failure</td>
+                                    <td class="px-6 py-4">Michael Scott</td>
+                                    <td class="px-6 py-4">
+                                        <span
+                                            class="inline-flex items-center rounded-full bg-cyan-50 px-2.5 py-0.5 text-xs font-medium text-brand-teal">
+                                            Open
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center gap-1.5 text-brand-red">
+                                            <div class="h-2 w-2 rounded-full bg-brand-red"></div>
+                                            <span class="font-medium">High</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 text-right">
+                                        <button class="text-gray-400 hover:text-brand-blue">
+                                            <span class="material-symbols-outlined">more_vert</span>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 font-mono font-medium text-gray-900">#TK-2048</td>
+                                    <td class="px-6 py-4 font-medium text-gray-800">Billing invoice mismatch</td>
+                                    <td class="px-6 py-4">Dwight Schrute</td>
+                                    <td class="px-6 py-4">
+                                        <span
+                                            class="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-brand-accent">
+                                            In Progress
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center gap-1.5 text-orange-500">
+                                            <div class="h-2 w-2 rounded-full bg-orange-500"></div>
+                                            <span class="font-medium">Medium</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 text-right">
+                                        <button class="text-gray-400 hover:text-brand-blue">
+                                            <span class="material-symbols-outlined">more_vert</span>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 font-mono font-medium text-gray-900">#TK-2047</td>
+                                    <td class="px-6 py-4 font-medium text-gray-800">Update account preferences</td>
+                                    <td class="px-6 py-4">Pam Beesly</td>
+                                    <td class="px-6 py-4">
+                                        <span
+                                            class="inline-flex items-center rounded-full bg-cyan-50 px-2.5 py-0.5 text-xs font-medium text-brand-teal">
+                                            Open
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center gap-1.5 text-green-600">
+                                            <div class="h-2 w-2 rounded-full bg-green-600"></div>
+                                            <span class="font-medium">Low</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 text-right">
+                                        <button class="text-gray-400 hover:text-brand-blue">
+                                            <span class="material-symbols-outlined">more_vert</span>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 font-mono font-medium text-gray-900">#TK-2046</td>
+                                    <td class="px-6 py-4 font-medium text-gray-800">Cannot access reports module</td>
+                                    <td class="px-6 py-4">Jim Halpert</td>
+                                    <td class="px-6 py-4">
+                                        <span
+                                            class="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-brand-accent">
+                                            In Progress
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center gap-1.5 text-brand-red">
+                                            <div class="h-2 w-2 rounded-full bg-brand-red"></div>
+                                            <span class="font-medium">High</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 text-right">
+                                        <button class="text-gray-400 hover:text-brand-blue">
+                                            <span class="material-symbols-outlined">more_vert</span>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-                <span class="text-lg font-bold text-brand-blue">DeskFlow</span>
             </div>
-            <div class="w-full max-w-[440px] mx-auto">
-                <!-- Header -->
-                <div class="mb-10">
-                    <h1 class="text-brand-blue text-[32px] font-bold leading-tight mb-2">Log in to your account</h1>
-                    <p class="text-slate-500 text-base font-normal">Welcome back! Please enter your details.</p>
-                </div>
-                <!-- Form -->
-                <form class="flex flex-col gap-6" onsubmit="event.preventDefault();">
-                    <!-- Email Field -->
-                    <div class="flex flex-col gap-2">
-                        <label class="text-[#121617] text-sm font-semibold" for="email">Email</label>
-                        <div class="relative">
-                            <input
-                                class="form-input block w-full rounded-lg border border-gray-200 bg-white p-3 text-base text-[#121617] placeholder:text-gray-400 focus:border-brand-teal focus:outline-none focus:ring-1 focus:ring-brand-teal h-12"
-                                id="email" placeholder="name@company.com" type="email" />
-                            <span
-                                class="material-symbols-outlined absolute right-3 top-3 text-gray-400 pointer-events-none"
-                                style="font-size: 20px;">mail</span>
-                        </div>
-                    </div>
-                    <!-- Password Field -->
-                    <div class="flex flex-col gap-2">
-                        <label class="text-[#121617] text-sm font-semibold" for="password">Password</label>
-                        <div class="relative">
-                            <input
-                                class="form-input block w-full rounded-lg border border-gray-200 bg-white p-3 text-base text-[#121617] placeholder:text-gray-400 focus:border-brand-teal focus:outline-none focus:ring-1 focus:ring-brand-teal h-12"
-                                id="password" placeholder="••••••••" type="password" />
-                            <span
-                                class="material-symbols-outlined absolute right-3 top-3 text-gray-400 cursor-pointer hover:text-gray-600 transition-colors"
-                                style="font-size: 20px;">visibility_off</span>
-                        </div>
-                    </div>
-                    <!-- Actions Row -->
-                    <div class="flex items-center justify-between">
-                        <label class="flex items-center gap-2 cursor-pointer group">
-                            <input
-                                class="h-4 w-4 rounded border-gray-300 text-brand-teal focus:ring-brand-teal/20 transition-all cursor-pointer"
-                                type="checkbox" />
-                            <span
-                                class="text-sm font-medium text-slate-600 group-hover:text-slate-800 transition-colors">Remember
-                                for 30 days</span>
-                        </label>
-                        <a class="text-sm font-semibold text-brand-teal hover:text-[#3aa9b8] transition-colors"
-                            href="#">Forgot password</a>
-                    </div>
-                    <!-- Sign In Button -->
-                    <!-- Using the specific requested Vibrant Red (#D92323) -->
-                    <button
-                        class="mt-2 w-full rounded-lg bg-[#D92323] py-3.5 px-4 text-base font-bold text-white shadow-sm hover:bg-[#b91b1b] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#D92323] focus:ring-offset-2 transition-all duration-200">
-                        Sign In
-                    </button>
-                    <!-- Footer Link -->
-                    <div class="mt-4 text-center">
-                        <p class="text-sm text-slate-600">
-                            Don't have an account?
-                            <a class="font-bold text-brand-teal hover:text-[#3aa9b8] hover:underline transition-all"
-                                href="#">Sign up</a>
-                        </p>
-                    </div>
-                </form>
-            </div>
-            <!-- Simple footer for support links inside right panel -->
-            <div class="mt-12 flex justify-center gap-6 text-xs text-slate-400">
-                <a class="hover:text-slate-600" href="#">Privacy Policy</a>
-                <a class="hover:text-slate-600" href="#">Terms of Service</a>
-                <a class="hover:text-slate-600" href="#">Help Center</a>
-            </div>
-        </div>
+        </main>
     </div>
+
 </body>
 
 </html>
