@@ -1,17 +1,12 @@
 <!DOCTYPE html>
-<html class="light" lang="en">
-
-<head>
-    <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Help Desk Main Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;display=swap"
-        rel="stylesheet" />
-    <link
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
-        rel="stylesheet" />
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <script id="tailwind-config">
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Help Desk Ticket List</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
             theme: {
@@ -35,270 +30,334 @@
         }
     </script>
 </head>
-
 <body class="font-display bg-background-light text-[#121617] antialiased overflow-hidden">
-    <div class="flex h-screen w-full flex-row">
-        <aside class="flex w-64 flex-col bg-brand-blue text-white transition-all duration-300">
-            <div class="flex h-20 items-center gap-3 border-b border-white/10 px-6">
-                <div class="flex h-8 w-8 items-center justify-center rounded bg-white/20 backdrop-blur-sm">
-                    <span class="material-symbols-outlined text-white" style="font-size: 20px;">support_agent</span>
-                </div>
-                <span class="text-xl font-bold tracking-wide">DeskFlow</span>
-            </div>
-            <nav class="flex-1 overflow-y-auto px-4 py-6">
-                <ul class="space-y-2">
-                    <li>
-                        <a class="group flex items-center gap-3 rounded-lg bg-brand-accent px-4 py-3 text-white transition-colors"
-                            href="#">
-                            <span class="material-symbols-outlined" style="font-size: 22px;">dashboard</span>
-                            <span class="font-semibold text-sm">Dashboard</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a class="group flex items-center gap-3 rounded-lg px-4 py-3 text-white/80 transition-colors hover:bg-white/10 hover:text-white"
-                            href="#">
-                            <span class="material-symbols-outlined" style="font-size: 22px;">confirmation_number</span>
-                            <span class="font-medium text-sm">Tickets</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a class="group flex items-center gap-3 rounded-lg px-4 py-3 text-white/80 transition-colors hover:bg-white/10 hover:text-white"
-                            href="#">
-                            <span class="material-symbols-outlined" style="font-size: 22px;">group</span>
-                            <span class="font-medium text-sm">Customers</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a class="group flex items-center gap-3 rounded-lg px-4 py-3 text-white/80 transition-colors hover:bg-white/10 hover:text-white"
-                            href="#">
-                            <span class="material-symbols-outlined" style="font-size: 22px;">bar_chart</span>
-                            <span class="font-medium text-sm">Reports</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a class="group flex items-center gap-3 rounded-lg px-4 py-3 text-white/80 transition-colors hover:bg-white/10 hover:text-white"
-                            href="#">
-                            <span class="material-symbols-outlined" style="font-size: 22px;">settings</span>
-                            <span class="font-medium text-sm">Settings</span>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-            <div class="border-t border-white/10 p-6">
-                <a class="flex items-center gap-3 text-sm text-white/60 hover:text-white" href="#">
-                    <span class="material-symbols-outlined" style="font-size: 20px;">help</span>
-                    <span>Support Center</span>
-                </a>
-            </div>
-        </aside>
-        <main class="flex flex-1 flex-col overflow-hidden bg-[#f6f8f8]">
-            <header class="flex h-20 items-center justify-between border-b border-gray-200 bg-white px-8 shadow-sm">
-                <div>
-                    <h1 class="text-xl font-bold text-gray-800">Dashboard Overview</h1>
-                </div>
-                <div class="flex items-center gap-6">
-                    <button
-                        class="relative rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 focus:outline-none">
-                        <span class="material-symbols-outlined text-2xl">notifications</span>
-                        <span
-                            class="absolute right-2 top-2 h-2.5 w-2.5 rounded-full border-2 border-white bg-brand-red"></span>
+<div class="flex h-screen w-full flex-row">
+<aside class="flex w-64 flex-col bg-brand-blue text-white transition-all duration-300">
+<div class="flex h-20 items-center gap-3 border-b border-white/10 px-6">
+<div class="flex h-8 w-8 items-center justify-center rounded bg-white/20 backdrop-blur-sm">
+<span class="material-symbols-outlined text-white" style="font-size: 20px;">support_agent</span>
+</div>
+<span class="text-xl font-bold tracking-wide">DeskFlow</span>
+</div>
+<nav class="flex-1 overflow-y-auto px-4 py-6">
+<ul class="space-y-2">
+<li>
+<a class="group flex items-center gap-3 rounded-lg px-4 py-3 text-white/80 transition-colors hover:bg-white/10 hover:text-white" href="#">
+<span class="material-symbols-outlined" style="font-size: 22px;">dashboard</span>
+<span class="font-medium text-sm">Dashboard</span>
+</a>
+</li>
+<li>
+<a class="group flex items-center gap-3 rounded-lg bg-brand-accent px-4 py-3 text-white transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-size: 22px;">confirmation_number</span>
+<span class="font-semibold text-sm">Tickets</span>
+</a>
+</li>
+<li>
+<a class="group flex items-center gap-3 rounded-lg px-4 py-3 text-white/80 transition-colors hover:bg-white/10 hover:text-white" href="#">
+<span class="material-symbols-outlined" style="font-size: 22px;">group</span>
+<span class="font-medium text-sm">Customers</span>
+</a>
+</li>
+<li>
+<a class="group flex items-center gap-3 rounded-lg px-4 py-3 text-white/80 transition-colors hover:bg-white/10 hover:text-white" href="#">
+<span class="material-symbols-outlined" style="font-size: 22px;">bar_chart</span>
+<span class="font-medium text-sm">Reports</span>
+</a>
+</li>
+<li>
+<a class="group flex items-center gap-3 rounded-lg px-4 py-3 text-white/80 transition-colors hover:bg-white/10 hover:text-white" href="#">
+<span class="material-symbols-outlined" style="font-size: 22px;">settings</span>
+<span class="font-medium text-sm">Settings</span>
+</a>
+</li>
+</ul>
+</nav>
+<div class="border-t border-white/10 p-6">
+<a class="flex items-center gap-3 text-sm text-white/60 hover:text-white" href="#">
+<span class="material-symbols-outlined" style="font-size: 20px;">help</span>
+<span>Support Center</span>
+</a>
+</div>
+</aside>
+<main class="flex flex-1 flex-col overflow-hidden bg-[#f6f8f8]">
+<header class="flex h-20 items-center justify-between border-b border-gray-200 bg-white px-8 shadow-sm">
+<div>
+<h1 class="text-xl font-bold text-gray-800">Tickets</h1>
+</div>
+<div class="flex items-center gap-6">
+<button class="relative rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 focus:outline-none">
+<span class="material-symbols-outlined text-2xl">notifications</span>
+<span class="absolute right-2 top-2 h-2.5 w-2.5 rounded-full border-2 border-white bg-brand-red"></span>
+</button>
+<div class="h-8 w-px bg-gray-200"></div>
+<div class="flex items-center gap-3">
+<div class="text-right">
+<p class="text-sm font-bold text-gray-800">Sarah Jenkins</p>
+<p class="text-xs text-gray-500">Support Lead</p>
+</div>
+<div class="h-10 w-10 rounded-full border-2 border-white shadow-sm bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBuL1Ae2a8vuc_EG-_LG-F5NQ6oUtVPu_NqlId53Wfah6UGW0WBh8eKo8aGYHzDwk86LHnXXCPdpuE43R1DfDsCDhkm5mkVAG4bGnADIMalxoyLIYNL9s7l96PVl5T3o4XdqsEtYcNDkU2vftY8W7t1Y2PE_ykhYYpqoPS2pu4K_VjdhQKVkFBghQe-3bjcPOMCrI4lsuiOlnhzUMfJCxZ4RPoAteEJsNCnX_bRXcGMoGxqcRSBHa8RgEX8_09H2Kg1y58HwqaNEw');"></div>
+</div>
+</div>
+</header>
+<div class="flex-1 overflow-y-auto p-8">
+<div class="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+<div>
+<h2 class="text-2xl font-bold text-gray-900">All Tickets</h2>
+<p class="mt-1 text-sm text-gray-500">Manage support requests and track their progress.</p>
+</div>
+<button class="flex items-center gap-2 rounded-lg bg-brand-red px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2">
+<span class="material-symbols-outlined text-xl">add</span>
+                        Create Ticket
                     </button>
-                    <div class="h-8 w-px bg-gray-200"></div>
-                    <div class="flex items-center gap-3">
-                        <div class="text-right">
-                            <p class="text-sm font-bold text-gray-800">Sarah Jenkins</p>
-                            <p class="text-xs text-gray-500">Support Lead</p>
-                        </div>
-                        <div class="h-10 w-10 rounded-full border-2 border-white shadow-sm bg-cover bg-center"
-                            style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBuL1Ae2a8vuc_EG-_LG-F5NQ6oUtVPu_NqlId53Wfah6UGW0WBh8eKo8aGYHzDwk86LHnXXCPdpuE43R1DfDsCDhkm5mkVAG4bGnADIMalxoyLIYNL9s7l96PVl5T3o4XdqsEtYcNDkU2vftY8W7t1Y2PE_ykhYYpqoPS2pu4K_VjdhQKVkFBghQe-3bjcPOMCrI4lsuiOlnhzUMfJCxZ4RPoAteEJsNCnX_bRXcGMoGxqcRSBHa8RgEX8_09H2Kg1y58HwqaNEw');">
-                        </div>
-                    </div>
-                </div>
-            </header>
-            <div class="flex-1 overflow-y-auto p-8">
-                <div class="mb-8">
-                    <h2 class="text-2xl font-bold text-gray-900">Welcome back, Sarah! 👋</h2>
-                    <p class="mt-1 text-gray-500">Here's an overview of your help desk performance today.</p>
-                </div>
-                <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-                    <div class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-gray-500">Total Tickets</p>
-                                <p class="mt-2 text-3xl font-bold text-gray-800">142</p>
-                            </div>
-                            <div
-                                class="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-50 text-brand-blue">
-                                <span class="material-symbols-outlined">folder</span>
-                            </div>
-                        </div>
-                        <div class="mt-4 flex items-center text-xs font-medium text-green-600">
-                            <span class="material-symbols-outlined mr-1 text-sm">trending_up</span>
-                            <span>+8% from yesterday</span>
-                        </div>
-                    </div>
-                    <div class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-gray-500">Active Now</p>
-                                <p class="mt-2 text-3xl font-bold text-gray-800">28</p>
-                            </div>
-                            <div
-                                class="flex h-12 w-12 items-center justify-center rounded-lg bg-cyan-50 text-brand-teal">
-                                <span class="material-symbols-outlined">bolt</span>
-                            </div>
-                        </div>
-                        <div class="mt-4 flex items-center text-xs font-medium text-gray-400">
-                            <span>Currently being handled</span>
-                        </div>
-                    </div>
-                    <div class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-gray-500">Pending</p>
-                                <p class="mt-2 text-3xl font-bold text-gray-800">14</p>
-                            </div>
-                            <div
-                                class="flex h-12 w-12 items-center justify-center rounded-lg bg-orange-50 text-orange-500">
-                                <span class="material-symbols-outlined">hourglass_top</span>
-                            </div>
-                        </div>
-                        <div class="mt-4 flex items-center text-xs font-medium text-brand-red">
-                            <span class="material-symbols-outlined mr-1 text-sm">priority_high</span>
-                            <span>3 high priority</span>
-                        </div>
-                    </div>
-                    <div class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-gray-500">Resolved</p>
-                                <p class="mt-2 text-3xl font-bold text-gray-800">100</p>
-                            </div>
-                            <div
-                                class="flex h-12 w-12 items-center justify-center rounded-lg bg-green-50 text-green-600">
-                                <span class="material-symbols-outlined">check_circle</span>
-                            </div>
-                        </div>
-                        <div class="mt-4 flex items-center text-xs font-medium text-green-600">
-                            <span class="material-symbols-outlined mr-1 text-sm">trending_up</span>
-                            <span>+12% completion rate</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="mt-8 rounded-xl border border-gray-100 bg-white shadow-sm">
-                    <div class="flex items-center justify-between border-b border-gray-100 px-6 py-5">
-                        <h3 class="text-lg font-bold text-gray-800">Recent Active Tickets</h3>
-                        <a class="text-sm font-bold text-brand-teal hover:text-brand-accent" href="#">View All</a>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-sm text-gray-600">
-                            <thead class="bg-gray-50 text-xs font-semibold uppercase text-gray-500">
-                                <tr>
-                                    <th class="px-6 py-4">ID</th>
-                                    <th class="px-6 py-4">Subject</th>
-                                    <th class="px-6 py-4">Customer</th>
-                                    <th class="px-6 py-4">Status</th>
-                                    <th class="px-6 py-4">Priority</th>
-                                    <th class="px-6 py-4 text-right">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-100">
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-6 py-4 font-mono font-medium text-gray-900">#TK-2049</td>
-                                    <td class="px-6 py-4 font-medium text-gray-800">Login authentication failure</td>
-                                    <td class="px-6 py-4">Michael Scott</td>
-                                    <td class="px-6 py-4">
-                                        <span
-                                            class="inline-flex items-center rounded-full bg-cyan-50 px-2.5 py-0.5 text-xs font-medium text-brand-teal">
+</div>
+<div class="mb-6 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+<div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+<div class="relative w-full max-w-md">
+<div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+<span class="material-symbols-outlined text-gray-400">search</span>
+</div>
+<input class="block w-full rounded-lg border-gray-200 bg-gray-50 py-2.5 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-500 focus:border-brand-teal focus:bg-white focus:ring-brand-teal" placeholder="Search by ID, subject, or customer..." type="text"/>
+</div>
+<div class="flex flex-wrap items-center gap-3">
+<div class="relative">
+<select class="appearance-none rounded-lg border-gray-200 bg-white py-2.5 pl-4 pr-10 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:border-brand-teal focus:ring-brand-teal">
+<option>All Statuses</option>
+<option>Open</option>
+<option>In Progress</option>
+<option>Resolved</option>
+</select>
+<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+<span class="material-symbols-outlined text-lg">expand_more</span>
+</div>
+</div>
+<div class="relative">
+<select class="appearance-none rounded-lg border-gray-200 bg-white py-2.5 pl-4 pr-10 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:border-brand-teal focus:ring-brand-teal">
+<option>All Priorities</option>
+<option>High</option>
+<option>Medium</option>
+<option>Low</option>
+</select>
+<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+<span class="material-symbols-outlined text-lg">expand_more</span>
+</div>
+</div>
+<button class="inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white p-2.5 text-gray-500 hover:border-brand-teal hover:text-brand-teal focus:outline-none focus:ring-2 focus:ring-brand-teal focus:ring-offset-2">
+<span class="material-symbols-outlined">filter_list</span>
+</button>
+</div>
+</div>
+</div>
+<div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+<div class="overflow-x-auto">
+<table class="w-full text-left text-sm text-gray-600">
+<thead class="bg-gray-50 text-xs font-semibold uppercase text-gray-500">
+<tr>
+<th class="px-6 py-4">ID</th>
+<th class="px-6 py-4">Subject</th>
+<th class="px-6 py-4">Customer</th>
+<th class="px-6 py-4">Status</th>
+<th class="px-6 py-4">Priority</th>
+<th class="px-6 py-4">Last Updated</th>
+<th class="px-6 py-4 text-right">Action</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-gray-100 bg-white">
+<tr class="group hover:bg-gray-50">
+<td class="px-6 py-4 font-mono font-medium text-gray-900">#TK-2049</td>
+<td class="px-6 py-4">
+<p class="font-medium text-gray-900">Login authentication failure</p>
+<p class="text-xs text-gray-500">Portal access denied</p>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-600">MS</div>
+<span class="font-medium text-gray-900">Michael Scott</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center rounded-full bg-cyan-50 px-2.5 py-0.5 text-xs font-medium text-brand-teal">
                                             Open
                                         </span>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <div class="flex items-center gap-1.5 text-brand-red">
-                                            <div class="h-2 w-2 rounded-full bg-brand-red"></div>
-                                            <span class="font-medium">High</span>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 text-right">
-                                        <button class="text-gray-400 hover:text-brand-blue">
-                                            <span class="material-symbols-outlined">more_vert</span>
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-6 py-4 font-mono font-medium text-gray-900">#TK-2048</td>
-                                    <td class="px-6 py-4 font-medium text-gray-800">Billing invoice mismatch</td>
-                                    <td class="px-6 py-4">Dwight Schrute</td>
-                                    <td class="px-6 py-4">
-                                        <span
-                                            class="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-brand-accent">
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="h-2.5 w-2.5 rounded-full bg-brand-red"></div>
+<span class="font-medium text-gray-700">High</span>
+</div>
+</td>
+<td class="px-6 py-4 text-gray-500">2 hours ago</td>
+<td class="px-6 py-4 text-right">
+<button class="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-brand-blue">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<tr class="group hover:bg-gray-50">
+<td class="px-6 py-4 font-mono font-medium text-gray-900">#TK-2048</td>
+<td class="px-6 py-4">
+<p class="font-medium text-gray-900">Billing invoice mismatch</p>
+<p class="text-xs text-gray-500">Q3 invoice total incorrect</p>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="flex h-8 w-8 items-center justify-center rounded-full bg-yellow-100 text-xs font-bold text-yellow-700">DS</div>
+<span class="font-medium text-gray-900">Dwight Schrute</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-brand-accent">
                                             In Progress
                                         </span>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <div class="flex items-center gap-1.5 text-orange-500">
-                                            <div class="h-2 w-2 rounded-full bg-orange-500"></div>
-                                            <span class="font-medium">Medium</span>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 text-right">
-                                        <button class="text-gray-400 hover:text-brand-blue">
-                                            <span class="material-symbols-outlined">more_vert</span>
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-6 py-4 font-mono font-medium text-gray-900">#TK-2047</td>
-                                    <td class="px-6 py-4 font-medium text-gray-800">Update account preferences</td>
-                                    <td class="px-6 py-4">Pam Beesly</td>
-                                    <td class="px-6 py-4">
-                                        <span
-                                            class="inline-flex items-center rounded-full bg-cyan-50 px-2.5 py-0.5 text-xs font-medium text-brand-teal">
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="h-2.5 w-2.5 rounded-full bg-orange-400"></div>
+<span class="font-medium text-gray-700">Medium</span>
+</div>
+</td>
+<td class="px-6 py-4 text-gray-500">4 hours ago</td>
+<td class="px-6 py-4 text-right">
+<button class="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-brand-blue">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<tr class="group hover:bg-gray-50">
+<td class="px-6 py-4 font-mono font-medium text-gray-900">#TK-2047</td>
+<td class="px-6 py-4">
+<p class="font-medium text-gray-900">Update account preferences</p>
+<p class="text-xs text-gray-500">Change notification email</p>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="flex h-8 w-8 items-center justify-center rounded-full bg-pink-100 text-xs font-bold text-pink-600">PB</div>
+<span class="font-medium text-gray-900">Pam Beesly</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center rounded-full bg-cyan-50 px-2.5 py-0.5 text-xs font-medium text-brand-teal">
                                             Open
                                         </span>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <div class="flex items-center gap-1.5 text-green-600">
-                                            <div class="h-2 w-2 rounded-full bg-green-600"></div>
-                                            <span class="font-medium">Low</span>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 text-right">
-                                        <button class="text-gray-400 hover:text-brand-blue">
-                                            <span class="material-symbols-outlined">more_vert</span>
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-6 py-4 font-mono font-medium text-gray-900">#TK-2046</td>
-                                    <td class="px-6 py-4 font-medium text-gray-800">Cannot access reports module</td>
-                                    <td class="px-6 py-4">Jim Halpert</td>
-                                    <td class="px-6 py-4">
-                                        <span
-                                            class="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-brand-accent">
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="h-2.5 w-2.5 rounded-full bg-green-500"></div>
+<span class="font-medium text-gray-700">Low</span>
+</div>
+</td>
+<td class="px-6 py-4 text-gray-500">1 day ago</td>
+<td class="px-6 py-4 text-right">
+<button class="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-brand-blue">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<tr class="group hover:bg-gray-50">
+<td class="px-6 py-4 font-mono font-medium text-gray-900">#TK-2046</td>
+<td class="px-6 py-4">
+<p class="font-medium text-gray-900">Cannot access reports module</p>
+<p class="text-xs text-gray-500">Error 403 on dashboard</p>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-600">JH</div>
+<span class="font-medium text-gray-900">Jim Halpert</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-brand-accent">
                                             In Progress
                                         </span>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <div class="flex items-center gap-1.5 text-brand-red">
-                                            <div class="h-2 w-2 rounded-full bg-brand-red"></div>
-                                            <span class="font-medium">High</span>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 text-right">
-                                        <button class="text-gray-400 hover:text-brand-blue">
-                                            <span class="material-symbols-outlined">more_vert</span>
-                                        </button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </main>
-    </div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="h-2.5 w-2.5 rounded-full bg-brand-red"></div>
+<span class="font-medium text-gray-700">High</span>
+</div>
+</td>
+<td class="px-6 py-4 text-gray-500">1 day ago</td>
+<td class="px-6 py-4 text-right">
+<button class="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-brand-blue">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<tr class="group hover:bg-gray-50">
+<td class="px-6 py-4 font-mono font-medium text-gray-900">#TK-2045</td>
+<td class="px-6 py-4">
+<p class="font-medium text-gray-900">Integration API key revoked</p>
+<p class="text-xs text-gray-500">Slack integration stopped</p>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="flex h-8 w-8 items-center justify-center rounded-full bg-green-100 text-xs font-bold text-green-700">RM</div>
+<span class="font-medium text-gray-900">Ryan Howard</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center rounded-full bg-cyan-50 px-2.5 py-0.5 text-xs font-medium text-brand-teal">
+                                            Open
+                                        </span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="h-2.5 w-2.5 rounded-full bg-orange-400"></div>
+<span class="font-medium text-gray-700">Medium</span>
+</div>
+</td>
+<td class="px-6 py-4 text-gray-500">2 days ago</td>
+<td class="px-6 py-4 text-right">
+<button class="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-brand-blue">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<tr class="group hover:bg-gray-50">
+<td class="px-6 py-4 font-mono font-medium text-gray-900">#TK-2044</td>
+<td class="px-6 py-4">
+<p class="font-medium text-gray-900">Mobile app crashing on launch</p>
+<p class="text-xs text-gray-500">iOS version 16.2</p>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="flex h-8 w-8 items-center justify-center rounded-full bg-purple-100 text-xs font-bold text-purple-700">KK</div>
+<span class="font-medium text-gray-900">Kelly Kapoor</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-brand-accent">
+                                            In Progress
+                                        </span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="h-2.5 w-2.5 rounded-full bg-brand-red"></div>
+<span class="font-medium text-gray-700">High</span>
+</div>
+</td>
+<td class="px-6 py-4 text-gray-500">3 days ago</td>
+<td class="px-6 py-4 text-right">
+<button class="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-brand-blue">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="flex items-center justify-between border-t border-gray-200 bg-white px-6 py-4">
+<div class="text-sm text-gray-500">
+                            Showing <span class="font-medium text-gray-900">1</span> to <span class="font-medium text-gray-900">6</span> of <span class="font-medium text-gray-900">142</span> results
+                        </div>
+<div class="flex gap-2">
+<button class="rounded-lg border border-gray-200 px-3 py-1 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-50">Previous</button>
+<button class="rounded-lg border border-gray-200 px-3 py-1 text-sm text-gray-600 hover:bg-gray-50">Next</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
 
-</body>
-
-</html>
+</body></html>

@@ -3,9 +3,10 @@ import { useAuth } from '../../context/useAuth';
 
 interface HeaderProps {
     toggleMobileSidebar: () => void;
+    title?: string;
 }
 
-export function Header({ toggleMobileSidebar }: HeaderProps) {
+export function Header({ toggleMobileSidebar, title = 'Dashboard' }: HeaderProps) {
     const { user, logout } = useAuth();
 
     return (
@@ -17,7 +18,7 @@ export function Header({ toggleMobileSidebar }: HeaderProps) {
                 >
                     <span className="material-symbols-outlined">menu</span>
                 </button>
-                <h1 className="text-xl font-bold text-gray-800">Dashboard</h1>
+                <h1 className="text-xl font-bold text-gray-800">{title}</h1>
             </div>
             <div className="flex items-center gap-6">
                 <button
