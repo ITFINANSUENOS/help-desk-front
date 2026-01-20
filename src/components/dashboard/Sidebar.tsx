@@ -1,7 +1,8 @@
 
 import { Link } from 'react-router-dom';
 import { cn } from '../../lib/utils';
-
+import { useAuth } from '../../context/useAuth';
+import type { PermissionSubject } from '../../lib/rbac';
 
 interface SidebarProps {
     isCollapsed: boolean;
@@ -10,7 +11,39 @@ interface SidebarProps {
     closeMobile: () => void;
 }
 
+interface MenuItem {
+    to: string;
+    icon: string;
+    label: string;
+    subject?: PermissionSubject; // Optional permission subject required
+    action?: string; // Defaults to 'read' if not specified
+}
+
 export function Sidebar({ isCollapsed, toggleCollapse, isMobileOpen, closeMobile }: SidebarProps) {
+    const { user } = useAuth();
+
+    const hasPermission = (subject?: PermissionSubject, action: string = 'read') => {
+        if (!subject) return true; // Public item
+        if (!user?.permissions) return false;
+
+        return user.permissions.some(p =>
+            (p.subject === subject || p.subject === 'all') &&
+            (p.action === action || p.action === 'manage')
+        );
+    };
+
+    const menuItems: MenuItem[] = [
+        { to: "/", icon: "dashboard", label: "Dashboard" }, // Public (or authenticated basic)
+        { to: "/tickets", icon: "confirmation_number", label: "Tickets", subject: 'Ticket' },
+        { to: "/customers", icon: "group", label: "Customers", subject: 'User' },
+        { to: "/reports", icon: "bar_chart", label: "Reports", subject: 'Report' },
+        { to: "/roles", icon: "admin_panel_settings", label: "Roles y Permisos", subject: 'Role' },
+        { to: "/permissions", icon: "lock_open", label: "Catálogo Permisos", subject: 'Permission' },
+        { to: "/settings", icon: "settings", label: "Settings" } // Usually open or has specific settings perm
+    ];
+
+    const filteredItems = menuItems.filter(item => hasPermission(item.subject, item.action));
+
     return (
         <>
             {/* Mobile Overlay */}
@@ -58,15 +91,7 @@ export function Sidebar({ isCollapsed, toggleCollapse, isMobileOpen, closeMobile
                 {/* Navigation */}
                 <nav className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-6">
                     <ul className="space-y-2">
-                        {[
-                            { to: "/", icon: "dashboard", label: "Dashboard" },
-                            { to: "/tickets", icon: "confirmation_number", label: "Tickets" },
-                            { to: "/customers", icon: "group", label: "Customers" },
-                            { to: "/reports", icon: "bar_chart", label: "Reports" },
-                            { to: "/roles", icon: "admin_panel_settings", label: "Roles y Permisos" },
-                            { to: "/permissions", icon: "lock_open", label: "Catálogo Permisos" },
-                            { to: "/settings", icon: "settings", label: "Settings" }
-                        ].map((item) => (
+                        {filteredItems.map((item) => (
                             <li key={item.to}>
                                 <Link
                                     to={item.to}

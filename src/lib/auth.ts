@@ -1,4 +1,5 @@
 import { api } from './api';
+import type { Permission } from './rbac';
 
 /**
  * Credenciales necesarias para identificar a un usuario.
@@ -27,6 +28,7 @@ export interface User {
     car_id: number | null;
     dp_id: number | null;
     es_nacional: boolean;
+    permissions?: Permission[];
 }
 
 /**

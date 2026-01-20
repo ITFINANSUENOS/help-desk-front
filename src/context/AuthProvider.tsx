@@ -12,6 +12,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const token = localStorage.getItem('token');
             if (token) {
                 const userData = await authService.getProfile();
+                // We now expect the backend to return 'permissions' inside the user profile
                 setUser(userData);
             }
         } catch (error) {
