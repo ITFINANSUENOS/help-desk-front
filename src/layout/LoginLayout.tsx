@@ -37,12 +37,12 @@ export function LoginLayout({ children }: LoginLayoutProps) {
                 {/* Hero Content */}
                 <div className="relative z-10 max-w-md">
                     <h2 className="mb-6 text-4xl font-bold leading-tight">
-                        Empowering Support,<br />
-                        Simplifying Solutions.
+                        Soporte que Empodera,<br />
+                        Soluciones Simplificadas.
                     </h2>
                     <div className="flex flex-col gap-4 border-l-2 border-white/20 pl-6">
                         <p className="text-lg leading-relaxed text-white/80">
-                            "The dashboard is intuitive, fast, and exactly what our IT team needed to scale operations securely."
+                            "El panel es intuitivo, rápido y exactamente lo que nuestro equipo de TI necesitaba para escalar operaciones de forma segura."
                         </p>
                         <div className="flex items-center gap-3">
                             <div
@@ -63,7 +63,7 @@ export function LoginLayout({ children }: LoginLayoutProps) {
                 <div className="relative z-10 flex justify-between text-xs font-medium uppercase tracking-wider text-white/40">
                     <span>© 2026 DeskFlow Inc.</span>
                     <span>
-                        System Status: <span className="text-green-400">Operational</span>
+                        Estado del Sistema: <span className="text-green-400">Operativo</span>
                     </span>
                 </div>
             </div>

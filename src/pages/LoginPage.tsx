@@ -32,10 +32,10 @@ export default function LoginPage() {
                 {/* Header */}
                 <div className="mb-10">
                     <h1 className="mb-2 text-[32px] font-bold leading-tight text-brand-blue">
-                        Log in to your account
+                        Inicia sesión en tu cuenta
                     </h1>
                     <p className="text-base font-normal text-slate-500">
-                        Welcome back! Please enter your details.
+                        ¡Bienvenido de nuevo! Por favor, introduce tus datos.
                     </p>
                 </div>
 
@@ -46,7 +46,7 @@ export default function LoginPage() {
                         id="email"
                         type="email"
                         label="Email"
-                        placeholder="name@company.com"
+                        placeholder="nombre@empresa.com"
                         icon="mail"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
@@ -57,7 +57,7 @@ export default function LoginPage() {
                     <Input
                         id="password"
                         type="password"
-                        label="Password"
+                        label="Contraseña"
                         placeholder="••••••••"
                         icon="visibility_off"
                         value={password}
@@ -73,31 +73,31 @@ export default function LoginPage() {
                                 className="h-4 w-4 rounded border-gray-300 text-brand-teal transition-all focus:ring-brand-teal/20"
                             />
                             <span className="text-sm font-medium text-slate-600 transition-colors group-hover:text-slate-800">
-                                Remember for 30 days
+                                Recordar por 30 días
                             </span>
                         </label>
                         <a
                             href="#"
                             className="text-sm font-semibold text-brand-teal transition-colors hover:text-[#3aa9b8]"
                         >
-                            Forgot password
+                            ¿Olvidaste tu contraseña?
                         </a>
                     </div>
 
                     {/* Sign In Button */}
                     <Button variant="brand" size="xl" className="w-full mt-2" type="submit">
-                        Sign In
+                        Iniciar Sesión
                     </Button>
 
                     {/* Footer Link */}
                     <div className="mt-4 text-center">
                         <p className="text-sm text-slate-600">
-                            Don't have an account?{' '}
+                            ¿No tienes una cuenta?{' '}
                             <a
                                 href="#"
                                 className="font-bold text-brand-teal transition-all hover:text-[#3aa9b8] hover:underline"
                             >
-                                Sign up
+                                Regístrate
                             </a>
                         </p>
                     </div>
@@ -107,13 +107,13 @@ export default function LoginPage() {
             {/* Simple footer for support links inside right panel */}
             <div className="mt-12 flex justify-center gap-6 text-xs text-slate-400">
                 <a href="#" className="hover:text-slate-600">
-                    Privacy Policy
+                    Política de Privacidad
                 </a>
                 <a href="#" className="hover:text-slate-600">
-                    Terms of Service
+                    Términos de Servicio
                 </a>
                 <a href="#" className="hover:text-slate-600">
-                    Help Center
+                    Centro de Ayuda
                 </a>
             </div>
         </LoginLayout>
