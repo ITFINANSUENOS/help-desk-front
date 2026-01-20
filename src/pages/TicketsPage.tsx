@@ -12,6 +12,12 @@ export default function TicketsPage() {
     const [loading, setLoading] = useState(true);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
+    // Pagination
+    const [page, setPage] = useState(1);
+    const [limit] = useState(10);
+    const [total, setTotal] = useState(0);
+    const [totalPages, setTotalPages] = useState(1);
+
     // Filters
     const [statusFilter, setStatusFilter] = useState<TicketStatus | 'All Statuses'>('All Statuses');
     const [priorityFilter, setPriorityFilter] = useState<TicketPriority | 'All Priorities'>('All Priorities');
@@ -25,21 +31,38 @@ export default function TicketsPage() {
                 status: statusFilter,
                 priority: priorityFilter,
                 search: searchQuery,
+                page,
+                limit
             });
             setTickets(response.data);
+            setTotal(response.meta.total);
+            setTotalPages(response.meta.totalPages);
         } catch (error) {
             console.error("Error fetching tickets:", error);
         } finally {
             setLoading(false);
         }
+    }, [statusFilter, priorityFilter, searchQuery, page, limit]);
+
+    // Reset page when filters change
+    useEffect(() => {
+        setPage(1);
     }, [statusFilter, priorityFilter, searchQuery]);
 
     useEffect(() => {
         const timeoutId = setTimeout(() => {
             fetchTickets();
-        }, 300); // Debounce search
+        }, 300); // Debounce search + fetch
         return () => clearTimeout(timeoutId);
     }, [fetchTickets]);
+
+    const handlePreviousPage = () => {
+        if (page > 1) setPage(p => p - 1);
+    };
+
+    const handleNextPage = () => {
+        if (page < totalPages) setPage(p => p + 1);
+    };
 
     const getStatusColor = (status: TicketStatus) => {
         switch (status) {
@@ -234,14 +257,26 @@ export default function TicketsPage() {
                         </tbody>
                     </table>
                 </div>
-                {/* Pagination (Mocked for now) */}
+                {/* Pagination */}
                 <div className="flex items-center justify-between border-t border-gray-200 bg-white px-6 py-4">
                     <div className="text-sm text-gray-500">
-                        Showing <span className="font-medium text-gray-900">{tickets.length > 0 ? 1 : 0}</span> to <span className="font-medium text-gray-900">{tickets.length}</span> of <span className="font-medium text-gray-900">{tickets.length}</span> results
+                        Showing <span className="font-medium text-gray-900">{total === 0 ? 0 : (page - 1) * limit + 1}</span> to <span className="font-medium text-gray-900">{Math.min(page * limit, total)}</span> of <span className="font-medium text-gray-900">{total}</span> results
                     </div>
                     <div className="flex gap-2">
-                        <button className="rounded-lg border border-gray-200 px-3 py-1 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-50" disabled>Previous</button>
-                        <button className="rounded-lg border border-gray-200 px-3 py-1 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-50" disabled>Next</button>
+                        <button
+                            className="rounded-lg border border-gray-200 px-3 py-1 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                            onClick={handlePreviousPage}
+                            disabled={page === 1}
+                        >
+                            Previous
+                        </button>
+                        <button
+                            className="rounded-lg border border-gray-200 px-3 py-1 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                            onClick={handleNextPage}
+                            disabled={page >= totalPages}
+                        >
+                            Next
+                        </button>
                     </div>
                 </div>
             </div>

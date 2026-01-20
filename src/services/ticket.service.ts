@@ -103,7 +103,9 @@ export const ticketService = {
         params.limit = filter.limit || 10;
 
         // NOTE: This endpoint is defined in API.md as GET /tickets/list
-        const response = await api.get<{ data: RawTicket[], meta: TicketListResponse['meta'] }>('/tickets/list', { params });
+        // NOTE: This endpoint is defined in API.md as GET /tickets/list
+        // Updated to handle root-level pagination fields as per user feedback
+        const response = await api.get<any>('/tickets/list', { params });
 
         const rawData = response.data.data || [];
         const mappedTickets: Ticket[] = rawData.map((t: RawTicket) => ({
@@ -118,9 +120,20 @@ export const ticketService = {
             lastUpdated: new Date(t.fechaCreacion).toLocaleDateString()
         }));
 
+        // Handle pagination: Check for 'meta' object OR root-level fields
+        const total = response.data.total ?? response.data.meta?.total ?? mappedTickets.length;
+        const page = response.data.page ?? response.data.meta?.page ?? 1;
+        const limit = response.data.limit ?? response.data.meta?.limit ?? 10;
+        const totalPages = response.data.totalPages ?? response.data.meta?.totalPages ?? Math.ceil(total / limit);
+
         return {
             data: mappedTickets,
-            meta: response.data.meta || { total: mappedTickets.length, page: 1, limit: 10, totalPages: 1 }
+            meta: {
+                total,
+                page,
+                limit,
+                totalPages
+            }
         };
     },
 
