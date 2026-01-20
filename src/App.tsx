@@ -2,6 +2,9 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import React from 'react';
 import LoginPage from "./pages/LoginPage";
 import DashboardPage from './pages/DashboardPage';
+import RolesPage from './pages/RolesPage';
+import RoleDetailPage from './pages/RoleDetailPage';
+import PermissionsPage from './pages/PermissionsPage';
 import { AuthProvider } from './context/AuthProvider';
 import { useAuth } from './context/useAuth';
 
@@ -32,6 +35,30 @@ function App() {
             element={
               <ProtectedRoute>
                 <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/roles"
+            element={
+              <ProtectedRoute>
+                <RolesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/roles/:id"
+            element={
+              <ProtectedRoute>
+                <RoleDetailPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/permissions"
+            element={
+              <ProtectedRoute>
+                <PermissionsPage />
               </ProtectedRoute>
             }
           />

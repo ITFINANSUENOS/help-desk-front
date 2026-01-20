@@ -42,6 +42,20 @@ export function Sidebar() {
                     </li>
                     <li>
                         <Link className="group flex items-center gap-3 rounded-lg px-4 py-3 text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+                            to="/roles">
+                            <span className="material-symbols-outlined" style={{ fontSize: '22px' }}>admin_panel_settings</span>
+                            <span className="font-medium text-sm">Roles y Permisos</span>
+                        </Link>
+                    </li>
+                    <li>
+                        <Link className="group flex items-center gap-3 rounded-lg px-4 py-3 text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+                            to="/permissions">
+                            <span className="material-symbols-outlined" style={{ fontSize: '22px' }}>lock_open</span>
+                            <span className="font-medium text-sm">Catálogo Permisos</span>
+                        </Link>
+                    </li>
+                    <li>
+                        <Link className="group flex items-center gap-3 rounded-lg px-4 py-3 text-white/80 transition-colors hover:bg-white/10 hover:text-white"
                             to="/settings">
                             <span className="material-symbols-outlined" style={{ fontSize: '22px' }}>settings</span>
                             <span className="font-medium text-sm">Settings</span>
