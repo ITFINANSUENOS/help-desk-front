@@ -1,74 +1,122 @@
 
 import { Link } from 'react-router-dom';
+import { cn } from '../../lib/utils';
 
-export function Sidebar() {
+
+interface SidebarProps {
+    isCollapsed: boolean;
+    toggleCollapse: () => void;
+    isMobileOpen: boolean;
+    closeMobile: () => void;
+}
+
+export function Sidebar({ isCollapsed, toggleCollapse, isMobileOpen, closeMobile }: SidebarProps) {
     return (
-        <aside className="flex w-64 flex-col bg-brand-blue text-white transition-all duration-300">
-            <div className="flex h-20 items-center gap-3 border-b border-white/10 px-6">
-                <div className="flex h-8 w-8 items-center justify-center rounded bg-white/20 backdrop-blur-sm">
-                    <span className="material-symbols-outlined text-white" style={{ fontSize: '20px' }}>support_agent</span>
+        <>
+            {/* Mobile Overlay */}
+            {isMobileOpen && (
+                <div
+                    className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
+                    onClick={closeMobile}
+                />
+            )}
+
+            {/* Sidebar */}
+            <aside
+                className={cn(
+                    "fixed inset-y-0 left-0 z-50 flex flex-col bg-brand-blue text-white transition-all duration-300 lg:static lg:z-auto",
+                    isCollapsed ? "w-20" : "w-64",
+                    // Mobile slide behavior
+                    !isMobileOpen && "-translate-x-full lg:translate-x-0"
+                )}
+            >
+                {/* Header / Logo */}
+                <div className={cn(
+                    "flex h-20 items-center border-b border-white/10 transition-all",
+                    isCollapsed ? "justify-center px-0" : "justify-between px-6"
+                )}>
+                    <div className="flex items-center gap-3 overflow-hidden">
+                        <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded bg-white/20 backdrop-blur-sm">
+                            <span className="material-symbols-outlined text-white" style={{ fontSize: '20px' }}>support_agent</span>
+                        </div>
+                        <span className={cn(
+                            "text-xl font-bold tracking-wide transition-opacity whitespace-nowrap",
+                            isCollapsed ? "w-0 opacity-0 hidden" : "w-auto opacity-100"
+                        )}>
+                            DeskFlow
+                        </span>
+                    </div>
+                    {/* Mobile Close Button */}
+                    <button
+                        onClick={closeMobile}
+                        className="lg:hidden text-white/80 hover:text-white"
+                    >
+                        <span className="material-symbols-outlined">close</span>
+                    </button>
                 </div>
-                <span className="text-xl font-bold tracking-wide">DeskFlow</span>
-            </div>
-            <nav className="flex-1 overflow-y-auto px-4 py-6">
-                <ul className="space-y-2">
-                    <li>
-                        <Link className="group flex items-center gap-3 rounded-lg bg-brand-accent px-4 py-3 text-white transition-colors"
-                            to="/">
-                            <span className="material-symbols-outlined" style={{ fontSize: '22px' }}>dashboard</span>
-                            <span className="font-semibold text-sm">Dashboard</span>
-                        </Link>
-                    </li>
-                    <li>
-                        <Link className="group flex items-center gap-3 rounded-lg px-4 py-3 text-white/80 transition-colors hover:bg-white/10 hover:text-white"
-                            to="/tickets">
-                            <span className="material-symbols-outlined" style={{ fontSize: '22px' }}>confirmation_number</span>
-                            <span className="font-medium text-sm">Tickets</span>
-                        </Link>
-                    </li>
-                    <li>
-                        <Link className="group flex items-center gap-3 rounded-lg px-4 py-3 text-white/80 transition-colors hover:bg-white/10 hover:text-white"
-                            to="/customers">
-                            <span className="material-symbols-outlined" style={{ fontSize: '22px' }}>group</span>
-                            <span className="font-medium text-sm">Customers</span>
-                        </Link>
-                    </li>
-                    <li>
-                        <Link className="group flex items-center gap-3 rounded-lg px-4 py-3 text-white/80 transition-colors hover:bg-white/10 hover:text-white"
-                            to="/reports">
-                            <span className="material-symbols-outlined" style={{ fontSize: '22px' }}>bar_chart</span>
-                            <span className="font-medium text-sm">Reports</span>
-                        </Link>
-                    </li>
-                    <li>
-                        <Link className="group flex items-center gap-3 rounded-lg px-4 py-3 text-white/80 transition-colors hover:bg-white/10 hover:text-white"
-                            to="/roles">
-                            <span className="material-symbols-outlined" style={{ fontSize: '22px' }}>admin_panel_settings</span>
-                            <span className="font-medium text-sm">Roles y Permisos</span>
-                        </Link>
-                    </li>
-                    <li>
-                        <Link className="group flex items-center gap-3 rounded-lg px-4 py-3 text-white/80 transition-colors hover:bg-white/10 hover:text-white"
-                            to="/permissions">
-                            <span className="material-symbols-outlined" style={{ fontSize: '22px' }}>lock_open</span>
-                            <span className="font-medium text-sm">Catálogo Permisos</span>
-                        </Link>
-                    </li>
-                    <li>
-                        <Link className="group flex items-center gap-3 rounded-lg px-4 py-3 text-white/80 transition-colors hover:bg-white/10 hover:text-white"
-                            to="/settings">
-                            <span className="material-symbols-outlined" style={{ fontSize: '22px' }}>settings</span>
-                            <span className="font-medium text-sm">Settings</span>
-                        </Link>
-                    </li>
-                </ul>
-            </nav>
-            <div className="border-t border-white/10 p-6">
-                <a className="flex items-center gap-3 text-sm text-white/60 hover:text-white" href="#">
-                    <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>help</span>
-                    <span>Support Center</span>
-                </a>
-            </div>
-        </aside>
+
+                {/* Navigation */}
+                <nav className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-6">
+                    <ul className="space-y-2">
+                        {[
+                            { to: "/", icon: "dashboard", label: "Dashboard" },
+                            { to: "/tickets", icon: "confirmation_number", label: "Tickets" },
+                            { to: "/customers", icon: "group", label: "Customers" },
+                            { to: "/reports", icon: "bar_chart", label: "Reports" },
+                            { to: "/roles", icon: "admin_panel_settings", label: "Roles y Permisos" },
+                            { to: "/permissions", icon: "lock_open", label: "Catálogo Permisos" },
+                            { to: "/settings", icon: "settings", label: "Settings" }
+                        ].map((item) => (
+                            <li key={item.to}>
+                                <Link
+                                    to={item.to}
+                                    title={isCollapsed ? item.label : undefined}
+                                    className={cn(
+                                        "group flex items-center rounded-lg py-3 text-white/80 transition-colors hover:bg-white/10 hover:text-white",
+                                        isCollapsed ? "justify-center px-0" : "px-4 gap-3",
+                                        location.pathname === item.to && "bg-brand-accent text-white"
+                                    )}
+                                    onClick={() => closeMobile()} // Close on navigation in mobile
+                                >
+                                    <span className="material-symbols-outlined flex-shrink-0" style={{ fontSize: '22px' }}>{item.icon}</span>
+                                    <span className={cn(
+                                        "font-medium text-sm transition-all whitespace-nowrap",
+                                        isCollapsed ? "w-0 opacity-0 hidden" : "w-auto opacity-100"
+                                    )}>
+                                        {item.label}
+                                    </span>
+                                </Link>
+                            </li>
+                        ))}
+                    </ul>
+                </nav>
+
+                {/* Footer / Toggle */}
+                <div className="border-t border-white/10 p-4">
+                    {/* Support Link */}
+                    <a
+                        className={cn(
+                            "flex items-center gap-3 text-sm text-white/60 hover:text-white mb-4",
+                            isCollapsed ? "justify-center" : ""
+                        )}
+                        href="#"
+                        title="Support Center"
+                    >
+                        <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>help</span>
+                        {!isCollapsed && <span>Support Center</span>}
+                    </a>
+
+                    {/* Desktop Collapse Toggle */}
+                    <button
+                        onClick={toggleCollapse}
+                        className="hidden lg:flex w-full items-center justify-center rounded-lg bg-white/5 p-2 text-white/60 hover:bg-white/10 hover:text-white transition-colors"
+                    >
+                        <span className="material-symbols-outlined">
+                            {isCollapsed ? 'keyboard_double_arrow_right' : 'keyboard_double_arrow_left'}
+                        </span>
+                    </button>
+                </div>
+            </aside>
+        </>
     );
 }

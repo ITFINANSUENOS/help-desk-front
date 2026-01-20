@@ -1,12 +1,22 @@
 
 import { useAuth } from '../../context/useAuth';
 
-export function Header() {
+interface HeaderProps {
+    toggleMobileSidebar: () => void;
+}
+
+export function Header({ toggleMobileSidebar }: HeaderProps) {
     const { user, logout } = useAuth();
 
     return (
-        <header className="flex h-20 items-center justify-between border-b border-gray-200 bg-white px-8 shadow-sm">
-            <div>
+        <header className="flex h-20 items-center justify-between border-b border-gray-200 bg-white px-4 md:px-8 shadow-sm">
+            <div className="flex items-center gap-4">
+                <button
+                    onClick={toggleMobileSidebar}
+                    className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg lg:hidden"
+                >
+                    <span className="material-symbols-outlined">menu</span>
+                </button>
                 <h1 className="text-xl font-bold text-gray-800">Dashboard Overview</h1>
             </div>
             <div className="flex items-center gap-6">
