@@ -60,6 +60,12 @@ interface RawTicket {
     prioridadDefecto?: string;
 }
 
+interface RawAttachment {
+    id: number;
+    nombre: string;
+    url: string;
+}
+
 interface RawTimelineItem {
     id?: number;
     actor?: { id: number; nombre: string };
@@ -74,6 +80,7 @@ interface RawTimelineItem {
 
     fecha: string;
     metadata?: Record<string, unknown>;
+    adjuntos?: RawAttachment[]; // New field from API 13.5
 }
 
 export const ticketService = {
@@ -96,12 +103,6 @@ export const ticketService = {
         params.limit = filter.limit || 10;
 
         // NOTE: This endpoint is defined in API.md as GET /tickets/list
-        // IMPORTANT: We need to handle potential differences between List and Detail DTOs.
-        // For now, we assume List might still return flatter structure or we map carefully.
-        // To satisfy lint, we define a loose shape for list items or reuse RawTicket if we are confident.
-        // Given we don't have list JSON, we'll try to use a union or Partial<RawTicket> but 'any' was flagged.
-        // Let's use a temporary interface locally or just safely cast.
-
         const response = await api.get<{ data: RawTicket[], meta: TicketListResponse['meta'] }>('/tickets/list', { params });
 
         const rawData = response.data.data || [];
@@ -172,7 +173,8 @@ export const ticketService = {
     },
 
     async getTicketTimeline(id: number): Promise<TicketTimelineItem[]> {
-        const response = await api.get<RawTimelineItem[]>(`/tickets/${id}/timeline`);
+        // Updated endpoint based on API 13.5: /tickets/:id/history represents consolidated timeline
+        const response = await api.get<RawTimelineItem[]>(`/tickets/${id}/history`);
         console.log('Raw Timeline Data:', response.data);
         return response.data.map((item, index) => {
             // Determine author name
@@ -192,7 +194,10 @@ export const ticketService = {
                 authorRole: item.autorRol, // This might be missing in new response, check logic later
                 authorAvatar: authorName.substring(0, 2).toUpperCase(),
                 date: item.fecha,
-                metadata: item.metadata
+                metadata: {
+                    ...item.metadata,
+                    attachments: item.adjuntos // Pass attachments through metadata if UI supports it later
+                }
             };
         });
     }

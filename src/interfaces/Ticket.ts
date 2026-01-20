@@ -65,5 +65,6 @@ export interface TicketTimelineItem {
         newValue?: string;
         fileUrl?: string;
         fileName?: string;
+        attachments?: { id: number; nombre: string; url: string }[];
     };
 }
