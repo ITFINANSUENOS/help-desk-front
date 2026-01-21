@@ -24,6 +24,7 @@ interface DataTableProps<T> {
     pagination?: PaginationInfo;
     onRowClick?: (item: T) => void;
     getRowKey: (item: T) => string | number;
+    className?: string; // Add className prop
 }
 
 export function DataTable<T>({
@@ -34,12 +35,13 @@ export function DataTable<T>({
     loadingMessage = 'Cargando...',
     pagination,
     onRowClick,
-    getRowKey
+    getRowKey,
+    className = ''
 }: DataTableProps<T>) {
     const colSpan = columns.length;
 
     return (
-        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+        <div className={`overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm ${className}`}>
             <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm text-gray-600">
                     <thead className="bg-gray-50 text-xs font-semibold uppercase text-gray-500">

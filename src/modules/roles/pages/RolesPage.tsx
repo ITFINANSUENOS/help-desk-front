@@ -7,6 +7,7 @@ import type { Role } from '../interfaces/Role';
 import { Button } from '../../../shared/components/Button';
 import { Modal } from '../../../shared/components/Modal';
 import { ConfirmationModal } from '../../../shared/components/ConfirmationModal';
+import { DataTable } from '../../../shared/components/DataTable';
 import { Input } from '../../../shared/components/Input';
 
 export default function RolesPage() {
@@ -82,68 +83,61 @@ export default function RolesPage() {
             </div>
 
             {/* Roles Table */}
-            <div className="rounded-xl border border-gray-100 bg-white shadow-sm overflow-hidden">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left text-sm text-gray-600">
-                        <thead className="bg-gray-50 text-xs font-semibold uppercase text-gray-500">
-                            <tr>
-                                <th className="px-6 py-4">Nombre / ID</th>
-                                <th className="px-6 py-4">Descripción</th>
-                                <th className="px-6 py-4">Estado</th>
-                                <th className="px-6 py-4 text-right">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100">
-                            {loading ? (
-                                <tr>
-                                    <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
-                                        Cargando roles...
-                                    </td>
-                                </tr>
-                            ) : roles.length === 0 ? (
-                                <tr>
-                                    <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
-                                        No hay roles creados.
-                                    </td>
-                                </tr>
-                            ) : (
-                                roles.map((role) => (
-                                    <tr key={role.id} className="hover:bg-gray-50 transition-colors">
-                                        <td className="px-6 py-4">
-                                            <div className="font-semibold text-gray-900">{role.nombre}</div>
-                                            <div className="text-xs text-gray-400">ID: {role.id}</div>
-                                        </td>
-                                        <td className="px-6 py-4">{role.descripcion}</td>
-                                        <td className="px-6 py-4">
-                                            <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${role.estado === 1 ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
-                                                {role.estado === 1 ? 'Activo' : 'Inactivo'}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 text-right">
-                                            <div className="flex justify-end gap-2">
-                                                <Link
-                                                    to={`/roles/${role.id}`}
-                                                    className="inline-flex items-center justify-center h-8 w-8 rounded text-brand-blue hover:bg-blue-50 transition-colors"
-                                                    title="Editar y Permisos"
-                                                >
-                                                    <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>edit</span>
-                                                </Link>
-                                                <button
-                                                    onClick={() => handleDeleteClick(role.id)}
-                                                    className="inline-flex items-center justify-center h-8 w-8 rounded text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
-                                                    title="Eliminar"
-                                                >
-                                                    <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>delete</span>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            <DataTable<Role>
+                data={roles}
+                loading={loading}
+                emptyMessage="No hay roles creados."
+                loadingMessage="Cargando roles..."
+                getRowKey={(role) => role.id}
+                columns={[
+                    {
+                        key: 'nombre',
+                        header: 'Nombre / ID',
+                        render: (role: Role) => (
+                            <div>
+                                <div className="font-semibold text-gray-900">{role.nombre}</div>
+                                <div className="text-xs text-gray-400">ID: {role.id}</div>
+                            </div>
+                        )
+                    },
+                    {
+                        key: 'descripcion',
+                        header: 'Descripción'
+                    },
+                    {
+                        key: 'estado',
+                        header: 'Estado',
+                        render: (role: Role) => (
+                            <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${role.estado === 1 ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+                                {role.estado === 1 ? 'Activo' : 'Inactivo'}
+                            </span>
+                        )
+                    },
+                    {
+                        key: 'actions',
+                        header: 'Acciones',
+                        className: 'px-6 py-4 text-right',
+                        render: (role: Role) => (
+                            <div className="flex justify-end gap-2">
+                                <Link
+                                    to={`/roles/${role.id}`}
+                                    className="inline-flex items-center justify-center h-8 w-8 rounded text-brand-blue hover:bg-blue-50 transition-colors"
+                                    title="Editar y Permisos"
+                                >
+                                    <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>edit</span>
+                                </Link>
+                                <button
+                                    onClick={() => handleDeleteClick(role.id)}
+                                    className="inline-flex items-center justify-center h-8 w-8 rounded text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                                    title="Eliminar"
+                                >
+                                    <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>delete</span>
+                                </button>
+                            </div>
+                        )
+                    }
+                ]}
+            />
 
             {/* Create Role Modal */}
             <Modal

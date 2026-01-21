@@ -1,8 +1,20 @@
 
 import { cn } from '../../../shared/lib/utils';
+import { DataTable } from '../../../shared/components/DataTable';
+
+interface MockTicket {
+    id: string;
+    subject: string;
+    customer: string;
+    status: string;
+    priority: string;
+    statusColor: string;
+    priorityColor: string;
+    priorityDot: string;
+}
 
 // Mock Data matching the design
-const recentTickets = [
+const recentTickets: MockTicket[] = [
     {
         id: "#TK-2049",
         subject: "Login authentication failure",
@@ -47,50 +59,62 @@ const recentTickets = [
 
 export function TicketTable() {
     return (
-        <div className="mt-8 rounded-xl border border-gray-100 bg-white shadow-sm">
-            <div className="flex items-center justify-between border-b border-gray-100 px-6 py-5">
+        <div className="mt-8">
+            <div className="flex items-center justify-between mb-4 px-1">
                 <h3 className="text-lg font-bold text-gray-800">Recent Active Tickets</h3>
                 <a className="text-sm font-bold text-brand-teal hover:text-brand-accent" href="#">View All</a>
             </div>
-            <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm text-gray-600">
-                    <thead className="bg-gray-50 text-xs font-semibold uppercase text-gray-500">
-                        <tr>
-                            <th className="px-6 py-4">ID</th>
-                            <th className="px-6 py-4">Subject</th>
-                            <th className="px-6 py-4">Customer</th>
-                            <th className="px-6 py-4">Status</th>
-                            <th className="px-6 py-4">Priority</th>
-                            <th className="px-6 py-4 text-right">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                        {recentTickets.map((ticket) => (
-                            <tr key={ticket.id} className="hover:bg-gray-50 transition-colors">
-                                <td className="px-6 py-4 font-mono font-medium text-gray-900">{ticket.id}</td>
-                                <td className="px-6 py-4 font-medium text-gray-800">{ticket.subject}</td>
-                                <td className="px-6 py-4">{ticket.customer}</td>
-                                <td className="px-6 py-4">
-                                    <span className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium", ticket.statusColor)}>
-                                        {ticket.status}
-                                    </span>
-                                </td>
-                                <td className="px-6 py-4">
-                                    <div className={cn("flex items-center gap-1.5", ticket.priorityColor)}>
-                                        <div className={cn("h-2 w-2 rounded-full", ticket.priorityDot)}></div>
-                                        <span className="font-medium">{ticket.priority}</span>
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4 text-right">
-                                    <button className="text-gray-400 hover:text-brand-blue transition-colors">
-                                        <span className="material-symbols-outlined">more_vert</span>
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+            <DataTable<MockTicket>
+                data={recentTickets}
+                getRowKey={(ticket) => ticket.id}
+                columns={[
+                    {
+                        key: 'id',
+                        header: 'ID',
+                        className: 'px-6 py-4 font-mono font-medium text-gray-900',
+                    },
+                    {
+                        key: 'subject',
+                        header: 'Subject',
+                        className: 'px-6 py-4 font-medium text-gray-800'
+                    },
+                    {
+                        key: 'customer',
+                        header: 'Customer'
+                    },
+                    {
+                        key: 'status',
+                        header: 'Status',
+                        render: (ticket: MockTicket) => (
+                            <span className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium", ticket.statusColor)}>
+                                {ticket.status}
+                            </span>
+                        )
+                    },
+                    {
+                        key: 'priority',
+                        header: 'Priority',
+                        render: (ticket: MockTicket) => (
+                            <div className={cn("flex items-center gap-1.5", ticket.priorityColor)}>
+                                <div className={cn("h-2 w-2 rounded-full", ticket.priorityDot)}></div>
+                                <span className="font-medium">{ticket.priority}</span>
+                            </div>
+                        )
+                    },
+                    {
+                        key: 'actions',
+                        header: 'Action',
+                        className: 'px-6 py-4 text-right',
+                        render: () => (
+                            <div className="flex justify-end">
+                                <button className="text-gray-400 hover:text-brand-blue transition-colors">
+                                    <span className="material-symbols-outlined">more_vert</span>
+                                </button>
+                            </div>
+                        )
+                    }
+                ]}
+            />
         </div>
     );
 }
