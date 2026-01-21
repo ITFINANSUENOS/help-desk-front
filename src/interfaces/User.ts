@@ -1,57 +1,85 @@
-import type { Permission } from './Permission';
-
-/**
- * Representa un usuario en el sistema.
- * Mapea la estructura devuelta por el endpoint `/auth/profile`.
- */
+// User entity interface
 export interface User {
-    /** ID único del usuario en la base de datos. */
-    usu_id: number;
-    /** Correo electrónico del usuario. */
-    usu_correo: string;
-    /** ID del rol asignado (referencia). */
-    rol_id: number | null;
-    /** ID de la regional asignada (referencia). */
-    reg_id: number | null;
-    /** ID del cargo asignado (referencia). */
-    car_id: number | null;
-    /** ID del departamento asignado (referencia). */
-    dp_id: number | null;
-    /** Indicador de si es usuario nacional. */
-    es_nacional: boolean | number;
-    /** Nombre de pila. */
+    id: number;
+    cedula: string;
     nombre: string;
-    /** Apellido. */
     apellido: string;
-    /** Lista de permisos calculados para este usuario (opcional). */
-    permissions?: Permission[];
-    /** Objeto con detalles del rol. */
-    role?: {
+    email: string;
+    rolId: number;
+    regionalId: number | null;
+    cargoId: number | null;
+    departamentoId: number | null;
+    esNacional: boolean;
+    estado: number; // 1=active, 0=inactive
+
+    // Relations (optional, loaded with 'included')
+    rol?: {
         id: number;
         nombre: string;
-        descripcion?: string;
-        estado?: number;
     };
-    /** Objeto con detalles del cargo. */
-    cargo?: {
-        id: number;
-        nombre: string;
-        estado: number;
-    };
-    /** Objeto con detalles de la regional. */
     regional?: {
         id: number;
         nombre: string;
-        estado: number;
-        zonaId: number;
     };
-    /** Objeto con detalles del departamento. */
+    cargo?: {
+        id: number;
+        nombre: string;
+    };
     departamento?: {
         id: number;
         nombre: string;
-        fechaCreacion: string;
-        fechaModificacion: string | null;
-        fechaEliminacion: string | null;
-        estado: number;
+    };
+}
+
+// Create user DTO
+export interface CreateUserDto {
+    cedula: string;
+    nombre: string;
+    apellido: string;
+    email: string;
+    password: string;
+    rolId: number;
+    regionalId?: number;
+    cargoId?: number;
+    departamentoId?: number;
+    esNacional?: boolean;
+    empresasIds?: number[];
+}
+
+// Update user DTO
+export interface UpdateUserDto {
+    cedula?: string;
+    nombre?: string;
+    apellido?: string;
+    email?: string;
+    password?: string;
+    rolId?: number;
+    regionalId?: number;
+    cargoId?: number;
+    departamentoId?: number;
+    esNacional?: boolean;
+    estado?: number;
+    empresasIds?: number[];
+}
+
+// User filter interface
+export interface UserFilter {
+    search?: string;
+    rolId?: number | 'all';
+    cargoId?: number | 'all';
+    regionalId?: number | 'all';
+    estado?: number | 'all';
+    page?: number;
+    limit?: number;
+}
+
+// User list response
+export interface UserListResponse {
+    data: User[];
+    meta: {
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
     };
 }

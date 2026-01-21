@@ -11,6 +11,7 @@ const RoleDetailPage = lazy(() => import('../pages/RoleDetailPage'));
 const PermissionsPage = lazy(() => import('../pages/PermissionsPage'));
 const TicketsPage = lazy(() => import('../pages/TicketsPage'));
 const TicketDetailPage = lazy(() => import('../pages/TicketDetailPage'));
+const UsersPage = lazy(() => import('../pages/UsersPage'));
 
 
 export const appRoutes: RouteObject[] = [
@@ -70,6 +71,14 @@ export const appRoutes: RouteObject[] = [
                 element: (
                     <Suspense fallback={<PageLoader />}>
                         <PermissionsPage />
+                    </Suspense>
+                )
+            },
+            {
+                path: '/users',
+                element: (
+                    <Suspense fallback={<PageLoader />}>
+                        <UsersPage />
                     </Suspense>
                 )
             },

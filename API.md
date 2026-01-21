@@ -1,5 +1,160 @@
 # Help Desk API - Documentación
 
+## 2026-01-20: Workflow Engine Enhancements (Completed)
+
+### Summary
+Implemented critical legacy functionalities for the Workflow Engine to support manual assignment and approval flows.
+
+### Technical Detail
+1. **Manual Assignment (`checkStartFlow`)**:
+   - Implemented `checkStartFlow` in `WorkflowEngineService`.
+   - Checks if the initial step has explicit users (`step.usuarios`) or a specific role (`step.cargoAsignadoId`).
+   - Returns a list of candidates (`UserCandidateDto[]`) for the frontend to present a selection UI.
+   - Endpoint: `GET /workflows/check-start-flow/:subcategoriaId`
+
+2. **Approval Flow (`approveFlow`)**:
+   - Implemented `approveFlow` to handle Boss Approvals.
+   - Validates `usuarioJefeAprobadorId` matches the requester.
+   - Transitions ticket using 'aprobado' key.
+   - Fallback logic: If 'aprobado' transition fails, searches for the next non-approval step.
+   - Endpoint: `POST /workflows/approve-flow/:ticketId`
+
+3. **Entity Improvements**:
+   - Corrected property name `usuarioIdJefeAprobador` -> `usuarioJefeAprobadorId` in `Ticket` entity to match column usage.
+   - Used `step.usuarios` relation instead of legacy `pasoFlujoUsuarios`.
+
+### Testing
+- Unit tests added for logic in `workflow-engine.service.spec.ts`.
+- Controller tests added in `workflow.controller.spec.ts`.
+
+---
+
+## 2026-01-20: Ticket Listing & History (Completed)
+
+### Summary
+Backfilled missing functionality in `TicketListingService` and `TicketHistoryService` to match legacy capabilities, including precise filtering, assignee name resolution, and signed document tracking.
+
+### Technical Detail
+1. **Ticket Listing (`TicketListingService`)**:
+   - Implemented view-based scopes (`CREATED`, `ASSIGNED`, `ALL`, `ERRORS_REPORTED`, `ERRORS_RECEIVED`).
+   - Added automatic assignee name resolution: Legacy stores IDs as "1,2,3", service maps these to "Real Name (+N)".
+   - Optimized eager loading with `TicketEtiqueta` (Tags).
+
+2. **Ticket History (`TicketHistoryService`)**:
+   - Merged timeline from three sources: 
+     - `TicketDetalle` (Comments/Logs)
+     - `TicketAsignacionHistorico` (Events)
+     - `DocumentoFlujo` (Signed Documents) - **New Implementation**
+   - Implemented `getLastSignedDocument(ticketId)` helper for UI usage.
+
+### Testing
+- **Filters**: Verified correct query building for different user roles and views.
+- **Timeline**: Verified correct chronological merging of heterogeneous events (Signed Docs, Assignments, Comments).
+- **Unit Tests**: `ticket-listing.service.spec.ts` and `ticket-history.service.spec.ts` added and passed.
+
+---
+
+## 2026-01-20: KPI & Statistics System (Completed)
+
+### Summary
+Implemented robust statistical analysis and hierarchical scoping for the Dashboard.
+
+### Technical Detail
+1. **Hierarchical Scope (`getScope`)**:
+   - **Recursive Logic**: If user has Subordinates (checked via `Organigrama` entity), recursively fetches all cargo IDs in the subtree.
+   - **Boss View**: Managers see tickets from all users in their hierarchy tree.
+   - **Agent/Client View**: Fallback to self-only (Agent sees assigned, Client sees created).
+
+2. **Median Response Time (`getMedianResponseTime`)**:
+   - Implemented Median calculation (not Average) to exclude outliers.
+   - Computes time difference (Minutes) between `Creation` and `Closure` for closed tickets.
+   - Sorts values and picks the middle element (or average of two middle elements).
+
+3. **Dynamic Grouping (`getGroupedStats`)**:
+   - Added `cargo` grouping to existing `department`, `category`, and `user`.
+   - Supports aggregation for charts.
+
+4. **API Endpoints**:
+   - `GET /statistics/dashboard`: Main endpoint for charts and counters.
+   - `GET /statistics/median-response-time`: Specific endpoint for the median metric.
+   - `GET /statistics/ticket/:id/performance`: Granular step-by-step metrics.
+
+### Testing
+- **Unit Logic**: `ticket-statistics.service.spec.ts` verifies:
+  - Recursive ID fetching (simulated 3-level depth).
+  - Median calculation algorithm with odd/even datasets.
+  - Basic role scope.
+
+---
+
+## 2026-01-20: Template Fields Module (Completed)
+
+### Summary
+Implemented dynamic field logic matching legacy `CampoPlantilla.php` capabilities, including dynamic autocomplete queries and step-specific field retrieval.
+
+### Technical Detail
+1. **Field Retrieval (`getFieldsByStep`)**:
+   - `GET /templates/fields/:stepId`
+   - Returns all active fields (`estado=1`) for a given workflow step.
+   - Used by frontend to render dynamic inputs.
+
+2. **Dynamic Autocomplete (`executeFieldQuery`)**:
+   - `GET /templates/query/:fieldId?term=searchvalue`
+   - **Presets**:
+     - `PRESET_REGIONAL`: Searches `tm_regional`.
+     - `PRESET_CARGO`: Searches `tm_cargo`.
+     - `PRESET_USUARIOS`: Searches `tm_usuario` (Name + Surname).
+   - **Dynamic SQL**: Finds distinct `tm_consulta` record by ID stored in `campoQuery`. Executes the stored SQL directly.
+   - **Security**:
+     - Uses `DataSource.query()` for raw execution.
+     - Filters results in memory if the SQL doesn't support parameters, ensuring `term` is respected without SQL injection risk in the fallback path.
+
+### Testing
+- **Service**: `templates.service.ts` logic updated and verified manually via Postman.
+- **Controller**: `TemplatesController` endpoints exposed and secured with `read Ticket` policy.
+
+---
+
+## 2026-01-20: Helpers & Utilities (Completed)
+
+### 1. DateUtilService (Common)
+- **Location**: `src/common/services/date-util.service.ts`
+- **Logic**: Handles calculation of business hours/days.
+- **Methods**: `addBusinessHours`, `addBusinessDays`.
+
+### 2. FastAnswers Module (New)
+- **Location**: `src/modules/fast-answers/`
+- **Endpoint**: `GET /fast-answers`
+- **Entity**: `tm_fast_answer` (Process mistakes, frequent answers).
+- **Access**: Public for authenticated users (`read Ticket` permission).
+
+### 3. ExcelDataService (Imports Module)
+- **Location**: `src/modules/imports/services/excel-data.service.ts`
+- **Logic**: Retrieves JSON content stored in `tm_data_excel` linked to workflows.
+- **Usage**: Used to load regional Excel files dynamically during flow execution.
+
+### 4. TicketError Module (Tickets)
+- **Controller**: `TicketErrorController` (`src/modules/tickets/controllers/ticket-error.controller.ts`)
+- **Service**: `TicketErrorService` (`src/modules/tickets/services/ticket-error.service.ts`)
+- **Endpoints**:
+    - `POST /tickets/errors`: Report an error on a ticket.
+    - `GET /tickets/errors/received`: List errors reported to me.
+    - `GET /tickets/errors/reported`: List errors reported by me.
+    - `GET /tickets/errors/stats`: Error statistics by type.
+- **Relations**: Linked to `Ticket`, `User` (reporter/responsible), and `FastAnswer` (error type).
+
+### 5. Tags Module (Etiquetas)
+- **Controller**: `TagsController` (`src/modules/tags/tags.controller.ts`)
+- **Service**: `TagsService` (`src/modules/tags/tags.service.ts`)
+- **Endpoints**:
+    - `GET /tags`: List my tags.
+    - `POST /tags`: Create personal tag.
+    - `PATCH /tags/:id`: Update tag.
+    - `DELETE /tags/:id`: Delete tag.
+- **Scope**: Tags are currently user-specific (`usuarioId`).
+
+---
+
 ## 2026-01-15 - Configuración Inicial del Backend NestJS
 
 ### Contexto
@@ -794,6 +949,63 @@ mysql -u root -p mesa_de_ayuda < migrations/2026-01-18_dynamic_permissions.sql
 
 ---
 
+## 9. Módulo de Estadísticas (`src/modules/reports/`)
+
+### Objetivos
+Reemplazar la lógica legacy de `Kpi.php` por un servicio limpio basado en QueryBuilder y DTOs, capaz de calcular KPIs dinámicos y métricas de desempeño.
+
+### 9.1 Endpoints (`StatisticsController`)
+
+Prefix: `/statistics` (requiere permiso `Report`)
+
+| Método | Ruta | Descripción | Params |
+|--------|------|-------------|--------|
+| `GET` | `/statistics/dashboard` | Dashboard de KPIs | `?dateFrom=...&groupBy=department` |
+| `GET` | `/statistics/ticket/:id/performance` | Métricas de Tiempos | `id` (Ticket ID) |
+
+### 9.2 Request: Dashboard Filters (`DashboardFiltersDto`)
+```json
+{
+  "dateFrom": "2026-01-01",
+  "dateTo": "2026-01-31",
+  "groupBy": "department" // 'category', 'user', 'priority'
+}
+```
+
+### 9.3 Response: Dashboard Stats (`DashboardStatsDto`)
+```json
+{
+  "openCount": 150,
+  "closedCount": 50,
+  "totalCount": 200,
+  "dataset": [
+    { "label": "Sistemas", "value": 120, "id": 1 },
+    { "label": "Recursos Humanos", "value": 80, "id": 2 }
+  ]
+}
+```
+
+### 9.4 Response: Performance Metrics (`StepMetricDto[]`)
+```json
+[
+  {
+    "stepName": "Paso 1",
+    "durationMinutes": 45,
+    "startDate": "2026-01-20T10:00:00.000Z",
+    "endDate": "2026-01-20T10:45:00.000Z",
+    "assignedUser": "Juan Perez"
+  }
+]
+```
+
+### 9.5 Estructura del Servicio (`TicketStatisticsService`)
+
+- **`getScope(user)`**: Determina si el usuario ve 'all' o solo sus tickets, basado en reglas de rol.
+- **`getDashboardStats(user, filters)`**: Aplica el scope + filtros y ejecuta agregaciones (COUNT, GROUP BY).
+- **`getPerformanceMetrics(ticketId)`**: Analiza `th_ticket_asignacion` para calcular la duración entre reasignaciones.
+
+---
+
 ## Decisiones Técnicas
 
 1. **`synchronize: false`** - No se modifica el esquema de la DB legacy
@@ -1110,7 +1322,7 @@ Reemplaza a `TicketLister.php`. Provee endpoints optimizados para bandejas.
 
 #### Endpoints
 - **GET** `/tickets/list` (**NUEVO - Maestro**): Listado unificado con soporte de vistas dinámicas.
-    - Param `view`: `all` | `created` | `assigned` | `observed`
+    - Param `view`: `all` | `created` | `assigned` | `observed` | `errors_reported` | `errors_received`
     - Param `search`, `status`, `dateFrom`, `dateTo`, etc.
     - **Seguridad**: Si un usuario pide `view=all` pero no tiene permisos, el sistema automáticamente le muestra `created` o `assigned` (Fallback seguro).
 
@@ -1290,4 +1502,182 @@ El módulo se inyecta en:
 - `TicketsModule`: Notifica al creador tras la generación exitosa (`TicketService.create`).
 - `WorkflowsModule`: Notifica al agente/responsable cada vez que el ticket transiciona o se asigna (`WorkflowEngineService.transitionStep` y `startTicketFlow`).
 
+---
 
+## 17. Módulo de Gestión Documental (`src/modules/documents/`)
+
+### Objetivo
+Proporcionar un mecanismo centralizado y seguro para el almacenamiento y recuperación de archivos adjuntos asociados a Tickets, Comentarios y Cierres. Se elimina la dispersión de lógica de archivos del sistema legacy.
+
+### Arquitectura
+- **StorageService**: Abstracción de bajo nivel que maneja el sistema de archivos físico (`fs`). Actualmente usa almacenamiento local en `public/documentos/{ticketId}/`, pero está diseñado para facilitar la migración a S3/Cloud Storage.
+- **DocumentsService**: Lógica de negocio. Registra los metadatos del archivo en la base de datos (`tm_documento`, `td_documento_detalle`, `td_documento_cierre`) y coordina con `StorageService`.
+- **DocumentsController**: Exposición API. Maneja subidas (via `Multer`) y descargas seguras (streaming).
+
+### Integración con Tickets
+El módulo se integra directamente con `TicketService` para:
+- Registrar automáticamente los PDFs de tickets generados por el sistema.
+- Permitir adjuntar archivos durante el ciclo de vida del ticket.
+
+### Endpoints (`DocumentsController`)
+
+| Método | Ruta | Descripción | Permiso Requ | Body (Multipart) |
+|--------|------|-------------|--------------|------------------|
+| `POST` | `/documents/ticket/:ticketId` | Subir adjunto principal al ticket | `update Ticket` | `file`: (binary) |
+| `POST` | `/documents/comment/:detailId` | Subir adjunto a un comentario | `update Ticket` | `file`: (binary) |
+| `POST` | `/documents/closing/:ticketId` | Subir adjunto de cierre | `update Ticket` | `file`: (binary) |
+| `GET` | `/documents/:type/:id/download` | Descargar archivo | `read Ticket` | - |
+
+**Tipos para descarga (`:type`):**
+- `ticket`: Documentos principales (`tm_documento`)
+- `detail`: Adjuntos de comentarios (`td_documento_detalle`)
+- `closing`: Adjuntos de cierre (`td_documento_cierre`)
+
+### Seguridad (CASL)
+- **Subidas**: Requieren permiso `update` sobre el recurso `Ticket`.
+- **Descargas**: Requieren permiso `read` sobre el recurso `Ticket` asociado.
+- **Validación de Archivos**: Se utiliza `Interceptor` de NestJS para manejar `multipart/form-data`.
+
+### Almacenamiento Físico
+Los archivos se organizan por ID de ticket para evitar directorios con millones de archivos:
+`public/documentos/{ticketId}/{filename}`
+
+---
+
+## 18. Notificaciones en Tiempo Real (WebSockets)
+
+### Objetivo
+Permitir a los clientes (Frontend) recibir actualizaciones inmediatas sobre eventos críticos (Asignaciones, Cierre de Tickets) sin necesidad de polling.
+
+### Tecnología
+- **Protocolo:** Socket.IO
+- **Librería Backend:** `@nestjs/websockets` + `socket.io`
+- **Autenticación:** JWT (Reutiliza el mismo token del login REST)
+
+### 18.1 Conexión
+
+```javascript
+import { io } from 'socket.io-client';
+
+const socket = io('http://localhost:3000', {
+  query: {
+    token: 'JWT_ACCESS_TOKEN'
+  }
+});
+// Nota: Se puede usar query param 'token' o header Authorization
+
+socket.on('connect', () => {
+  console.log('Conectado a notificaciones');
+});
+```
+
+### 18.2 Eventos
+
+| Evento | Payload | Descripción |
+|--------|---------|-------------|
+| `new_notification` | `{ mensaje: string, ticketId: number, fecha: Date }` | Se envía al usuario específico cuando se le asigna un ticket o recibe una actualización directa. |
+
+### 18.3 Seguridad
+- El Gateway valida el JWT en el momento de la conexión (`handleConnection`).
+- Si el token es inválido o expira, el servidor desconecta el socket automáticamente.
+- Cada usuario se une a una sala privada `user_{usu_id}` para recibir solo sus mensajes.
+
+---
+
+## 19. Automatización de SLA (SLA Service)
+
+### Objetivo
+Monitorear el tiempo que un ticket pasa en cada paso y realizar acciones automáticas si se excede el tiempo límite (`horasSla`).
+
+### Componentes
+- **`SlaService`**: Lógica de cálculo de tiempos y ejecución de escalamientos.
+- **`SlaSchedulerService`**: Cron Job que ejecuta la revisión cada 5 minutos (configurable via `SLA_CHECK_CRON`).
+
+### 19.1 Configuración
+El SLA se define en la entidad `PasoFlujo`:
+- `paso_horas_sla`: Tiempo máximo en horas (decimal).
+- `usuario_escalado_id`: ID del usuario a quien se reasignará el ticket si vence el SLA (Opcional).
+
+### 19.2 Lógica de Alerta
+1. El scheduler busca tickets activos donde `(NOW - fechaAsignacion) > horasSla`.
+2. Si encuentra uno vencido:
+   - Marca el histórico actual como `slaStatus = 'Atrasado'`.
+   - Envía notificación WebSocket (`ticket_overdue`) a los usuarios asignados para alertarles.
+   - **No reasigna** automáticamente (cambio de lógica para mantener responsabilidad).
+
+---
+
+## 20. Estampado de Firmas en PDF
+
+### Objetivo
+Incrustar dinámicamente la firma de los usuarios (imagen PNG/JPG) en los documentos generados por el flujo.
+
+### Componentes
+- **`PdfStampingService`**: Utilería de bajo nivel para manipular PDFs. Ahora soporta `stampImages` para incrustar imágenes.
+- **`SignatureStampingService`**: Orquestador que:
+  1. Lee la configuración de firmas del paso actual (`PasoFlujoFirma`).
+  2. Resuelve la ruta física de la imagen de firma del usuario (`User.firma`).
+  3. Llama a `PdfStampingService` para estampar.
+
+### 20.1 Configuración
+La entidad `PasoFlujoFirma` define:
+- `coord_x`, `coord_y`: Coordenadas en la página.
+- `pagina`: Número de página (1-based).
+- `usu_id` o `car_id`: A quién corresponde la firma (Usuario específico o Cargo).
+
+### 20.2 Uso
+El servicio se invoca durante la transición o generación de documentos:
+```typescript
+const pdfBytes = await this.signatureService.stampSignaturesForStep(pdfPath, pasoId);
+```
+Si el usuario no tiene firma configurada en `User.firma`, la operación se omite para ese usuario con un warning.
+
+
+
+## 10. Módulo de Workflows y SLA ('src/modules/workflows/')
+
+### SLA (Acuerdos de Nivel de Servicio)
+
+El sistema monitorea automáticamente el tiempo que un ticket permanece en cada paso del flujo.
+
+#### Conceptos Clave
+- **Tiempo Hábil ('paso_tiempo_habil')**: Definido en 'tm_flujo_paso'. Representa los días calendario (MVP) o hábiles que un ticket puede estar en un paso.
+- **Estado de Tiempo ('estado_tiempo_paso')**: Columna en 'th_ticket_asignacion_historico'.
+    - 'A Tiempo': El ticket está dentro del plazo.
+    - 'Vencido': El ticket excedió el tiempo límite.
+
+#### Funcionamiento del Motor SLA ('SlaSchedulerService')
+1. **Cron Job**: Se ejecuta cada 5 minutos.
+2. **Detección**: Busca tickets activos ('est=1') cuyo tiempo transcurrido desde la última asignación supere el 'tiempoHabil' del paso actual.
+3. **Acción**:
+    - Actualiza 'estado_tiempo_paso' a 'Vencido'.
+    - Envía notificación WebSocket ('ticket_overdue') en tiempo real al usuario asignado.
+
+#### Configuración
+- **Frecuencia de Chequeo**: Define 'SLA_CHECK_CRON' en '.env' (Default: '*/5 * * * *').
+
+### PDF Dynamic Stamping ('PdfStampingService')
+Permite estampar firmas y sellos dinámicos en documentos PDF generados o subidos.
+
+- **Servicio:** 'src/modules/templates/services/pdf-stamping.service.ts'
+- **Capacidades:**
+    - Insertar imágenes (PNG/JPG) en coordenadas específicas (X, Y).
+    - Insertar en páginas específicas (1-based).
+    - Escalar imágenes automáticamente.
+
+#### Uso:
+```typescript
+const pdfBytes = await this.pdfStampingService.stampImages(
+    'path/to/document.pdf',
+    [
+        {
+            imagePath: 'path/to/signature.png',
+            page: 1,
+            x: 100,
+            y: 200,
+            width: 150,
+            height: 50
+        }
+    ]
+);
+```
