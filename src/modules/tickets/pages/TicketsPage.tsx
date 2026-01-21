@@ -19,17 +19,18 @@ export default function TicketsPage() {
     const [totalPages, setTotalPages] = useState(1);
 
     // Filters
-    const [statusFilter, setStatusFilter] = useState<TicketStatus | 'All Statuses'>('All Statuses');
-    const [priorityFilter, setPriorityFilter] = useState<TicketPriority | 'All Priorities'>('All Priorities');
+    const [viewFilter, setViewFilter] = useState<'all' | 'created' | 'assigned'>('all');
+    const [statusFilter, setStatusFilter] = useState<TicketStatus | 'Todos'>('Todos');
+    const [priorityFilter, setPriorityFilter] = useState<TicketPriority | 'Todas'>('Todas');
     const [searchQuery, setSearchQuery] = useState('');
 
     const fetchTickets = useCallback(async () => {
         try {
             setLoading(true);
             const response = await ticketService.getTickets({
-                view: 'all',
-                status: statusFilter,
-                priority: priorityFilter,
+                view: viewFilter,
+                status: statusFilter === 'Todos' ? undefined : statusFilter,
+                priority: priorityFilter === 'Todas' ? undefined : priorityFilter,
                 search: searchQuery,
                 page,
                 limit
@@ -42,11 +43,11 @@ export default function TicketsPage() {
         } finally {
             setLoading(false);
         }
-    }, [statusFilter, priorityFilter, searchQuery, page, limit]);
+    }, [viewFilter, statusFilter, priorityFilter, searchQuery, page, limit]);
 
     useEffect(() => {
         setPage(1);
-    }, [statusFilter, priorityFilter, searchQuery]);
+    }, [viewFilter, statusFilter, priorityFilter, searchQuery]);
 
     useEffect(() => {
         const timeoutId = setTimeout(() => {
@@ -103,9 +104,21 @@ export default function TicketsPage() {
         {
             type: 'search',
             name: 'search',
-            placeholder: 'Search by ID, subject, or customer...',
+            placeholder: 'Buscar por ID, asunto o cliente...',
             value: searchQuery,
             onChange: (val) => setSearchQuery(val as string)
+        },
+        {
+            type: 'select',
+            name: 'view',
+            value: viewFilter,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            onChange: (val) => setViewFilter(val as any),
+            options: [
+                { label: 'Todos los Tickets', value: 'all' },
+                { label: 'Creados por mí', value: 'created' },
+                { label: 'Asignados a mí', value: 'assigned' }
+            ]
         },
         {
             type: 'select',
@@ -114,7 +127,7 @@ export default function TicketsPage() {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             onChange: (val) => setStatusFilter(val as any),
             options: [
-                { label: 'All Statuses', value: 'All Statuses' },
+                { label: 'Todos los Estados', value: 'Todos' },
                 { label: 'Abierto', value: 'Abierto' },
                 { label: 'Pausado', value: 'Pausado' },
                 { label: 'Cerrado', value: 'Cerrado' }
@@ -127,7 +140,7 @@ export default function TicketsPage() {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             onChange: (val) => setPriorityFilter(val as any),
             options: [
-                { label: 'All Priorities', value: 'All Priorities' },
+                { label: 'Todas las Prioridades', value: 'Todas' },
                 { label: 'Alta', value: 'Alta' },
                 { label: 'Media', value: 'Media' },
                 { label: 'Baja', value: 'Baja' }
@@ -139,8 +152,8 @@ export default function TicketsPage() {
         <DashboardLayout title="Tickets">
             <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                 <div>
-                    <h2 className="text-2xl font-bold text-gray-900">All Tickets</h2>
-                    <p className="mt-1 text-sm text-gray-500">Manage support requests and track their progress.</p>
+                    <h2 className="text-2xl font-bold text-gray-900">Tickets</h2>
+                    <p className="mt-1 text-sm text-gray-500">Gestiona solicitudes de soporte y sigue su progreso.</p>
                 </div>
                 <Button variant="brand" className="shadow-sm" onClick={() => navigate('/tickets/create')}>
                     <span className="material-symbols-outlined mr-2">add</span>
@@ -153,8 +166,8 @@ export default function TicketsPage() {
             <DataTable<Ticket>
                 data={tickets}
                 loading={loading}
-                emptyMessage="No tickets found matching your filters."
-                loadingMessage="Loading tickets..."
+                emptyMessage="No se encontraron tickets con los filtros aplicados."
+                loadingMessage="Cargando tickets..."
                 getRowKey={(ticket) => ticket.id}
                 onRowClick={(ticket) => navigate(`/tickets/${ticket.id}`)}
                 pagination={{
@@ -173,7 +186,7 @@ export default function TicketsPage() {
                     },
                     {
                         key: 'subject',
-                        header: 'Subject',
+                        header: 'Asunto',
                         render: (ticket: Ticket) => (
                             <div>
                                 <p className="font-medium text-gray-900">{ticket.subject}</p>
@@ -183,7 +196,7 @@ export default function TicketsPage() {
                     },
                     {
                         key: 'customer',
-                        header: 'Customer',
+                        header: 'Cliente',
                         render: (ticket: Ticket) => (
                             <div className="flex items-center gap-3">
                                 <div className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold ${getAvatarColor(ticket.customer)}`}>
@@ -195,7 +208,7 @@ export default function TicketsPage() {
                     },
                     {
                         key: 'status',
-                        header: 'Status',
+                        header: 'Estado',
                         render: (ticket: Ticket) => (
                             <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusColor(ticket.status)}`}>
                                 {ticket.status}
@@ -204,7 +217,7 @@ export default function TicketsPage() {
                     },
                     {
                         key: 'priority',
-                        header: 'Priority',
+                        header: 'Prioridad',
                         render: (ticket: Ticket) => (
                             <div className="flex items-center gap-2">
                                 <div className={`h-2.5 w-2.5 rounded-full ${getPriorityColor(ticket.priority).split(' ')[0]}`}></div>
@@ -214,12 +227,12 @@ export default function TicketsPage() {
                     },
                     {
                         key: 'lastUpdated',
-                        header: 'Last Updated',
+                        header: 'Última Actualización',
                         render: (ticket: Ticket) => <span className="text-gray-500">{ticket.lastUpdated}</span>
                     },
                     {
                         key: 'actions',
-                        header: 'Action',
+                        header: 'Acciones',
                         className: 'px-6 py-4 text-right',
                         render: () => (
                             <div className="flex justify-end">

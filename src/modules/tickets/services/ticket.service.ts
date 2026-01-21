@@ -91,11 +91,11 @@ export const ticketService = {
         if (filter.view) params.view = filter.view;
         if (filter.search) params.search = filter.search;
 
-        if (filter.status && filter.status !== 'All Statuses') {
+        if (filter.status) {
             params.status = filter.status;
         }
 
-        if (filter.priority && filter.priority !== 'All Priorities') {
+        if (filter.priority) {
             params.priority = filter.priority;
         }
 
