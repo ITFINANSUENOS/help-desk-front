@@ -115,8 +115,8 @@ export default function PermissionsPage() {
                             <tr>
                                 <th className="px-6 py-4">ID</th>
                                 <th className="px-6 py-4">Nombre</th>
-                                <th className="px-6 py-4">Subject (Recurso)</th>
-                                <th className="px-6 py-4">Action (Acción)</th>
+                                <th className="px-6 py-4">Recurso (Subject)</th>
+                                <th className="px-6 py-4">Acción (Action)</th>
                                 <th className="px-6 py-4">Descripción</th>
                                 <th className="px-6 py-4 text-right">Acciones</th>
                             </tr>

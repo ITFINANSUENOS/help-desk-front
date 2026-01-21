@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { DashboardLayout } from '../layout/DashboardLayout';
 import { Button } from '../components/ui/Button';
 import { FilterBar, type FilterConfig } from '../components/ui/FilterBar';
+import { DataTable } from '../components/ui/DataTable';
 import { userService } from '../services/user.service';
 import type { User } from '../interfaces/User';
 import { CreateUserModal } from '../components/users/CreateUserModal';
@@ -139,88 +140,93 @@ export default function UsersPage() {
             <FilterBar filters={filterConfig} className="mb-6" />
 
             {/* Table */}
-            <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left text-sm text-gray-600">
-                        <thead className="bg-gray-50 text-xs font-semibold uppercase text-gray-500">
-                            <tr>
-                                <th className="px-6 py-4">Name</th>
-                                <th className="px-6 py-4">Contact</th>
-                                <th className="px-6 py-4">Role / Position</th>
-                                <th className="px-6 py-4">Locations</th>
-                                <th className="px-6 py-4">Status</th>
-                                <th className="px-6 py-4 text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100">
-                            {loading ? (
-                                <tr><td colSpan={6} className="px-6 py-8 text-center">Loading...</td></tr>
-                            ) : users.length === 0 ? (
-                                <tr><td colSpan={6} className="px-6 py-8 text-center">No users found.</td></tr>
-                            ) : (
-                                users.map(user => (
-                                    <tr key={user.id} className="hover:bg-gray-50">
-                                        <td className="px-6 py-4">
-                                            <div className="font-medium text-gray-900">{user.nombre} {user.apellido}</div>
-                                            <div className="text-xs text-gray-500">CC: {user.cedula}</div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div>{user.email}</div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="font-medium">{user.rol?.nombre || '-'}</div>
-                                            <div className="text-xs text-gray-500">{user.cargo?.nombre || '-'}</div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div>{user.regional?.nombre || '-'}</div>
-                                            <div className="text-xs text-gray-500">{user.departamento?.nombre || '-'}</div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${user.estado === 1 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                                                }`}>
-                                                {user.estado === 1 ? 'Activo' : 'Inactivo'}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 text-right">
-                                            <button
-                                                className="text-gray-400 hover:text-brand-blue mr-2"
-                                                onClick={() => setEditingUser(user)}
-                                            >
-                                                <span className="material-symbols-outlined text-[20px]">edit</span>
-                                            </button>
-                                            <button
-                                                className="text-gray-400 hover:text-red-600"
-                                                onClick={() => setDeletingUser(user)}
-                                            >
-                                                <span className="material-symbols-outlined text-[20px]">delete</span>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-
-                {/* Pagination */}
-                <div className="flex items-center justify-between border-t border-gray-200 px-6 py-4">
-                    <div className="text-sm text-gray-500">
-                        Mostrando <span className="font-medium text-gray-900">{total === 0 ? 0 : (page - 1) * limit + 1}</span> a <span className="font-medium text-gray-900">{Math.min(page * limit, total)}</span> de <span className="font-medium text-gray-900">{total}</span> resultados
-                    </div>
-                    <div className="flex gap-2">
-                        <button
-                            className="rounded-lg border border-gray-200 px-3 py-1 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                            onClick={() => setPage(p => Math.max(1, p - 1))}
-                            disabled={page === 1}
-                        >Anterior</button>
-                        <button
-                            className="rounded-lg border border-gray-200 px-3 py-1 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                            disabled={page >= totalPages}
-                        >Siguiente</button>
-                    </div>
-                </div>
-            </div>
+            <DataTable<User>
+                columns={[
+                    {
+                        key: 'nombre',
+                        header: 'Nombre',
+                        render: (user: User) => (
+                            <div>
+                                <div className="font-medium text-gray-900">{user.nombre} {user.apellido}</div>
+                                <div className="text-xs text-gray-500">CC: {user.cedula}</div>
+                            </div>
+                        )
+                    },
+                    {
+                        key: 'email',
+                        header: 'Contacto',
+                        render: (user: User) => <div>{user.email}</div>
+                    },
+                    {
+                        key: 'role',
+                        header: 'Rol / Cargo',
+                        render: (user: User) => (
+                            <div>
+                                <div className="font-medium">{user.role?.nombre || '-'}</div>
+                                <div className="text-xs text-gray-500">{user.cargo?.nombre || '-'}</div>
+                            </div>
+                        )
+                    },
+                    {
+                        key: 'regional',
+                        header: 'Ubicación',
+                        render: (user: User) => (
+                            <div>
+                                <div>{user.regional?.nombre || '-'}</div>
+                                <div className="text-xs text-gray-500">{user.departamento?.nombre || '-'}</div>
+                            </div>
+                        )
+                    },
+                    {
+                        key: 'estado',
+                        header: 'Estado',
+                        render: (user: User) => (
+                            <span className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${user.estado === 1 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                                {user.estado === 1 ? 'Activo' : 'Inactivo'}
+                            </span>
+                        )
+                    },
+                    {
+                        key: 'actions',
+                        header: 'Acciones',
+                        className: 'px-6 py-4 text-right',
+                        render: (user: User) => (
+                            <div className="flex justify-end gap-2">
+                                <button
+                                    className="text-gray-400 hover:text-brand-blue"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setEditingUser(user);
+                                    }}
+                                >
+                                    <span className="material-symbols-outlined text-[20px]">edit</span>
+                                </button>
+                                <button
+                                    className="text-gray-400 hover:text-red-600"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setDeletingUser(user);
+                                    }}
+                                >
+                                    <span className="material-symbols-outlined text-[20px]">delete</span>
+                                </button>
+                            </div>
+                        )
+                    }
+                ]}
+                data={users}
+                loading={loading}
+                emptyMessage="No se encontraron usuarios."
+                loadingMessage="Cargando usuarios..."
+                getRowKey={(user: User) => user.id}
+                pagination={{
+                    page,
+                    totalPages,
+                    total,
+                    limit,
+                    onPageChange: setPage
+                }}
+            />
         </DashboardLayout>
     );
 }

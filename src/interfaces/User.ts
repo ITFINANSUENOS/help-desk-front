@@ -13,7 +13,7 @@ export interface User {
     estado: number; // 1=active, 0=inactive
 
     // Relations (optional, loaded with 'included')
-    rol?: {
+    role?: {
         id: number;
         nombre: string;
     };
