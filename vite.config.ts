@@ -56,30 +56,65 @@ export default defineConfig({
       '/categories': {
         target: 'http://localhost:3000',
         changeOrigin: true,
+        bypass: (req) => {
+          if (req.headers.accept?.includes('text/html')) {
+            return req.url;
+          }
+        },
       },
       '/subcategorias': {
         target: 'http://localhost:3000',
         changeOrigin: true,
+        bypass: (req) => {
+          if (req.headers.accept?.includes('text/html')) {
+            return req.url;
+          }
+        },
       },
       '/departments': {
         target: 'http://localhost:3000',
         changeOrigin: true,
+        bypass: (req) => {
+          if (req.headers.accept?.includes('text/html')) {
+            return req.url;
+          }
+        },
       },
       '/priorities': {
         target: 'http://localhost:3000',
         changeOrigin: true,
+        bypass: (req) => {
+          if (req.headers.accept?.includes('text/html')) {
+            return req.url;
+          }
+        },
       },
       '/companies': {
         target: 'http://localhost:3000',
         changeOrigin: true,
+        bypass: (req) => {
+          if (req.headers.accept?.includes('text/html')) {
+            return req.url;
+          }
+        },
       },
       '/documents': {
         target: 'http://localhost:3000',
         changeOrigin: true,
+        bypass: (req) => {
+          if (req.headers.accept?.includes('text/html')) {
+            return req.url;
+          }
+        },
       },
       '/workflows': {
         target: 'http://localhost:3000',
         changeOrigin: true,
+        bypass: (req) => {
+          if (req.headers.accept?.includes('text/html')) {
+            return req.url;
+          }
+        },
       },
     },
   },
