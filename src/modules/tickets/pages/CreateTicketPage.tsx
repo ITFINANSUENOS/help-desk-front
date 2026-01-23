@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 
-import { DashboardLayout } from '../../../core/layout/DashboardLayout';
 import { Button } from '../../../shared/components/Button';
 import { InfoModal } from '../../../shared/components/InfoModal';
 
@@ -24,9 +23,11 @@ import type { CreateTicketDto } from '../interfaces/Ticket';
 import type { UserCandidate } from '../interfaces/Workflow';
 import type { Department } from '../interfaces/Department';
 import type { Company } from '../interfaces/Company';
+import { useLayout } from '../../../core/layout/context/LayoutContext';
 
 
 export default function CreateTicketPage() {
+    const {setTitle} = useLayout();
     const navigate = useNavigate();
     const { user } = useAuth();
 
@@ -44,7 +45,7 @@ export default function CreateTicketPage() {
     const [assigneeCandidates, setAssigneeCandidates] = useState<UserCandidate[]>([]);
 
     // Form State
-    const [title, setTitle] = useState('');
+    const [title, setTitleSubject] = useState('');
     const [departmentId, setDepartmentId] = useState<number | ''>('');
     const [categoryId, setCategoryId] = useState<number | ''>('');
     const [subcategoryId, setSubcategoryId] = useState<number | ''>('');
@@ -57,6 +58,10 @@ export default function CreateTicketPage() {
     // Workflow Logic State
     const [requiresManualSelection, setRequiresManualSelection] = useState(false);
     const [initialStepName, setInitialStepName] = useState<string>('');
+
+    useEffect(() => {
+        setTitle('Gestión de Roles');
+    }, [setTitle]);
 
     // 1. Initial Load (Departments, Companies, Priorities)
     useEffect(() => {
@@ -211,7 +216,7 @@ export default function CreateTicketPage() {
     };
 
     return (
-        <DashboardLayout title="Crear Ticket">
+        <>
             <div className="mx-auto max-w-6xl">
                 <div className="mb-8">
                     <h2 className="text-2xl font-bold text-gray-900">Nueva Solicitud de Ticket</h2>
@@ -229,7 +234,7 @@ export default function CreateTicketPage() {
                                 placeholder="Resuma el problema"
                                 type="text"
                                 value={title}
-                                onChange={(e) => setTitle(e.target.value)}
+                                onChange={(e) => setTitleSubject(e.target.value)}
                                 required
                             />
                         </div>
@@ -467,6 +472,6 @@ export default function CreateTicketPage() {
                 message="El ticket ha sido registrado en el sistema y se ha iniciado el flujo de trabajo correspondiente. Puede hacer seguimiento en la lista de tickets."
                 variant="success"
             />
-        </DashboardLayout>
+        </>
     );
 }

@@ -1,16 +1,17 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { DashboardLayout } from '../../../core/layout/DashboardLayout';
 import { ticketService } from '../services/ticket.service';
 import type { Ticket, TicketStatus, TicketPriority } from '../interfaces/Ticket';
 import { Button } from '../../../shared/components/Button';
 import { FilterBar, type FilterConfig } from '../../../shared/components/FilterBar';
 import { DataTable } from '../../../shared/components/DataTable';
 import { usePermissions } from '../../../shared/hooks/usePermissions';
+import { useLayout } from '../../../core/layout/context/LayoutContext';
 
 export default function TicketsPage() {
     const navigate = useNavigate();
     const { can } = usePermissions();
+    const { setTitle } = useLayout();
     const [tickets, setTickets] = useState<Ticket[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -25,6 +26,10 @@ export default function TicketsPage() {
     const [statusFilter, setStatusFilter] = useState<TicketStatus | 'Todos'>('Todos');
     const [priorityFilter, setPriorityFilter] = useState<TicketPriority | 'Todas'>('Todas');
     const [searchQuery, setSearchQuery] = useState('');
+
+    useEffect(() => {
+        setTitle('Gestión de tickets');
+    }, [setTitle]);
 
     const fetchTickets = useCallback(async () => {
         try {
@@ -172,7 +177,7 @@ export default function TicketsPage() {
     ];
 
     return (
-        <DashboardLayout title="Tickets">
+        <>
             <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                 <div>
                     <h2 className="text-2xl font-bold text-gray-900">Tickets</h2>
@@ -269,6 +274,6 @@ export default function TicketsPage() {
                     }
                 ]}
             />
-        </DashboardLayout>
+        </>
     );
 }

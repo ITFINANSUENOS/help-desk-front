@@ -1,6 +1,5 @@
 
 import { useEffect, useState } from 'react';
-import { DashboardLayout } from '../../../core/layout/DashboardLayout';
 import { rbacService } from '../services/rbac.service';
 import type { Permission } from '../interfaces/Permission';
 import { PERMISSION_SUBJECTS, PERMISSION_ACTIONS } from '../interfaces/Permission';
@@ -9,11 +8,13 @@ import { Modal } from '../../../shared/components/Modal';
 import { ConfirmationModal } from '../../../shared/components/ConfirmationModal';
 import { InfoModal } from '../../../shared/components/InfoModal';
 import { Input } from '../../../shared/components/Input';
+import { useLayout } from '../../../core/layout/context/LayoutContext';
 
 export default function PermissionsPage() {
     const [permissions, setPermissions] = useState<Permission[]>([]);
     const [loading, setLoading] = useState(true);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const { setTitle } = useLayout();
 
     // Form state
     const [nombre, setNombre] = useState('');
@@ -21,6 +22,10 @@ export default function PermissionsPage() {
     const [action, setAction] = useState('read');
     const [description, setDescription] = useState('');
     const [formLoading, setFormLoading] = useState(false);
+
+    useEffect(() => {
+        setTitle('Gestión de Roles');
+    }, [setTitle]);
 
     const fetchPermissions = async () => {
         try {
@@ -95,7 +100,7 @@ export default function PermissionsPage() {
     };
 
     return (
-        <DashboardLayout>
+        <>
             <div className="mb-6 flex items-center justify-between">
                 <div>
                     <h2 className="text-2xl font-bold text-gray-900">Catálogo de Permisos</h2>
@@ -253,6 +258,6 @@ export default function PermissionsPage() {
                 message={infoModal.message}
                 variant={infoModal.variant}
             />
-        </DashboardLayout>
+        </>
     );
 }

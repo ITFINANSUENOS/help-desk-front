@@ -1,14 +1,20 @@
 
-import { DashboardLayout } from '../../../core/layout/DashboardLayout';
+import { useEffect } from 'react';
 import { StatsCard } from '../components/StatsCard';
 import { TicketTable } from '../components/TicketTable';
 import { useAuth } from '../../auth/context/useAuth';
+import { useLayout } from '../../../core/layout/context/LayoutContext';
 
 export default function DashboardPage() {
     const { user } = useAuth();
+    const { setTitle } = useLayout();
+
+    useEffect(() => {
+        setTitle('Dashboard');
+    }, [setTitle]);
 
     return (
-        <DashboardLayout>
+        <>
             <div className="mb-8">
                 <h2 className="text-2xl font-bold text-gray-900">Bienvenido, {user?.nombre} {user?.apellido}! 👋</h2>
                 <p className="mt-1 text-gray-500">Aquí tienes un resumen de tu actividad de hoy.</p>
@@ -55,6 +61,6 @@ export default function DashboardPage() {
 
             {/* Recent Tickets Table */}
             <TicketTable />
-        </DashboardLayout>
+        </>
     );
 }

@@ -1,5 +1,4 @@
 import { useEffect, useState, useCallback } from 'react';
-import { DashboardLayout } from '../../../core/layout/DashboardLayout';
 import { Button } from '../../../shared/components/Button';
 import { DataTable } from '../../../shared/components/DataTable';
 import { ConfirmDialog } from '../../../shared/components/ConfirmDialog';
@@ -10,11 +9,13 @@ import { CreateSubcategoryModal } from '../components/CreateSubcategoryModal';
 import { EditSubcategoryModal } from '../components/EditSubcategoryModal';
 import type { Subcategory, CreateSubcategoryDto, UpdateSubcategoryDto } from '../interfaces/Subcategory';
 import type { Category } from '../../categories/interfaces/Category';
+import { useLayout } from '../../../core/layout/context/LayoutContext';
 
 /**
  * Página principal de gestión de subcategorías
  */
 export default function SubcategoriesPage() {
+    const { setTitle } = useLayout();
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -35,6 +36,10 @@ export default function SubcategoriesPage() {
     const [categories, setCategories] = useState<Category[]>([]);
     const [loading, setLoading] = useState(false);
     const [selectedItem, setSelectedItem] = useState<Subcategory | null>(null);
+
+    useEffect(() => {
+        setTitle('Gestión de Subcategorías');
+    }, [setTitle]);
 
     // Cargar categorías para filtros
     useEffect(() => {
@@ -235,7 +240,7 @@ export default function SubcategoriesPage() {
     ];
 
     return (
-        <DashboardLayout title="Gestión de Subcategorías">
+        <>
             {/* Header */}
             <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                 <div>
@@ -302,6 +307,6 @@ export default function SubcategoriesPage() {
                     onPageChange: setPage
                 }}
             />
-        </DashboardLayout>
+        </>
     );
 }

@@ -1,7 +1,6 @@
 
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { DashboardLayout } from '../../../core/layout/DashboardLayout';
 import { rbacService } from '../services/rbac.service';
 import type { Role } from '../interfaces/Role';
 import { Button } from '../../../shared/components/Button';
@@ -9,8 +8,10 @@ import { Modal } from '../../../shared/components/Modal';
 import { ConfirmationModal } from '../../../shared/components/ConfirmationModal';
 import { DataTable } from '../../../shared/components/DataTable';
 import { Input } from '../../../shared/components/Input';
+import { useLayout } from '../../../core/layout/context/LayoutContext';
 
 export default function RolesPage() {
+    const { setTitle } = useLayout();
     const [roles, setRoles] = useState<Role[]>([]);
     const [loading, setLoading] = useState(true);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -19,6 +20,10 @@ export default function RolesPage() {
     const [newRoleName, setNewRoleName] = useState('');
     const [newRoleDesc, setNewRoleDesc] = useState('');
     const [formLoading, setFormLoading] = useState(false);
+
+    useEffect(() => {
+        setTitle('Gestión de Roles');
+    }, [setTitle]);
 
     const fetchRoles = async () => {
         try {
@@ -70,7 +75,7 @@ export default function RolesPage() {
     };
 
     return (
-        <DashboardLayout>
+        <>
             <div className="mb-6 flex items-center justify-between">
                 <div>
                     <h2 className="text-2xl font-bold text-gray-900">Gestión de Roles</h2>
@@ -191,6 +196,6 @@ export default function RolesPage() {
                 confirmText="Eliminar"
                 variant="danger"
             />
-        </DashboardLayout>
+        </>
     );
 }

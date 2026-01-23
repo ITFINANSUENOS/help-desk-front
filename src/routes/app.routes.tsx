@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react';
 import { Navigate, type RouteObject } from 'react-router-dom';
 import { AuthGuard } from '../modules/auth/guards/AuthGuard';
 import { PageLoader } from '../shared/components/PageLoader';
+import { MainLayout } from '../core/layout/MainLayout';
 
 // Lazy load pages
 const LoginPage = lazy(() => import('../modules/auth/pages/LoginPage'));
@@ -34,121 +35,126 @@ export const appRoutes: RouteObject[] = [
         element: <AuthGuard />,
         children: [
             {
-                path: '/',
-                element: (
-                    <Suspense fallback={<PageLoader />}>
-                        <DashboardPage />
-                    </Suspense>
-                )
+                element: <MainLayout />,
+                children: [
+                    {
+                        path: '/',
+                        element: (
+                            <Suspense fallback={<PageLoader />}>
+                                <DashboardPage />
+                            </Suspense>
+                        )
+                    },
+                    {
+                        path: '/tickets',
+                        element: (
+                            <Suspense fallback={<PageLoader />}>
+                                <TicketsPage />
+                            </Suspense>
+                        )
+                    },
+                    {
+                        path: '/tickets/create',
+                        element: (
+                            <Suspense fallback={<PageLoader />}>
+                                <CreateTicketPage />
+                            </Suspense>
+                        )
+                    },
+                    {
+                        path: '/tickets/:id',
+                        element: (
+                            <Suspense fallback={<PageLoader />}>
+                                <TicketDetailPage />
+                            </Suspense>
+                        )
+                    },
+                    {
+                        path: '/roles',
+                        element: (
+                            <Suspense fallback={<PageLoader />}>
+                                <RolesPage />
+                            </Suspense>
+                        )
+                    },
+                    {
+                        path: '/roles/:id',
+                        element: (
+                            <Suspense fallback={<PageLoader />}>
+                                <RoleDetailPage />
+                            </Suspense>
+                        )
+                    },
+                    {
+                        path: '/permissions',
+                        element: (
+                            <Suspense fallback={<PageLoader />}>
+                                <PermissionsPage />
+                            </Suspense>
+                        )
+                    },
+                    {
+                        path: '/users',
+                        element: (
+                            <Suspense fallback={<PageLoader />}>
+                                <UsersPage />
+                            </Suspense>
+                        )
+                    },
+                    {
+                        path: '/departments',
+                        element: (
+                            <Suspense fallback={<PageLoader />}>
+                                <DepartmentsPage />
+                            </Suspense>
+                        )
+                    },
+                    {
+                        path: '/categories',
+                        element: (
+                            <Suspense fallback={<PageLoader />}>
+                                <CategoriesPage />
+                            </Suspense>
+                        )
+                    },
+                    {
+                        path: '/companies',
+                        element: (
+                            <Suspense fallback={<PageLoader />}>
+                                <CompaniesPage />
+                            </Suspense>
+                        )
+                    },
+                    {
+                        path: '/regions',
+                        element: (
+                            <Suspense fallback={<PageLoader />}>
+                                <RegionsPage />
+                            </Suspense>
+                        )
+                    },
+                    {
+                        path: '/zones',
+                        element: (
+                            <Suspense fallback={<PageLoader />}>
+                                <ZonesPage />
+                            </Suspense>
+                        )
+                    },
+                    {
+                        path: '/subcategories',
+                        element: (
+                            <Suspense fallback={<PageLoader />}>
+                                <SubcategoriesPage />
+                            </Suspense>
+                        )
+                    },
+                ]
             },
             {
-                path: '/tickets',
-                element: (
-                    <Suspense fallback={<PageLoader />}>
-                        <TicketsPage />
-                    </Suspense>
-                )
-            },
-            {
-                path: '/tickets/create',
-                element: (
-                    <Suspense fallback={<PageLoader />}>
-                        <CreateTicketPage />
-                    </Suspense>
-                )
-            },
-            {
-                path: '/tickets/:id',
-                element: (
-                    <Suspense fallback={<PageLoader />}>
-                        <TicketDetailPage />
-                    </Suspense>
-                )
-            },
-            {
-                path: '/roles',
-                element: (
-                    <Suspense fallback={<PageLoader />}>
-                        <RolesPage />
-                    </Suspense>
-                )
-            },
-            {
-                path: '/roles/:id',
-                element: (
-                    <Suspense fallback={<PageLoader />}>
-                        <RoleDetailPage />
-                    </Suspense>
-                )
-            },
-            {
-                path: '/permissions',
-                element: (
-                    <Suspense fallback={<PageLoader />}>
-                        <PermissionsPage />
-                    </Suspense>
-                )
-            },
-            {
-                path: '/users',
-                element: (
-                    <Suspense fallback={<PageLoader />}>
-                        <UsersPage />
-                    </Suspense>
-                )
-            },
-            {
-                path: '/departments',
-                element: (
-                    <Suspense fallback={<PageLoader />}>
-                        <DepartmentsPage />
-                    </Suspense>
-                )
-            },
-            {
-                path: '/categories',
-                element: (
-                    <Suspense fallback={<PageLoader />}>
-                        <CategoriesPage />
-                    </Suspense>
-                )
-            },
-            {
-                path: '/companies',
-                element: (
-                    <Suspense fallback={<PageLoader />}>
-                        <CompaniesPage />
-                    </Suspense>
-                )
-            },
-            {
-                path: '/regions',
-                element: (
-                    <Suspense fallback={<PageLoader />}>
-                        <RegionsPage />
-                    </Suspense>
-                )
-            },
-            {
-                path: '/zones',
-                element: (
-                    <Suspense fallback={<PageLoader />}>
-                        <ZonesPage />
-                    </Suspense>
-                )
-            },
-            {
-                path: '/subcategories',
-                element: (
-                    <Suspense fallback={<PageLoader />}>
-                        <SubcategoriesPage />
-                    </Suspense>
-                )
-            },
+                path: '*',
+                element: <Navigate to="/" replace />
+            }
         ]
-    },
-    {
-        path: '*',
-        element: <Navigate to="/" replace />
     }
 ];

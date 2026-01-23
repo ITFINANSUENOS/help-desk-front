@@ -1,13 +1,13 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { DashboardLayout } from '../../../core/layout/DashboardLayout';
 import { rbacService } from '../services/rbac.service';
 import type { Role } from '../interfaces/Role';
 import type { Permission } from '../interfaces/Permission';
 import { Button } from '../../../shared/components/Button';
 import { Input } from '../../../shared/components/Input';
 import { InfoModal } from '../../../shared/components/InfoModal';
+import { useLayout } from '../../../core/layout/context/LayoutContext';
 
 interface GroupedPermissions {
     [subject: string]: Permission[];
@@ -19,6 +19,7 @@ export default function RoleDetailPage() {
     const roleId = Number(id);
 
     const [role, setRole] = useState<Role | null>(null);
+    const { setTitle } = useLayout();
     const [allPermissions, setAllPermissions] = useState<GroupedPermissions>({});
     const [selectedPermissions, setSelectedPermissions] = useState<Set<number>>(new Set());
     const [loading, setLoading] = useState(true);
@@ -27,6 +28,10 @@ export default function RoleDetailPage() {
     // Edit form state
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
+
+    useEffect(() => {
+        setTitle('Gestión de Roles');
+    }, [setTitle]);
 
     useEffect(() => {
         if (isNaN(roleId)) {
@@ -138,22 +143,22 @@ export default function RoleDetailPage() {
 
     if (loading) {
         return (
-            <DashboardLayout>
+            <>
                 <div className="flex justify-center p-10">Cargando...</div>
-            </DashboardLayout>
+            </>
         );
     }
 
     if (!role) {
         return (
-            <DashboardLayout>
+            <>
                 <div className="text-center p-10">Rol no encontrado</div>
-            </DashboardLayout>
+            </>
         );
     }
 
     return (
-        <DashboardLayout>
+        <>
             <div className="mb-6 flex items-center justify-between">
                 <div>
                     <h2 className="text-2xl font-bold text-gray-900">Editar Rol: {role.nombre}</h2>
@@ -248,6 +253,6 @@ export default function RoleDetailPage() {
                 message={infoModal.message}
                 variant={infoModal.variant}
             />
-        </DashboardLayout >
+        </ >
     );
 }

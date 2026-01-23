@@ -1,5 +1,4 @@
 import { useEffect, useState, useCallback } from 'react';
-import { DashboardLayout } from '../../../core/layout/DashboardLayout';
 import { Button } from '../../../shared/components/Button';
 import { FilterBar, type FilterConfig } from '../../../shared/components/FilterBar';
 import { DataTable } from '../../../shared/components/DataTable';
@@ -8,8 +7,10 @@ import type { User } from '../interfaces/User';
 import { CreateUserModal } from '../components/CreateUserModal';
 import { EditUserModal } from '../components/EditUserModal';
 import { ConfirmationModal } from '../../../shared/components/ConfirmationModal';
+import { useLayout } from '../../../core/layout/context/LayoutContext';
 
 export default function UsersPage() {
+    const { setTitle } = useLayout();
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -24,6 +25,10 @@ export default function UsersPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [roleFilter, setRoleFilter] = useState<number | 'all'>('all');
     const [statusFilter, setStatusFilter] = useState<number | 'all'>('all');
+
+    useEffect(() => {
+        setTitle('Gestión de Roles');
+    }, [setTitle]);
 
     // Filter configuration
     const filterConfig: FilterConfig[] = [
@@ -103,7 +108,7 @@ export default function UsersPage() {
     };
 
     return (
-        <DashboardLayout title="Gestión de Usuarios">
+        <>
             <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                 <div>
                     <h2 className="text-2xl font-bold text-gray-900">Usuarios</h2>
@@ -227,6 +232,6 @@ export default function UsersPage() {
                     onPageChange: setPage
                 }}
             />
-        </DashboardLayout>
+        </>
     );
 }

@@ -1,5 +1,4 @@
 import { useEffect, useState, useCallback } from 'react';
-import { DashboardLayout } from '../../../core/layout/DashboardLayout';
 import { Button } from '../../../shared/components/Button';
 import { DataTable } from '../../../shared/components/DataTable';
 import { ConfirmDialog } from '../../../shared/components/ConfirmDialog';
@@ -8,11 +7,13 @@ import { departmentService } from '../services/department.service';
 import { CreateDepartmentModal } from '../components/CreateDepartmentModal';
 import { EditDepartmentModal } from '../components/EditDepartmentModal';
 import type { Department, CreateDepartmentDto, UpdateDepartmentDto } from '../interfaces/Department';
+import { useLayout } from '../../../core/layout/context/LayoutContext';
 
 /**
  * Página principal de gestión de departamentos
  */
 export default function DepartmentsPage() {
+    const { setTitle } = useLayout();
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -31,6 +32,10 @@ export default function DepartmentsPage() {
     const [departments, setDepartments] = useState<Department[]>([]);
     const [loading, setLoading] = useState(false);
     const [selectedItem, setSelectedItem] = useState<Department | null>(null);
+
+    useEffect(() => {
+        setTitle('Gestión de Departamentos');
+    }, [setTitle]);
 
     // Función estable para cargar departamentos
     const loadDepartments = useCallback(async () => {
@@ -195,8 +200,7 @@ export default function DepartmentsPage() {
     ];
 
     return (
-        <DashboardLayout title="Gestión de Departamentos">
-            {/* Header */}
+        <>
             <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                 <div>
                     <h2 className="text-2xl font-bold text-gray-900">Departamentos</h2>
@@ -213,7 +217,6 @@ export default function DepartmentsPage() {
                 </Button>
             </div>
 
-            {/* Modals */}
             <CreateDepartmentModal
                 isOpen={showCreateModal}
                 onClose={() => setShowCreateModal(false)}
@@ -262,6 +265,6 @@ export default function DepartmentsPage() {
                     onPageChange: setPage
                 }}
             />
-        </DashboardLayout>
+        </>
     );
 }

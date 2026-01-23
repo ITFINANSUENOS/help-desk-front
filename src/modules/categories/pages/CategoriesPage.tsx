@@ -1,5 +1,4 @@
 import { useEffect, useState, useCallback } from 'react';
-import { DashboardLayout } from '../../../core/layout/DashboardLayout';
 import { Button } from '../../../shared/components/Button';
 import { DataTable } from '../../../shared/components/DataTable';
 import { ConfirmDialog } from '../../../shared/components/ConfirmDialog';
@@ -10,11 +9,13 @@ import { CreateCategoryModal } from '../components/CreateCategoryModal';
 import { EditCategoryModal } from '../components/EditCategoryModal';
 import type { Category, CreateCategoryDto, UpdateCategoryDto } from '../interfaces/Category';
 import type { Department } from '../../departments/interfaces/Department';
+import { useLayout } from '../../../core/layout/context/LayoutContext';
 
 /**
  * Página principal de gestión de categorías
  */
 export default function CategoriesPage() {
+    const { setTitle } = useLayout();
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -35,6 +36,10 @@ export default function CategoriesPage() {
     const [departments, setDepartments] = useState<Department[]>([]); // Para el filtro
     const [loading, setLoading] = useState(false);
     const [selectedItem, setSelectedItem] = useState<Category | null>(null);
+
+    useEffect(() => {
+        setTitle('Gestión de Categorías');
+    }, [setTitle]);
 
     // Cargar departamentos para el filtro
     useEffect(() => {
@@ -241,7 +246,7 @@ export default function CategoriesPage() {
     ];
 
     return (
-        <DashboardLayout title="Gestión de Categorías">
+        <>
             {/* Header */}
             <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                 <div>
@@ -308,6 +313,6 @@ export default function CategoriesPage() {
                     onPageChange: setPage
                 }}
             />
-        </DashboardLayout>
+        </>
     );
 }

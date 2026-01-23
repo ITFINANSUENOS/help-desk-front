@@ -1,5 +1,4 @@
 import { useEffect, useState, useCallback } from 'react';
-import { DashboardLayout } from '../../../core/layout/DashboardLayout';
 import { Button } from '../../../shared/components/Button';
 import { DataTable } from '../../../shared/components/DataTable';
 import { ConfirmDialog } from '../../../shared/components/ConfirmDialog';
@@ -8,8 +7,11 @@ import { regionService } from '../services/region.service';
 import { CreateRegionModal } from '../components/CreateRegionModal';
 import { EditRegionModal } from '../components/EditRegionModal';
 import type { Regional, CreateRegionalDto, UpdateRegionalDto } from '../interfaces/Region';
+import { useLayout } from '../../../core/layout/context/LayoutContext';
+
 
 export default function RegionsPage() {
+    const { setTitle } = useLayout();
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -28,6 +30,10 @@ export default function RegionsPage() {
     const [regions, setRegions] = useState<Regional[]>([]);
     const [loading, setLoading] = useState(false);
     const [selectedItem, setSelectedItem] = useState<Regional | null>(null);
+
+    useEffect(() => {
+        setTitle('Gestión de Roles');
+    }, [setTitle]);
 
     // Función estable para cargar regionales
     const loadRegions = useCallback(async () => {
@@ -193,7 +199,7 @@ export default function RegionsPage() {
     ];
 
     return (
-        <DashboardLayout title="Gestión de Regionales">
+        <>
             {/* Header */}
             <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                 <div>
@@ -260,6 +266,6 @@ export default function RegionsPage() {
                     onPageChange: setPage
                 }}
             />
-        </DashboardLayout>
+        </>
     );
 }

@@ -1,5 +1,4 @@
 import { useEffect, useState, useCallback } from 'react';
-import { DashboardLayout } from '../../../core/layout/DashboardLayout';
 import { Button } from '../../../shared/components/Button';
 import { DataTable } from '../../../shared/components/DataTable';
 import { ConfirmDialog } from '../../../shared/components/ConfirmDialog';
@@ -8,11 +7,13 @@ import { companyService } from '../services/company.service';
 import { CreateCompanyModal } from '../components/CreateCompanyModal';
 import { EditCompanyModal } from '../components/EditCompanyModal';
 import type { Company, CreateCompanyDto, UpdateCompanyDto } from '../interfaces/Company';
+import { useLayout } from '../../../core/layout/context/LayoutContext';
 
 /**
  * Página principal de gestión de empresas
  */
 export default function CompaniesPage() {
+    const { setTitle } = useLayout();
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -31,6 +32,10 @@ export default function CompaniesPage() {
     const [companies, setCompanies] = useState<Company[]>([]);
     const [loading, setLoading] = useState(false);
     const [selectedItem, setSelectedItem] = useState<Company | null>(null);
+
+    useEffect(() => {
+        setTitle('Gestión de Roles');
+    }, [setTitle]);
 
     // Función estable para cargar empresas
     const loadCompanies = useCallback(async () => {
@@ -195,7 +200,7 @@ export default function CompaniesPage() {
     ];
 
     return (
-        <DashboardLayout title="Gestión de Empresas">
+        <>
             {/* Header */}
             <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                 <div>
@@ -262,6 +267,6 @@ export default function CompaniesPage() {
                     onPageChange: setPage
                 }}
             />
-        </DashboardLayout>
+        </>
     );
 }

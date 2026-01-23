@@ -1,5 +1,4 @@
 import { useEffect, useState, useCallback } from 'react';
-import { DashboardLayout } from '../../../core/layout/DashboardLayout';
 import { Button } from '../../../shared/components/Button';
 import { DataTable } from '../../../shared/components/DataTable';
 import { ConfirmDialog } from '../../../shared/components/ConfirmDialog';
@@ -8,8 +7,10 @@ import { zoneService } from '../services/zone.service';
 import { CreateZoneModal } from '../components/CreateZoneModal';
 import { EditZoneModal } from '../components/EditZoneModal';
 import type { Zone, CreateZoneDto, UpdateZoneDto } from '../interfaces/Zone';
+import { useLayout } from '../../../core/layout/context/LayoutContext';
 
 export default function ZonesPage() {
+    const { setTitle } = useLayout();
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -28,6 +29,10 @@ export default function ZonesPage() {
     const [zones, setZones] = useState<Zone[]>([]);
     const [loading, setLoading] = useState(false);
     const [selectedItem, setSelectedItem] = useState<Zone | null>(null);
+
+    useEffect(() => {
+        setTitle('Gestión de Roles');
+    }, [setTitle]);    
 
     // Función estable para cargar zonas
     const loadZones = useCallback(async () => {
@@ -188,7 +193,7 @@ export default function ZonesPage() {
     ];
 
     return (
-        <DashboardLayout title="Gestión de Zonas">
+        <>
             {/* Header */}
             <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                 <div>
@@ -255,6 +260,6 @@ export default function ZonesPage() {
                     onPageChange: setPage
                 }}
             />
-        </DashboardLayout>
+        </>
     );
 }

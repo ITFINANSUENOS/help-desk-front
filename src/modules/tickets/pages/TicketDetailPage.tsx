@@ -1,14 +1,15 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { DashboardLayout } from '../../../core/layout/DashboardLayout';
 import { ticketService } from '../services/ticket.service';
 import type { TicketDetail, TicketTimelineItem, TicketStatus, TicketPriority } from '../interfaces/Ticket';
 import { Button } from '../../../shared/components/Button';
 import { TicketWorkflow } from '../components/TicketWorkflow';
 import { TicketTimeline } from '../components/TicketTimeline';
 import { EditTicketModal } from '../components/EditTicketModal';
+import { useLayout } from '../../../core/layout/context/LayoutContext';
 
 export default function TicketDetailPage() {
+    const { setTitle } = useLayout();
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const [ticket, setTicket] = useState<TicketDetail | null>(null);
@@ -17,6 +18,10 @@ export default function TicketDetailPage() {
     const [activeFilter, setActiveFilter] = useState<'all' | 'comments' | 'history'>('all');
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
+    useEffect(() => {
+        setTitle('Gestión de Roles');
+    }, [setTitle]);
+        
     const fetchData = useCallback(async () => {
         if (!id) return;
         try {
@@ -70,29 +75,29 @@ export default function TicketDetailPage() {
 
     if (loading) {
         return (
-            <DashboardLayout title="Detalle del Ticket">
+            <>
                 <div className="flex h-64 items-center justify-center">
                     <p className="text-gray-500">Cargando detalle del ticket...</p>
                 </div>
-            </DashboardLayout>
+            </>
         );
     }
 
     if (!ticket) {
         return (
-            <DashboardLayout title="Ticket No Encontrado">
+            <>
                 <div className="flex flex-col items-center justify-center h-64 gap-4">
                     <p className="text-gray-500">El ticket solicitado no pudo ser encontrado.</p>
                     <Button variant="secondary" onClick={() => navigate('/tickets')}>
                         Volver a Tickets
                     </Button>
                 </div>
-            </DashboardLayout>
+            </>
         );
     }
 
     return (
-        <DashboardLayout title={`Ticket #${ticket.id}`}>
+        <>
             <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
                 <div className="space-y-2">
                     <div className="flex items-center gap-3">
@@ -186,6 +191,6 @@ export default function TicketDetailPage() {
                 ticket={ticket}
             />
 
-        </DashboardLayout >
+        </>
     );
 }
