@@ -16,6 +16,7 @@ const UsersPage = lazy(() => import('../modules/users/pages/UsersPage'));
 const DepartmentsPage = lazy(() => import('../modules/departments/pages/DepartmentsPage'));
 const CategoriesPage = lazy(() => import('../modules/categories/pages/CategoriesPage'));
 const CompaniesPage = lazy(() => import('../modules/companies/pages/CompaniesPage'));
+const SubcategoriesPage = lazy(() => import('../modules/subcategories/pages/SubcategoriesPage'));
 
 
 export const appRoutes: RouteObject[] = [
@@ -115,6 +116,14 @@ export const appRoutes: RouteObject[] = [
                 element: (
                     <Suspense fallback={<PageLoader />}>
                         <CompaniesPage />
+                    </Suspense>
+                )
+            },
+            {
+                path: '/subcategories',
+                element: (
+                    <Suspense fallback={<PageLoader />}>
+                        <SubcategoriesPage />
                     </Suspense>
                 )
             },
