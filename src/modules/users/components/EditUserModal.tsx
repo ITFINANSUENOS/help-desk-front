@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { User, UpdateUserDto } from '../interfaces/User';
 import { userService } from '../services/user.service';
 import { UserForm } from './UserForm';
+import { Modal } from '../../../shared/components/Modal';
 
 interface EditUserModalProps {
     isOpen: boolean;
@@ -14,9 +15,12 @@ export function EditUserModal({ isOpen, user, onClose, onSuccess }: EditUserModa
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    if (!isOpen || !user) return null;
+    // Note: Modal handles isOpen check, but we need user to render form.
+    // If not open or no user, Modal returns null (if isOpen false) but if open and no user, we might crash.
+    // Ideally user is not null if isOpen is true.
 
     const handleSubmit = async (data: UpdateUserDto) => {
+        if (!user) return;
         try {
             setIsLoading(true);
             setError(null);
@@ -32,44 +36,26 @@ export function EditUserModal({ isOpen, user, onClose, onSuccess }: EditUserModa
     };
 
     return (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-            <div className="flex min-h-screen items-center justify-center p-4">
-                {/* Backdrop */}
-                <div
-                    className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
-                    onClick={onClose}
-                />
-
-                {/* Modal */}
-                <div className="relative w-full max-w-2xl rounded-xl bg-white shadow-xl">
-                    {/* Header */}
-                    <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-                        <h2 className="text-xl font-bold text-gray-900">Editar Usuario</h2>
-                        <button
-                            onClick={onClose}
-                            className="text-gray-400 hover:text-gray-600"
-                        >
-                            <span className="material-symbols-outlined">close</span>
-                        </button>
-                    </div>
-
-                    {/* Body */}
-                    <div className="px-6 py-4">
-                        {error && (
-                            <div className="mb-4 rounded-lg bg-red-50 p-4 text-sm text-red-800">
-                                {error}
-                            </div>
-                        )}
-
-                        <UserForm
-                            user={user}
-                            onSubmit={handleSubmit}
-                            onCancel={onClose}
-                            isLoading={isLoading}
-                        />
-                    </div>
+        <Modal
+            isOpen={isOpen}
+            onClose={onClose}
+            title="Editar Usuario"
+            className="max-w-2xl"
+        >
+            {error && (
+                <div className="mb-4 rounded-lg bg-red-50 p-4 text-sm text-red-800">
+                    {error}
                 </div>
-            </div>
-        </div>
+            )}
+
+            {user && (
+                <UserForm
+                    user={user}
+                    onSubmit={handleSubmit}
+                    onCancel={onClose}
+                    isLoading={isLoading}
+                />
+            )}
+        </Modal>
     );
 }
