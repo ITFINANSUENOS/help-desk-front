@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
-import { IconX } from '@tabler/icons-react';
 import { Button } from './Button';
+import { Modal } from './Modal';
 
 /**
  * Props para el componente FormModal
@@ -55,8 +55,6 @@ export function FormModal({
     loading = false,
     size = 'md'
 }: FormModalProps) {
-    if (!isOpen) return null;
-
     const sizeClasses = {
         sm: 'max-w-md',
         md: 'max-w-lg',
@@ -70,48 +68,35 @@ export function FormModal({
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-            <div className={`bg-white rounded-lg shadow-xl w-full ${sizeClasses[size]}`}>
-                {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b">
-                    <h2 className="text-xl font-semibold text-gray-900">
-                        {title}
-                    </h2>
-                    <button
-                        onClick={onClose}
-                        className="text-gray-400 hover:text-gray-600 transition-colors"
-                        disabled={loading}
-                    >
-                        <IconX size={24} />
-                    </button>
+        <Modal
+            isOpen={isOpen}
+            onClose={onClose}
+            title={title}
+            className={sizeClasses[size]}
+        >
+            <form onSubmit={handleSubmit}>
+                <div className="max-h-[calc(100vh-16rem)] overflow-y-auto -mr-2 pr-2">
+                    {children}
                 </div>
 
-                {/* Form */}
-                <form onSubmit={handleSubmit}>
-                    {/* Body */}
-                    <div className="p-6 max-h-[calc(100vh-16rem)] overflow-y-auto">
-                        {children}
-                    </div>
-
-                    {/* Footer */}
-                    <div className="flex justify-end gap-3 p-6 border-t bg-gray-50">
-                        <Button
-                            type="button"
-                            onClick={onClose}
-                            variant="outline"
-                            disabled={loading}
-                        >
-                            {cancelText}
-                        </Button>
-                        <Button
-                            type="submit"
-                            disabled={loading}
-                        >
-                            {loading ? 'Guardando...' : submitText}
-                        </Button>
-                    </div>
-                </form>
-            </div>
-        </div>
+                <div className="mt-8 flex justify-end gap-3">
+                    <Button
+                        type="button"
+                        onClick={onClose}
+                        variant="outline"
+                        disabled={loading}
+                    >
+                        {cancelText}
+                    </Button>
+                    <Button
+                        type="submit"
+                        disabled={loading}
+                        variant="brand"
+                    >
+                        {loading ? 'Guardando...' : submitText}
+                    </Button>
+                </div>
+            </form>
+        </Modal>
     );
 }
