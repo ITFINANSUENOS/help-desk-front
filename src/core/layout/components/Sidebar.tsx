@@ -37,6 +37,7 @@ export function Sidebar({ isCollapsed, toggleCollapse, isMobileOpen, closeMobile
         { to: "/tickets", icon: "confirmation_number", label: "Tickets", subject: 'Ticket' },
         { to: "/users", icon: "group", label: "Usuarios", subject: 'User' },
         { to: "/departments", icon: "corporate_fare", label: "Departamentos", subject: 'Department' },
+        { to: "/companies", icon: "business", label: "Empresas", subject: 'Company' as any }, // TODO: Add 'Company' to PermissionSubject type
         { to: "/categories", icon: "category", label: "Categorías", subject: 'Category' },
         { to: "/reports", icon: "bar_chart", label: "Reports", subject: 'Report' },
         { to: "/roles", icon: "admin_panel_settings", label: "Roles y Permisos", subject: 'Role' },

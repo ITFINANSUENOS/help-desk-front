@@ -15,6 +15,7 @@ const TicketDetailPage = lazy(() => import('../modules/tickets/pages/TicketDetai
 const UsersPage = lazy(() => import('../modules/users/pages/UsersPage'));
 const DepartmentsPage = lazy(() => import('../modules/departments/pages/DepartmentsPage'));
 const CategoriesPage = lazy(() => import('../modules/categories/pages/CategoriesPage'));
+const CompaniesPage = lazy(() => import('../modules/companies/pages/CompaniesPage'));
 
 
 export const appRoutes: RouteObject[] = [
@@ -106,6 +107,14 @@ export const appRoutes: RouteObject[] = [
                 element: (
                     <Suspense fallback={<PageLoader />}>
                         <CategoriesPage />
+                    </Suspense>
+                )
+            },
+            {
+                path: '/companies',
+                element: (
+                    <Suspense fallback={<PageLoader />}>
+                        <CompaniesPage />
                     </Suspense>
                 )
             },
