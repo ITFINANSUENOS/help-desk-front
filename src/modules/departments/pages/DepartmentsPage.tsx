@@ -17,8 +17,17 @@ export default function DepartmentsPage() {
     const [showEditModal, setShowEditModal] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [departmentToDelete, setDepartmentToDelete] = useState<Department | null>(null);
+
+    // Filtros & Paginación
     const [searchQuery, setSearchQuery] = useState('');
     const [estadoFilter, setEstadoFilter] = useState<number | 'all'>('all');
+
+    const [page, setPage] = useState(1);
+    const [limit] = useState(10);
+    const [total, setTotal] = useState(0);
+    const [totalPages, setTotalPages] = useState(1);
+
+    // Datos
     const [departments, setDepartments] = useState<Department[]>([]);
     const [loading, setLoading] = useState(false);
     const [selectedItem, setSelectedItem] = useState<Department | null>(null);
@@ -27,26 +36,35 @@ export default function DepartmentsPage() {
     const loadDepartments = useCallback(async () => {
         setLoading(true);
         try {
-            const data = await departmentService.getAll({
+            const response = await departmentService.getAll({
                 search: searchQuery,
-                estado: estadoFilter
+                estado: estadoFilter,
+                page,
+                limit
             });
-            setDepartments(data);
+            setDepartments(response.data);
+            setTotal(response.meta.total);
+            setTotalPages(response.meta.totalPages);
         } catch (error) {
             console.error('Error loading departments:', error);
         } finally {
             setLoading(false);
         }
+    }, [searchQuery, estadoFilter, page, limit]);
+
+    // Reset page on filter change
+    useEffect(() => {
+        setPage(1);
     }, [searchQuery, estadoFilter]);
 
-    // Cargar al montar y cuando cambian los filtros
+    // Cargar al montar y cuando cambian los filtros (con debounce para search)
     useEffect(() => {
         const timer = setTimeout(() => {
             loadDepartments();
         }, searchQuery ? 300 : 0);
 
         return () => clearTimeout(timer);
-    }, [searchQuery, estadoFilter, loadDepartments]);
+    }, [searchQuery, loadDepartments]);
 
     const handleCreate = async (data: CreateDepartmentDto) => {
         setLoading(true);
@@ -236,6 +254,13 @@ export default function DepartmentsPage() {
                 loading={loading}
                 emptyMessage="No se encontraron departamentos"
                 loadingMessage="Cargando departamentos..."
+                pagination={{
+                    page,
+                    totalPages,
+                    total,
+                    limit,
+                    onPageChange: setPage
+                }}
             />
         </DashboardLayout>
     );

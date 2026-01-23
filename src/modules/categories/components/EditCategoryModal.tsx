@@ -44,11 +44,11 @@ export function EditCategoryModal({ isOpen, onClose, onSubmit, category }: EditC
     const loadData = async () => {
         setLoadingData(true);
         try {
-            const [departmentsData, companiesData] = await Promise.all([
+            const [departmentsResponse, companiesData] = await Promise.all([
                 departmentService.getAll({ estado: 1 }),
                 companyService.getCompanies()
             ]);
-            setDepartments(departmentsData);
+            setDepartments(departmentsResponse.data);
             setCompanies(companiesData);
         } catch (err) {
             console.error('Error loading data:', err);

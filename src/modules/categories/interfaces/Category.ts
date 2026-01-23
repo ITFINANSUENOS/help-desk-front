@@ -57,4 +57,8 @@ export interface CategoryFilter {
     estado?: number | 'all';
     /** Filtrar por departamento asociado */
     departamentoId?: number | 'all';
+
+    // Paginación
+    page?: number;
+    limit?: number;
 }

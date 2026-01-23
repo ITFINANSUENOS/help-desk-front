@@ -1,5 +1,6 @@
 import { api } from '../../../core/api/api';
 import type { Category, CreateCategoryDto, UpdateCategoryDto, CategoryFilter } from '../interfaces/Category';
+import type { PaginatedResponse } from '../../../shared/interfaces/PaginatedResponse';
 
 /**
  * Servicio para gestionar categorías
@@ -9,7 +10,7 @@ export const categoryService = {
      * Obtiene todas las categorías
      * @param filters - Filtros opcionales
      */
-    async getAll(filters?: CategoryFilter): Promise<Category[]> {
+    async getAll(filters?: CategoryFilter): Promise<PaginatedResponse<Category>> {
         const params = new URLSearchParams();
 
         if (filters?.search) {
@@ -24,11 +25,39 @@ export const categoryService = {
             params.append('filter[departamentoId]', filters.departamentoId.toString());
         }
 
+        if (filters?.page) {
+            params.append('page', filters.page.toString());
+        }
+
+        if (filters?.limit) {
+            params.append('limit', filters.limit.toString());
+        }
+
         // Incluir departamentos y empresas
         params.append('included', 'departamentos,empresas');
 
-        const response = await api.get<Category[]>(`/categories?${params.toString()}`);
-        return response.data;
+        const response = await api.get<any>(`/categories?${params.toString()}`);
+
+        // Normalización de la respuesta
+        const rawData = response.data;
+        const data: Category[] = rawData.data || (Array.isArray(rawData) ? rawData : []);
+
+        // Extraer metadata con fallbacks (soporta total en root o en meta)
+        const total = rawData.total ?? rawData.meta?.total ?? data.length;
+        const page = rawData.page ?? rawData.meta?.page ?? filters?.page ?? 1;
+        const limit = rawData.limit ?? rawData.meta?.limit ?? filters?.limit ?? 10;
+        const totalPages = rawData.totalPages ?? rawData.meta?.totalPages ?? rawData.lastPage ?? rawData.meta?.lastPage ?? Math.ceil(total / limit);
+
+        return {
+            data,
+            meta: {
+                total,
+                page,
+                limit,
+                totalPages,
+                lastPage: totalPages // Aseguramos compatibilidad con PaginatedResponse interface
+            }
+        };
     },
 
     /**

@@ -1,5 +1,6 @@
 import { api } from '../../../core/api/api';
 import type { Department, CreateDepartmentDto, UpdateDepartmentDto, DepartmentFilter } from '../interfaces/Department';
+import type { PaginatedResponse } from '../../../shared/interfaces/PaginatedResponse';
 
 /**
  * Servicio para gestionar departamentos
@@ -10,9 +11,9 @@ export const departmentService = {
     /**
      * Obtiene todos los departamentos
      * @param filters - Filtros opcionales
-     * @returns Lista de departamentos
+     * @returns Respuesta paginada con lista de departamentos
      */
-    async getAll(filters?: DepartmentFilter): Promise<Department[]> {
+    async getAll(filters?: DepartmentFilter): Promise<PaginatedResponse<Department>> {
         const params = new URLSearchParams();
 
         if (filters?.search) {
@@ -23,8 +24,36 @@ export const departmentService = {
             params.append('filter[estado]', filters.estado.toString());
         }
 
-        const response = await api.get<Department[]>(`/departments?${params.toString()}`);
-        return response.data;
+        if (filters?.page) {
+            params.append('page', filters.page.toString());
+        }
+
+        if (filters?.limit) {
+            params.append('limit', filters.limit.toString());
+        }
+
+        const response = await api.get<any>(`/departments?${params.toString()}`);
+
+        // Normalización de la respuesta
+        const rawData = response.data;
+        const data: Department[] = rawData.data || (Array.isArray(rawData) ? rawData : []);
+
+        // Extraer metadata con fallbacks
+        const total = rawData.total ?? rawData.meta?.total ?? data.length;
+        const page = rawData.page ?? rawData.meta?.page ?? filters?.page ?? 1;
+        const limit = rawData.limit ?? rawData.meta?.limit ?? filters?.limit ?? 10;
+        const totalPages = rawData.totalPages ?? rawData.meta?.totalPages ?? rawData.lastPage ?? rawData.meta?.lastPage ?? Math.ceil(total / limit);
+
+        return {
+            data,
+            meta: {
+                total,
+                page,
+                limit,
+                totalPages,
+                lastPage: totalPages
+            }
+        };
     },
 
     /**

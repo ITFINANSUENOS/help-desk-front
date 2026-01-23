@@ -20,10 +20,15 @@ export default function CategoriesPage() {
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null);
 
-    // Filtros
+    // Filtros & Paginación
     const [searchQuery, setSearchQuery] = useState('');
     const [estadoFilter, setEstadoFilter] = useState<number | 'all'>('all');
     const [departamentoFilter, setDepartamentoFilter] = useState<number | 'all'>('all');
+
+    const [page, setPage] = useState(1);
+    const [limit] = useState(10);
+    const [total, setTotal] = useState(0);
+    const [totalPages, setTotalPages] = useState(1);
 
     // Datos
     const [categories, setCategories] = useState<Category[]>([]);
@@ -33,24 +38,33 @@ export default function CategoriesPage() {
 
     // Cargar departamentos para el filtro
     useEffect(() => {
-        departmentService.getAll({ estado: 1 }).then(setDepartments).catch(console.error);
+        departmentService.getAll({ estado: 1 }).then(response => setDepartments(response.data)).catch(console.error);
     }, []);
 
     // Función estable para cargar categorías
     const loadCategories = useCallback(async () => {
         setLoading(true);
         try {
-            const data = await categoryService.getAll({
+            const response = await categoryService.getAll({
                 search: searchQuery,
                 estado: estadoFilter,
-                departamentoId: departamentoFilter
+                departamentoId: departamentoFilter,
+                page,
+                limit
             });
-            setCategories(data);
+            setCategories(response.data);
+            setTotal(response.meta.total);
+            setTotalPages(response.meta.totalPages);
         } catch (error) {
             console.error('Error loading categories:', error);
         } finally {
             setLoading(false);
         }
+    }, [searchQuery, estadoFilter, departamentoFilter, page, limit]);
+
+    // Reset page on filter change
+    useEffect(() => {
+        setPage(1);
     }, [searchQuery, estadoFilter, departamentoFilter]);
 
     // Cargar al montar y cuando cambian los filtros (con debounce para search)
@@ -60,7 +74,7 @@ export default function CategoriesPage() {
         }, searchQuery ? 300 : 0);
 
         return () => clearTimeout(timer);
-    }, [searchQuery, estadoFilter, departamentoFilter, loadCategories]);
+    }, [loadCategories, searchQuery]);
 
     const handleCreate = async (data: CreateCategoryDto) => {
         setLoading(true);
@@ -286,6 +300,13 @@ export default function CategoriesPage() {
                 loading={loading}
                 emptyMessage="No se encontraron categorías"
                 loadingMessage="Cargando categorías..."
+                pagination={{
+                    page,
+                    totalPages,
+                    total,
+                    limit,
+                    onPageChange: setPage
+                }}
             />
         </DashboardLayout>
     );

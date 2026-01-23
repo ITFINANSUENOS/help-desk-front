@@ -42,4 +42,8 @@ export interface DepartmentFilter {
     search?: string;
     /** Filtrar por estado */
     estado?: number | 'all';
+
+    // Paginación
+    page?: number;
+    limit?: number;
 }
