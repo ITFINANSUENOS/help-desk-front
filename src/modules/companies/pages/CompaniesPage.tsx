@@ -34,7 +34,7 @@ export default function CompaniesPage() {
     const [selectedItem, setSelectedItem] = useState<Company | null>(null);
 
     useEffect(() => {
-        setTitle('Gestión de Roles');
+        setTitle('Gestión de Empresas');
     }, [setTitle]);
 
     // Función estable para cargar empresas

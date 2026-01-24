@@ -78,7 +78,7 @@ export default function RolesPage() {
         <>
             <div className="mb-6 flex items-center justify-between">
                 <div>
-                    <h2 className="text-2xl font-bold text-gray-900">Gestión de Roles</h2>
+                    <h2 className="text-2xl font-bold text-gray-900">Roles</h2>
                     <p className="text-gray-500">Administra los roles y sus permisos.</p>
                 </div>
                 <Button variant="brand" onClick={() => setIsCreateModalOpen(true)}>

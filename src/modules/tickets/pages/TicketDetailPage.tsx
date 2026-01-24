@@ -19,7 +19,7 @@ export default function TicketDetailPage() {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
     useEffect(() => {
-        setTitle('Gestión de Roles');
+        setTitle('Gestión de Tickets');
     }, [setTitle]);
         
     const fetchData = useCallback(async () => {

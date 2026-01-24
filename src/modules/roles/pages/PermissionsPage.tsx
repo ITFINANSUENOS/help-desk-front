@@ -24,7 +24,7 @@ export default function PermissionsPage() {
     const [formLoading, setFormLoading] = useState(false);
 
     useEffect(() => {
-        setTitle('Gestión de Roles');
+        setTitle('Gestión de Permisos');
     }, [setTitle]);
 
     const fetchPermissions = async () => {
@@ -103,7 +103,7 @@ export default function PermissionsPage() {
         <>
             <div className="mb-6 flex items-center justify-between">
                 <div>
-                    <h2 className="text-2xl font-bold text-gray-900">Catálogo de Permisos</h2>
+                    <h2 className="text-2xl font-bold text-gray-900">Permisos</h2>
                     <p className="text-gray-500">Definiciones técnicas de permisos (Solo para desarrolladores/admin).</p>
                 </div>
                 <Button variant="brand" onClick={() => setIsCreateModalOpen(true)}>

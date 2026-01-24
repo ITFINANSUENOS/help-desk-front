@@ -60,7 +60,7 @@ export default function CreateTicketPage() {
     const [initialStepName, setInitialStepName] = useState<string>('');
 
     useEffect(() => {
-        setTitle('Gestión de Roles');
+        setTitle('Gestión de Tickets');
     }, [setTitle]);
 
     // 1. Initial Load (Departments, Companies, Priorities)

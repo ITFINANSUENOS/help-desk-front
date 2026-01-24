@@ -31,7 +31,7 @@ export default function ZonesPage() {
     const [selectedItem, setSelectedItem] = useState<Zone | null>(null);
 
     useEffect(() => {
-        setTitle('Gestión de Roles');
+        setTitle('Gestión de Zonas');
     }, [setTitle]);    
 
     // Función estable para cargar zonas

@@ -27,7 +27,7 @@ export default function UsersPage() {
     const [statusFilter, setStatusFilter] = useState<number | 'all'>('all');
 
     useEffect(() => {
-        setTitle('Gestión de Roles');
+        setTitle('Gestión de Usuarios');
     }, [setTitle]);
 
     // Filter configuration

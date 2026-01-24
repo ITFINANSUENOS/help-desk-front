@@ -28,7 +28,7 @@ export default function TicketsPage() {
     const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
-        setTitle('Gestión de tickets');
+        setTitle('Gestión de Tickets');
     }, [setTitle]);
 
     const fetchTickets = useCallback(async () => {

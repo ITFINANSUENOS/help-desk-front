@@ -32,7 +32,7 @@ export default function RegionsPage() {
     const [selectedItem, setSelectedItem] = useState<Regional | null>(null);
 
     useEffect(() => {
-        setTitle('Gestión de Roles');
+        setTitle('Gestión de Regionales');
     }, [setTitle]);
 
     // Función estable para cargar regionales
