@@ -20,6 +20,7 @@ const CompaniesPage = lazy(() => import('../modules/companies/pages/CompaniesPag
 const SubcategoriesPage = lazy(() => import('../modules/subcategories/pages/SubcategoriesPage'));
 const RegionsPage = lazy(() => import('../modules/regions/pages/RegionsPage'));
 const ZonesPage = lazy(() => import('../modules/zones/pages/ZonesPage'));
+const PositionsPage = lazy(() => import('../modules/positions/pages/PositionsPage'));
 
 
 export const appRoutes: RouteObject[] = [
@@ -138,6 +139,14 @@ export const appRoutes: RouteObject[] = [
                         element: (
                             <Suspense fallback={<PageLoader />}>
                                 <ZonesPage />
+                            </Suspense>
+                        )
+                    },
+                    {
+                        path: '/positions',
+                        element: (
+                            <Suspense fallback={<PageLoader />}>
+                                <PositionsPage />
                             </Suspense>
                         )
                     },
