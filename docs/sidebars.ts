@@ -32,6 +32,26 @@ const sidebars: SidebarsConfig = {
         'usuarios/roles-permisos',
       ],
     },
+    {
+      type: 'category',
+      label: 'Organigrama',
+      items: [
+        'organigrama/gestion-organigrama',
+      ],
+    },
+    {
+      type: 'category',
+      label: 'Administración',
+      items: [
+        'administracion/gestion-empresas',
+        'administracion/gestion-zonas',
+        'administracion/gestion-regionales',
+        'administracion/gestion-departamentos',
+        'administracion/gestion-cargos',
+        'administracion/gestion-categorias',
+        'administracion/gestion-subcategorias',
+      ],
+    },
   ],
 };
 

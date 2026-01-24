@@ -1,0 +1,65 @@
+---
+sidebar_position: 1
+---
+
+# Gestión del Organigrama
+
+El módulo de **Organigrama** permite visualizar y administrar la estructura jerárquica de la organización. A través de una interfaz gráfica interactiva, puede definir quién reporta a quién, creando un árbol de dependencias claro.
+
+## Acceso
+
+Para acceder, haga clic en la opción **Organigrama** en el menú lateral principal.
+
+## Visualización del Árbol
+
+Al ingresar, verá la estructura actual de la empresa.
+
+- **Nodos**: Cada tarjeta representa un Cargo.
+- **Líneas**: Conectan un cargo superior (Jefe) con sus subordinados.
+- **Estado**: Una etiqueta muestra si el cargo está `Activo` (verde) o `Inactivo` (rojo).
+
+### Filtros de Visualización
+
+En la parte superior derecha encontrará controles para ajustar la vista:
+
+1.  **Mostrar Inactivos**: Por defecto, el árbol solo muestra relaciones y cargos **Activos**. Si marca esta casilla, aparecerán también los elementos inactivos, permitiendo ver el historial completo o cargos deshabilitados.
+2.  **Refrescar**: Actualiza los datos del árbol con la información más reciente del servidor.
+
+:::info Nota
+Los cargos que no tengan ninguna relación jerárquica (ni jefe ni subordinados) **no aparecerán** en el gráfico para mantener la vista limpia.
+:::
+
+## Agregar una Relación
+
+Para vincular un cargo con su jefe:
+
+1.  Haga clic en el botón rojo **Nueva Relación** en la esquina superior derecha.
+2.  Se abrirá una ventana emergente.
+3.  **Cargo Jefe (Superior)**: Seleccione el cargo que actuará como líder o supervisor.
+4.  **Cargo Subordinado**: Seleccione el cargo que reportará al jefe seleccionado.
+5.  Haga clic en **Crear Relación**.
+
+:::caution Restricciones
+- No puede seleccionar el mismo cargo como jefe y subordinado.
+- El sistema detectará automáticamente si intenta crear un "Ciclo" (ej: A es jefe de B, y B intenta ser jefe de A) y marcará esos nodos como problemáticos en el árbol.
+:::
+
+## Eliminar una Relación
+
+Si desea romper el vínculo entre un jefe y un subordinado:
+
+1.  En el árbol gráfico, ubique el nodo del **Subordinado** (el cargo de abajo).
+2.  Haga clic sobre la tarjeta del cargo.
+3.  Aparecerá un mensaje de confirmación: *"¿Estás seguro de que deseas desvincular el cargo...?"*.
+4.  Haga clic en **Desvincular**.
+
+El cargo quedará "suelto" de ese jefe. Si no tiene otros vínculos, desaparecerá de la vista hasta que se le asigne una nueva relación.
+
+## Manejo de Ciclos
+
+Si por error se configuran relaciones circulares (ej: El Gerente reporta al Asistente), el sistema no fallará, pero indicará visualmente el problema:
+
+- Los nodos afectados mostrarán una etiqueta **(Ciclo)** o **(Ciclo Aislado)**.
+- Aparecerá una advertencia en la tarjeta del cargo.
+
+Se recomienda eliminar las relaciones incorrectas para corregir la estructura.
