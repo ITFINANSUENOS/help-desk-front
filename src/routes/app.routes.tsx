@@ -22,6 +22,7 @@ const RegionsPage = lazy(() => import('../modules/regions/pages/RegionsPage'));
 const ZonesPage = lazy(() => import('../modules/zones/pages/ZonesPage'));
 const PositionsPage = lazy(() => import('../modules/positions/pages/PositionsPage'));
 const ProfilesPage = lazy(() => import('../modules/profiles/pages/ProfilesPage'));
+const OrganigramaPage = lazy(() => import('../modules/organigrama/pages/OrganigramaPage'));
 
 
 export const appRoutes: RouteObject[] = [
@@ -156,6 +157,14 @@ export const appRoutes: RouteObject[] = [
                         element: (
                             <Suspense fallback={<PageLoader />}>
                                 <ProfilesPage />
+                            </Suspense>
+                        )
+                    },
+                    {
+                        path: '/organigrama',
+                        element: (
+                            <Suspense fallback={<PageLoader />}>
+                                <OrganigramaPage />
                             </Suspense>
                         )
                     },

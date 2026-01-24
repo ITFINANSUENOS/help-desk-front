@@ -46,6 +46,7 @@ export function Sidebar({ isCollapsed, toggleCollapse, isMobileOpen, closeMobile
         { to: "/zones", icon: "location_on", label: "Zonas", subject: 'Zone' as any },
         { to: "/positions", icon: "badge", label: "Cargos", subject: 'Position' as any },
         { to: "/profiles", icon: "badge", label: "Perfiles", subject: 'Profile' as any },
+        { to: "/organigrama", icon: "account_tree", label: "Organigrama", subject: 'Organigrama' as any },
         { to: "/reports", icon: "bar_chart", label: "Reports", subject: 'Report' },
         { to: "/settings", icon: "settings", label: "Settings" }
     ];
