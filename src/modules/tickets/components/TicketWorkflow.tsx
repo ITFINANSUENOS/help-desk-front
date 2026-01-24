@@ -1,4 +1,6 @@
 import type { TicketDetail } from '../interfaces/Ticket';
+import ReactQuill from 'react-quill-new';
+import 'react-quill-new/dist/quill.bubble.css';
 
 interface TicketWorkflowProps {
     ticket: TicketDetail;
@@ -55,9 +57,21 @@ export function TicketWorkflow({ ticket }: TicketWorkflowProps) {
 
             <div className="mt-8 rounded-lg bg-sky-50 p-4 border border-sky-100">
                 <h4 className="text-sm font-bold text-brand-accent mb-1">Paso Actual: {activeStepName}</h4>
-                <p className="text-sm text-gray-600">
-                    Descripción de la Tarea: {ticket.description || 'No hay descripción disponible para este paso.'}
-                </p>
+                <div className="text-sm text-gray-600">
+                    <span className="font-bold">Descripción de la Tarea:</span>
+                    {ticket.description ? (
+                        <div className="react-quill-readonly mt-1 p-0 border-0 bg-transparent">
+                            <ReactQuill
+                                value={ticket.description}
+                                readOnly={true}
+                                theme="bubble"
+                                modules={{ toolbar: false }}
+                            />
+                        </div>
+                    ) : (
+                        ' No hay descripción disponible para este paso.'
+                    )}
+                </div>
             </div>
         </div>
     );
