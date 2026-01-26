@@ -50,6 +50,14 @@ export const WorkflowModal = ({ isOpen, onClose, onSuccess, workflow }: Workflow
             // Ensure ID is number
             data.subcategoriaId = Number(data.subcategoriaId);
 
+            // Auto-generate name based on subcategory
+            const selectedSub = subcategories.find(s => s.id === data.subcategoriaId);
+            if (selectedSub) {
+                data.nombre = `Flujo - ${selectedSub.nombre}`;
+            } else {
+                data.nombre = `Flujo - ${data.subcategoriaId}`; // Fallback
+            }
+
             if (isEdit && workflow) {
                 await workflowService.updateWorkflow(workflow.id, data);
                 toast.success('Flujo actualizado correctamente');
@@ -75,15 +83,6 @@ export const WorkflowModal = ({ isOpen, onClose, onSuccess, workflow }: Workflow
             submitText={isEdit ? 'Actualizar' : 'Crear'}
         >
             <div className="space-y-4">
-                <Input
-                    label="Nombre del Flujo"
-                    id="nombre"
-                    {...register('nombre', { required: 'El nombre es obligatorio' })}
-                    placeholder="Ej: Flujo de Soporte Crítico"
-                    className="w-full"
-                />
-                {errors.nombre && <p className="text-red-500 text-xs mt-1">{errors.nombre.message}</p>}
-
                 <div className="flex flex-col gap-2">
                     <label htmlFor="subcategoriaId" className="text-[#121617] text-sm font-semibold">Subcategoría</label>
                     <select
