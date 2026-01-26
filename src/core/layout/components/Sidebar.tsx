@@ -2,7 +2,7 @@
 import { Link } from 'react-router-dom';
 import { cn } from '../../../shared/lib/utils';
 import { useAuth } from '../../../modules/auth/context/useAuth';
-import type { PermissionSubject, Permission } from '../../../modules/roles/interfaces/Permission';
+import type { PermissionSubject } from '../../../modules/roles/interfaces/Permission';
 
 interface SidebarProps {
     isCollapsed: boolean;
@@ -26,7 +26,7 @@ export function Sidebar({ isCollapsed, toggleCollapse, isMobileOpen, closeMobile
         if (!subject) return true; // Public item
         if (!user?.permissions) return false;
 
-        return user.permissions.some((p: Permission) =>
+        return user.permissions.some((p) =>
             (p.subject === subject || p.subject === 'all') &&
             (p.action === action || p.action === 'manage')
         );

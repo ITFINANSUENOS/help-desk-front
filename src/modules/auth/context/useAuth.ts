@@ -1,5 +1,5 @@
 import { useContext, createContext } from 'react';
-import type { User } from '../interfaces/User';
+import type { User } from '../../users/interfaces/User';
 import type { LoginCredentials } from '../interfaces/Auth';
 
 /**

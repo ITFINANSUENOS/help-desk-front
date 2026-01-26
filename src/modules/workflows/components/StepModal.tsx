@@ -4,11 +4,14 @@ import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 import { FormModal } from '../../../shared/components/FormModal';
 import { Input } from '../../../shared/components/Input';
-import type { Step, CreateStepDto } from '../interfaces/Step';
+import type { Step, CreateStepDto, StepSignature } from '../interfaces/Step';
 import { stepService } from '../services/step.service';
 import { positionService } from '../../../shared/services/catalog.service';
 import type { Position } from '../../../shared/interfaces/Catalog';
+import { templateService } from '../../templates/services/template.service';
+import type { TemplateField } from '../../templates/interfaces/TemplateField';
 import { toast } from 'sonner';
+import { SignatureConfig } from './SignatureConfig';
 
 interface StepModalProps {
     isOpen: boolean;
@@ -20,8 +23,9 @@ interface StepModalProps {
 
 export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepModalProps) => {
     const isEdit = !!step;
-    const { register, handleSubmit, reset, control, formState: { errors, isSubmitting } } = useForm<CreateStepDto>();
+    const { register, handleSubmit, reset, control, setValue, watch, formState: { isSubmitting } } = useForm<CreateStepDto>();
     const [positions, setPositions] = useState<Position[]>([]);
+    const [templateFields, setTemplateFields] = useState<TemplateField[]>([]);
 
     useEffect(() => {
         if (isOpen) {
@@ -36,6 +40,7 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
                         descripcion: fullStep.descripcion,
                         cargoAsignadoId: fullStep.cargoAsignadoId,
                         tiempoHabil: fullStep.tiempoHabil,
+                        campoReferenciaJefeId: fullStep.campoReferenciaJefeId,
                         esAprobacion: !!fullStep.esAprobacion,
                         esTareaNacional: !!fullStep.esTareaNacional,
                         requiereSeleccionManual: fullStep.requiereSeleccionManual,
@@ -47,7 +52,8 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
                         requiereCamposPlantilla: fullStep.requiereCamposPlantilla,
                         asignarCreador: !!fullStep.asignarCreador,
                         cerrarTicketObligatorio: !!fullStep.cerrarTicketObligatorio,
-                        permiteDespachoMasivo: !!fullStep.permiteDespachoMasivo
+                        permiteDespachoMasivo: !!fullStep.permiteDespachoMasivo,
+                        firmas: fullStep.firmas || []
                     });
                 }).catch(err => {
                     console.error(err);
@@ -73,6 +79,7 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
 
     const loadCatalogs = () => {
         positionService.getAllActive().then(setPositions).catch(console.error);
+        templateService.getAllFields().then(setTemplateFields).catch(console.error);
     };
 
     const onSubmit = async (data: CreateStepDto) => {
@@ -177,6 +184,20 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
                     />
                 </div>
 
+                <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700">Campo Ref. Jefe (Opcional)</label>
+                    <select
+                        {...register('campoReferenciaJefeId')}
+                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                    >
+                        <option value="">-- Seleccionar Campo --</option>
+                        {Array.isArray(templateFields) && templateFields.map(f => (
+                            <option key={f.id} value={f.id}>{f.etiqueta} ({f.codigo})</option>
+                        ))}
+                    </select>
+                    <p className="text-xs text-gray-500">Usado para determinar jefe inmediato dinámicamente.</p>
+                </div>
+
                 {/* Flags Section */}
                 <div className="col-span-1 md:col-span-2 pt-4 border-t border-gray-100">
                     <h3 className="text-sm font-semibold text-gray-900 mb-3">Configuraciones Adicionales</h3>
@@ -222,14 +243,24 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
                             <input type="checkbox" {...register('esParalelo')} className="rounded text-brand-teal focus:ring-brand-teal" />
                             <span className="text-sm text-gray-700">Es Paralelo</span>
                         </label>
+                    </div>
 
-                        <div className="col-span-2">
-                            <Input
-                                label="Nombre de Adjunto Requerido"
-                                {...register('nombreAdjunto')}
-                                placeholder="Si requiere archivo, nombre aquí..."
+                    {watch('requiereFirma') && (
+                        <div className="mt-4">
+                            <SignatureConfig
+                                firmas={(watch('firmas') || []) as unknown as StepSignature[]}
+                                onChange={(newFirmas) => setValue('firmas', newFirmas)}
+                                positions={positions}
                             />
                         </div>
+                    )}
+
+                    <div className="flex flex-col gap-1 mt-4">
+                        <Input
+                            label="Nombre de Adjunto Requerido"
+                            {...register('nombreAdjunto')}
+                            placeholder="Si requiere archivo, nombre aquí..."
+                        />
                     </div>
                 </div>
             </div>

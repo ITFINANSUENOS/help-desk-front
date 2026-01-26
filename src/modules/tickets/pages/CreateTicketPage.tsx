@@ -2,21 +2,17 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
-
 import { Button } from '../../../shared/components/Button';
 import { InfoModal } from '../../../shared/components/InfoModal';
-
+import { useAuth } from '../../auth/context/useAuth';
 import { ticketService } from '../services/ticket.service';
-import { categoryService } from '../services/category.service';
 import { subcategoryService } from '../services/subcategory.service';
 import { priorityService } from '../services/priority.service';
 import { workflowService } from '../services/workflow.service';
 import { departmentService } from '../services/department.service';
 import { companyService } from '../services/company.service';
 import { documentService } from '../services/document.service';
-import { useAuth } from '../../auth/context/useAuth';
 
-import type { Category } from '../interfaces/Category';
 import type { Subcategory } from '../interfaces/Subcategory';
 import type { Priority } from '../interfaces/Priority';
 import type { CreateTicketDto } from '../interfaces/Ticket';

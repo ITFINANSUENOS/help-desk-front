@@ -23,6 +23,19 @@ export interface Step {
     asignarCreador?: boolean;
     cerrarTicketObligatorio?: boolean;
     permiteDespachoMasivo?: boolean;
+    firmas?: StepSignature[];
+}
+
+export interface StepSignature {
+    id?: number;
+    pasoId?: number;
+    usuarioId?: number;
+    usuario?: { id: number; nombre: string; apellido: string };
+    cargoId?: number;
+    cargo?: { id: number; nombre: string };
+    coordX: number;
+    coordY: number;
+    pagina: number;
 }
 
 export interface CreateStepDto {
@@ -49,6 +62,7 @@ export interface CreateStepDto {
     asignarCreador?: boolean;
     cerrarTicketObligatorio?: boolean;
     permiteDespachoMasivo?: boolean;
+    firmas?: StepSignature[];
 }
 
 export interface UpdateStepDto extends Partial<CreateStepDto> {

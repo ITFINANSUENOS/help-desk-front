@@ -63,6 +63,7 @@ export function CreateTicketModal({ isOpen, onClose, onSuccess }: CreateTicketMo
                 titulo: title,
                 descripcion: description,
                 categoriaId: Number(categoryId),
+                subcategoriaId: 0, // Placeholder for legacy modal
                 prioridadId: priorityId ? Number(priorityId) : undefined
             };
 

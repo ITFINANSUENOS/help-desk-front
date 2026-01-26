@@ -56,7 +56,7 @@ describe('TicketsPage Pagination', () => {
         await waitFor(() => expect(screen.getByText('Ticket 1')).toBeTruthy());
 
         // Use a function match for text split across multiple elements
-        expect(screen.getByText((content, element) => {
+        expect(screen.getByText((_content, element) => {
             return element?.tagName.toLowerCase() === 'div' &&
                 element.textContent === 'Showing 1 to 10 of 25 results';
         })).toBeTruthy();
@@ -75,7 +75,7 @@ describe('TicketsPage Pagination', () => {
 
         // Wait for page 2 update
         await waitFor(() => expect(screen.getByText('Ticket 11')).toBeTruthy());
-        expect(screen.getByText((content, element) => {
+        expect(screen.getByText((_content, element) => {
             return element?.tagName.toLowerCase() === 'div' &&
                 element.textContent === 'Showing 11 to 20 of 25 results';
         })).toBeTruthy();
