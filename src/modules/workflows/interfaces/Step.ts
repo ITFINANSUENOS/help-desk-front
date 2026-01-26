@@ -1,0 +1,73 @@
+export interface Step {
+    id: number;
+    flujoId: number;
+    orden: number;
+    nombre: string;
+    descripcion?: string;
+    cargoAsignadoId?: number;
+    cargoAsignado?: { id: number; nombre: string }; // Relation
+    tiempoHabil?: number; // SLA in hours
+    estado: number;
+
+    // Flags
+    esAprobacion: boolean;
+    esTareaNacional: boolean;
+    requiereSeleccionManual?: number; // 1 or 0
+    nombreAdjunto?: string;
+    campoReferenciaJefeId?: number;
+    permiteCerrar?: number; // 1 or 0
+    necesitaAprobacionJefe?: boolean;
+    esParalelo?: boolean;
+    requiereFirma?: boolean;
+    requiereCamposPlantilla?: number; // 1 or 0
+    asignarCreador?: boolean;
+    cerrarTicketObligatorio?: boolean;
+    permiteDespachoMasivo?: boolean;
+}
+
+export interface CreateStepDto {
+    flujoId: number;
+    orden: number;
+    nombre: string;
+
+    // Optional
+    cargoAsignadoId?: number;
+    tiempoHabil?: number;
+    descripcion?: string;
+
+    // Checkboxes / Flags
+    esAprobacion: boolean;
+    esTareaNacional?: boolean;
+    requiereSeleccionManual?: number;
+    nombreAdjunto?: string;
+    campoReferenciaJefeId?: number;
+    permiteCerrar?: number;
+    necesitaAprobacionJefe?: boolean;
+    esParalelo?: boolean;
+    requiereFirma?: boolean;
+    requiereCamposPlantilla?: number;
+    asignarCreador?: boolean;
+    cerrarTicketObligatorio?: boolean;
+    permiteDespachoMasivo?: boolean;
+}
+
+export interface UpdateStepDto extends Partial<CreateStepDto> {
+    estado?: number;
+}
+
+export interface StepFilter {
+    flujoId?: number;
+    search?: string;
+    limit?: number;
+    page?: number;
+}
+
+export interface StepListResponse {
+    data: Step[];
+    meta: {
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+    };
+}

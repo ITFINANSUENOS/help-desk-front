@@ -25,6 +25,7 @@ const ProfilesPage = lazy(() => import('../modules/profiles/pages/ProfilesPage')
 const OrganigramaPage = lazy(() => import('../modules/organigrama/pages/OrganigramaPage'));
 const ErrorTypesPage = lazy(() => import('../modules/error-types/pages/ErrorTypesPage'));
 const WorkflowListPage = lazy(() => import('../modules/workflows/pages/WorkflowListPage'));
+const WorkflowStepsPage = lazy(() => import('../modules/workflows/pages/WorkflowStepsPage').then(module => ({ default: module.WorkflowStepsPage })));
 
 
 export const appRoutes: RouteObject[] = [
@@ -183,6 +184,14 @@ export const appRoutes: RouteObject[] = [
                         element: (
                             <Suspense fallback={<PageLoader />}>
                                 <WorkflowListPage />
+                            </Suspense>
+                        )
+                    },
+                    {
+                        path: '/workflows/:id/steps',
+                        element: (
+                            <Suspense fallback={<PageLoader />}>
+                                <WorkflowStepsPage />
                             </Suspense>
                         )
                     },

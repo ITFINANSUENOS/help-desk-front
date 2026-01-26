@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '../../../shared/components/Button';
 import { useLayout } from '../../../core/layout/context/LayoutContext';
 import { workflowService } from '../services/workflow.service';
@@ -11,6 +12,7 @@ import { FilterBar, type FilterConfig } from '../../../shared/components/FilterB
 
 export default function WorkflowListPage() {
     const { setTitle } = useLayout();
+    const navigate = useNavigate();
     const [workflows, setWorkflows] = useState<Workflow[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -126,6 +128,13 @@ export default function WorkflowListPage() {
                         title="Editar"
                     >
                         <span className="material-symbols-outlined text-[20px]">edit</span>
+                    </button>
+                    <button
+                        onClick={() => navigate(`/workflows/${wf.id}/steps`)}
+                        className="text-gray-400 hover:text-brand-teal"
+                        title="Gestionar Pasos"
+                    >
+                        <span className="material-symbols-outlined text-[20px]">account_tree</span>
                     </button>
                     <button
                         onClick={() => handleDeleteClick(wf)}
