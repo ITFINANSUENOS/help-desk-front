@@ -5,6 +5,7 @@ import { Button } from '../../../shared/components/Button';
 import { useWorkflowTransition } from '../hooks/useWorkflowTransition';
 import { WorkflowDecisionModal } from './WorkflowDecisionModal';
 import { DynamicStepForm } from './DynamicStepForm';
+import { SignatureModal } from './SignatureModal';
 import { ticketService } from '../services/ticket.service';
 import type { TransitionTicketDto, TemplateField } from '../interfaces/Ticket';
 import { toast } from 'sonner';
@@ -34,6 +35,10 @@ export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
     const [dynamicValues, setDynamicValues] = useState<{ campoId: number; valor: string }[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    // Signature State
+    const [signature, setSignature] = useState<string | null>(null);
+    const [isSignatureModalOpen, setIsSignatureModalOpen] = useState(false);
+
     // Permission Logic
     const canInteract = Number(user?.id) === Number(assignedToId) || Number(user?.id) === Number(creatorId);
 
@@ -56,6 +61,12 @@ export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
         await checkTransition();
     };
 
+    // Handler: Confirm Signature
+    const handleSignatureConfirm = (base64: string) => {
+        setSignature(base64);
+        toast.success('Firma capturada correctamente');
+    };
+
     // Handler when Modal confirms decision/user
     const handleTransitionConfirm = async (transitionKeyOrStepId: string, targetUserId?: number) => {
         setIsSubmitting(true);
@@ -66,6 +77,7 @@ export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
                 comentario: comment,
                 targetUserId,
                 templateValues: dynamicValues.length > 0 ? dynamicValues : undefined,
+                signature: signature || undefined
             };
 
             await ticketService.transitionTicket(dto);
@@ -73,6 +85,7 @@ export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
             toast.success('Ticket actualizado correctamente');
             setComment('');
             setDynamicValues([]);
+            setSignature(null);
             closeModal();
             onSuccess();
 
@@ -114,7 +127,7 @@ export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
             )}
 
             {/* EDITOR AREA */}
-            <div className="mb-4">
+            <div className="mb-4 space-y-3">
                 <ReactQuill
                     theme="snow"
                     value={comment}
@@ -122,6 +135,24 @@ export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
                     placeholder="Escriba su respuesta o notas internas..."
                     className="bg-white"
                 />
+
+                {/* Signature Preview or Button */}
+                {signature ? (
+                    <div className="flex items-center gap-4 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                        <div className="flex-1">
+                            <span className="text-xs text-gray-500 font-medium block mb-1">Firma Adjunta:</span>
+                            <img src={signature} alt="Firma" className="h-16 border bg-white rounded object-contain p-1" />
+                        </div>
+                        <Button variant="ghost" className="text-red-500 hover:text-red-700" onClick={() => setSignature(null)}>
+                            <span className="material-symbols-outlined">delete</span>
+                        </Button>
+                    </div>
+                ) : (
+                    <Button variant="secondary" size="sm" onClick={() => setIsSignatureModalOpen(true)}>
+                        <span className="material-symbols-outlined text-sm mr-2">ink_pen</span>
+                        Agregar Firma
+                    </Button>
+                )}
             </div>
 
             {/* ACTION BUTTONS */}
@@ -135,13 +166,19 @@ export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
                 </Button>
             </div>
 
-            {/* MODAL */}
+            {/* MODALS */}
             <WorkflowDecisionModal
                 open={modalOpen}
                 onOpenChange={(v) => !v && closeModal()}
                 transitionData={transitionData}
                 onConfirm={handleTransitionConfirm}
                 isLoading={isSubmitting}
+            />
+
+            <SignatureModal
+                isOpen={isSignatureModalOpen}
+                onClose={() => setIsSignatureModalOpen(false)}
+                onConfirm={handleSignatureConfirm}
             />
         </div>
     );
