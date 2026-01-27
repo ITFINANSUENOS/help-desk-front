@@ -16,8 +16,9 @@ export default function TicketDetailPage() {
     const [ticket, setTicket] = useState<TicketDetail | null>(null);
     const [timeline, setTimeline] = useState<TicketTimelineItem[]>([]);
     const [loading, setLoading] = useState(true);
-    const [activeFilter, setActiveFilter] = useState<'all' | 'comments' | 'history'>('all');
+    const [activeFilter, setActiveFilter] = useState<'all' | 'comments' | 'history' | 'document'>('all');
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [pdfUrl, setPdfUrl] = useState<string | null>(null);
 
     useEffect(() => {
         setTitle('Gestión de Tickets');
@@ -43,6 +44,17 @@ export default function TicketDetailPage() {
     useEffect(() => {
         fetchData();
     }, [fetchData]);
+
+    useEffect(() => {
+        if (activeFilter === 'document' && ticket && !pdfUrl) {
+            ticketService.getTicketMasterPdf(ticket.id)
+                .then(blob => {
+                    const url = URL.createObjectURL(blob);
+                    setPdfUrl(url);
+                })
+                .catch(err => console.error("Error loading PDF", err));
+        }
+    }, [activeFilter, ticket, pdfUrl]);
 
     const getStatusColor = (status: TicketStatus) => {
         switch (status) {
@@ -178,6 +190,21 @@ export default function TicketDetailPage() {
                         <h3 className="text-lg font-bold text-gray-900">Actividad Reciente</h3>
                         <div className="flex gap-2">
                             <button
+                                type="button"
+                                onClick={() => setActiveFilter('document')}
+                                className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${activeFilter === 'document'
+                                    ? 'border border-gray-200 bg-white text-gray-900 shadow-sm'
+                                    : 'border border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                                    }`}
+                            >
+                                <span className="flex items-center gap-1">
+                                    <span className="material-symbols-outlined text-[16px]">picture_as_pdf</span>
+                                    Documento
+                                </span>
+                            </button>
+                            <div className="w-px h-6 bg-gray-200 mx-1"></div>
+                            <button
+                                type="button"
                                 onClick={() => setActiveFilter('all')}
                                 className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${activeFilter === 'all'
                                     ? 'border border-gray-200 bg-white text-gray-900 shadow-sm'
@@ -187,6 +214,7 @@ export default function TicketDetailPage() {
                                 Toda la Actividad
                             </button>
                             <button
+                                type="button"
                                 onClick={() => setActiveFilter('comments')}
                                 className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${activeFilter === 'comments'
                                     ? 'border border-gray-200 bg-white text-gray-900 shadow-sm'
@@ -196,6 +224,7 @@ export default function TicketDetailPage() {
                                 Comentarios
                             </button>
                             <button
+                                type="button"
                                 onClick={() => setActiveFilter('history')}
                                 className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${activeFilter === 'history'
                                     ? 'border border-gray-200 bg-white text-gray-900 shadow-sm'
@@ -207,7 +236,23 @@ export default function TicketDetailPage() {
                         </div>
                     </div>
 
-                    <TicketTimeline items={filteredItems} />
+                    {activeFilter === 'document' ? (
+                        <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden min-h-[600px]">
+                            {pdfUrl ? (
+                                <iframe
+                                    src={pdfUrl}
+                                    className="w-full h-[800px]"
+                                    title="Vista Previa del Documento"
+                                />
+                            ) : (
+                                <div className="flex h-64 items-center justify-center">
+                                    <p className="text-gray-500">Cargando documento...</p>
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        <TicketTimeline items={filteredItems} />
+                    )}
                 </div>
             </div>
 

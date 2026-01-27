@@ -205,6 +205,13 @@ export const ticketService = {
 
     async transitionTicket(dto: TransitionTicketDto): Promise<void> {
         await api.post('/workflows/transition', dto);
+    },
+
+    async getTicketMasterPdf(ticketId: number): Promise<Blob> {
+        const response = await api.get(`/documents/ticket/${ticketId}/master-pdf`, {
+            responseType: 'blob'
+        });
+        return response.data;
     }
 };
 
