@@ -169,6 +169,7 @@ export const ticketService = {
             workflowStepId: stepId,
             assignedTo: assignedToName,
             assignedToId: (t.usuarioAsignadoIds && t.usuarioAsignadoIds.length > 0) ? t.usuarioAsignadoIds[0] : 0,
+            assignedToIds: t.usuarioAsignadoIds || [],
             priorityId: t.prioridad?.id
         };
     },

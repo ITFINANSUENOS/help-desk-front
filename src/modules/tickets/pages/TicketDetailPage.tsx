@@ -252,6 +252,7 @@ export default function TicketDetailPage() {
                 <TicketResponsePanel
                     ticketId={ticket.id}
                     assignedToId={ticket.assignedToId}
+                    assignedToIds={ticket.assignedToIds}
                     assignedToName={effectiveAssignedToName}
                     creatorId={ticket.creatorId}
                     creatorName={ticket.creatorName}

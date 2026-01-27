@@ -62,6 +62,7 @@ export interface TicketDetail extends Ticket {
     workflowStepId: number;
     assignedTo?: string;
     assignedToId?: number;
+    assignedToIds?: number[];
     priorityId?: number; // Add ID for editing
 }
 
@@ -100,6 +101,7 @@ export interface LinearTransition {
     targetStepName: string;
     requiresManualAssignment: boolean;
     candidates: UserCandidate[];
+    missingRoles?: { id: number; name: string }[];
 }
 
 export interface DecisionOption {
@@ -107,6 +109,8 @@ export interface DecisionOption {
     label: string;
     targetStepId: number;
     requiresManualAssignment: boolean;
+    candidates?: UserCandidate[];
+    missingRoles?: { id: number; name: string }[];
 }
 
 export interface ParallelStatus {
@@ -129,7 +133,7 @@ export interface TransitionTicketDto {
     templateValues?: { campoId: number; valor: string }[];
     attachmentIds?: number[]; // IDs of uploaded files
     signature?: string; // base64
-    // parallelAssignments... (future)
+    manualAssignments?: Record<string, number>;
 }
 
 export interface TemplateField {

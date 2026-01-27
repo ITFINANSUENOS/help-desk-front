@@ -7,9 +7,9 @@ interface WorkflowDecisionModalProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     transitionData: CheckNextStepResponse | null;
-    onConfirm: (decisionKey: string, targetUserId?: number) => void;
+    onConfirm: (decisionKey: string, targetUserId?: number, manualAssignments?: Record<string, number>) => void;
     isLoading?: boolean;
-    isAssignedUser: boolean; // Re-added
+    isAssignedUser: boolean;
 }
 
 export const WorkflowDecisionModal: React.FC<WorkflowDecisionModalProps> = ({
@@ -22,6 +22,7 @@ export const WorkflowDecisionModal: React.FC<WorkflowDecisionModalProps> = ({
 }) => {
     const [selectedDecision, setSelectedDecision] = useState<string>('');
     const [selectedUser, setSelectedUser] = useState<string>('');
+    const [manualAssignments, setManualAssignments] = useState<Record<number, string>>({});
     const [stepCandidates, setStepCandidates] = useState<UserCandidate[]>([]);
     const [verified, setVerified] = useState(false);
 
@@ -34,6 +35,7 @@ export const WorkflowDecisionModal: React.FC<WorkflowDecisionModalProps> = ({
             // Reset states when opening
             setSelectedDecision('');
             setSelectedUser('');
+            setManualAssignments({});
             setVerified(false);
 
             if (isLinearMode && transitionData?.linear?.candidates) {
@@ -42,17 +44,47 @@ export const WorkflowDecisionModal: React.FC<WorkflowDecisionModalProps> = ({
         }
     }, [open, transitionData, isLinearMode]);
 
+    // Update candidates when decision changes
+    useEffect(() => {
+        if (isDecisionMode && selectedDecision) {
+            const decision = transitionData?.decisions?.find(d => d.decisionId === selectedDecision);
+            setManualAssignments({}); // Reset assignments on decision change
+            if (decision?.candidates) {
+                setStepCandidates(decision.candidates);
+            } else {
+                setStepCandidates([]);
+            }
+        }
+    }, [selectedDecision, isDecisionMode, transitionData]);
+
     const handleConfirm = () => {
         const transitionKey = isDecisionMode ? selectedDecision : (transitionData?.linear?.targetStepId.toString() || '');
         const userId = selectedUser ? Number(selectedUser) : undefined;
-        onConfirm(transitionKey, userId);
+
+        const assignmentsPayload: Record<string, number> = {};
+        Object.entries(manualAssignments).forEach(([roleId, uId]) => {
+            if (uId) assignmentsPayload[roleId] = Number(uId);
+        });
+
+        onConfirm(transitionKey, userId, Object.keys(assignmentsPayload).length > 0 ? assignmentsPayload : undefined);
     };
 
-    const needsUserSelection = () => {
-        if (isLinearMode) return transitionData?.linear?.requiresManualAssignment;
-        // Logic for decision mode user selection would go here
-        return false;
+    const getCurrentOption = () => {
+        if (isLinearMode) return transitionData?.linear;
+        if (isDecisionMode && selectedDecision) return transitionData?.decisions?.find(d => d.decisionId === selectedDecision);
+        return null;
     };
+
+    const currentOption = getCurrentOption();
+    const needsUserSelection = currentOption?.requiresManualAssignment || false;
+    const missingRoles = currentOption?.missingRoles || [];
+
+    // Check if all needed assignments are made
+    const areAllRolesAssigned = missingRoles.every(r => manualAssignments[r.id]);
+    const isFormValid =
+        (isAssignedUser ? verified : true) &&
+        (isDecisionMode ? !!selectedDecision : true) &&
+        (missingRoles.length > 0 ? areAllRolesAssigned : (needsUserSelection ? !!selectedUser : true));
 
     return (
         <Modal
@@ -90,10 +122,57 @@ export const WorkflowDecisionModal: React.FC<WorkflowDecisionModalProps> = ({
                         </div>
                     )}
 
-                    {/* MANUAL ASSIGNMENT SELECTOR (Linear Mode) */}
-                    {needsUserSelection() && (
+                    {/* MISSING ROLES WARNING & SELECTION */}
+                    {missingRoles.length > 0 && (
+                        <div className="space-y-3">
+                            <div className="bg-amber-50 border border-amber-200 rounded-md p-3">
+                                <div className="flex gap-2">
+                                    <span className="material-symbols-outlined text-amber-600">warning</span>
+                                    <div>
+                                        <p className="text-sm font-medium text-amber-800">Cargos sin usuario asignado</p>
+                                        <p className="text-xs text-amber-700 mt-1">
+                                            El sistema no encontró usuarios automáticos para los siguientes cargos. Seleccione un responsable para cada uno.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Render a select for EACH missing role */}
+                            <div className="space-y-3 pt-2">
+                                {missingRoles.map(role => (
+                                    <div key={role.id} className="space-y-1">
+                                        <label htmlFor={`role-${role.id}`} className="text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                            {role.name}
+                                        </label>
+                                        <div className="relative">
+                                            <select
+                                                id={`role-${role.id}`}
+                                                className="block w-full rounded-lg border border-gray-200 bg-slate-50 p-2 text-sm text-[#121617] focus:border-brand-teal focus:bg-white focus:outline-none h-10 appearance-none"
+                                                value={manualAssignments[role.id] || ''}
+                                                onChange={(e) => setManualAssignments(prev => ({ ...prev, [role.id]: e.target.value }))}
+                                            >
+                                                <option value="">Seleccione asignado...</option>
+                                                {stepCandidates.map((u) => (
+                                                    <option key={u.id} value={u.id.toString()}>
+                                                        {u.nombre} {u.apellido} {u.cargo ? `(${u.cargo})` : ''}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            <span className="material-symbols-outlined absolute right-2 top-2.5 text-gray-400 pointer-events-none text-lg">expand_more</span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* SINGLE MANUAL ASSIGNMENT (Fallback or Normal) */}
+                    {/* Show this ONLY if NO missing roles are present (to avoid double entry), BUT manual selection is still required */}
+                    {needsUserSelection && missingRoles.length === 0 && (selectedDecision || isLinearMode) && (
                         <div className="space-y-2">
-                            <label htmlFor="user-select" className="text-sm font-semibold text-[#121617]">Asignar a Usuario</label>
+                            <label htmlFor="user-select" className="text-sm font-semibold text-[#121617]">
+                                Asignar a Usuario
+                            </label>
                             <div className="relative">
                                 <select
                                     id="user-select"
@@ -134,7 +213,6 @@ export const WorkflowDecisionModal: React.FC<WorkflowDecisionModalProps> = ({
 
                 {/* FOOTER: Checkbox + Actions */}
                 <div className="flex items-center justify-between pt-4 border-t border-gray-100 gap-4">
-
                     {/* VERIFICATION CHECKBOX (Left Side) - ONLY FOR ASSIGNED USER */}
                     {isAssignedUser && (
                         <div className="flex items-center gap-2">
@@ -159,12 +237,7 @@ export const WorkflowDecisionModal: React.FC<WorkflowDecisionModalProps> = ({
                         <Button
                             variant="brand"
                             onClick={handleConfirm}
-                            disabled={
-                                isLoading ||
-                                (isAssignedUser && !verified) ||
-                                (isDecisionMode && !selectedDecision) ||
-                                (needsUserSelection() && !selectedUser)
-                            }
+                            disabled={isLoading || !isFormValid}
                         >
                             {isLoading ? 'Wait...' : 'Avanzar'}
                         </Button>

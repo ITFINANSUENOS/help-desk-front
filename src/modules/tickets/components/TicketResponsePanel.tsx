@@ -14,6 +14,7 @@ import { useAuth } from '../../auth/context/useAuth';
 interface TicketResponsePanelProps {
     ticketId: number;
     assignedToId?: number;
+    assignedToIds?: number[]; // Support parallel assignees
     assignedToName?: string;
     creatorId: number; // Required for checking permissions
     creatorName: string;
@@ -24,6 +25,7 @@ interface TicketResponsePanelProps {
 export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
     ticketId,
     assignedToId,
+    assignedToIds,
     assignedToName,
     creatorId,
     creatorName,
@@ -40,7 +42,11 @@ export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
     const [isSignatureModalOpen, setIsSignatureModalOpen] = useState(false);
 
     // Permission Logic
-    const canInteract = Number(user?.id) === Number(assignedToId) || Number(user?.id) === Number(creatorId);
+    const isExplicitlyAssigned = Number(user?.id) === Number(assignedToId);
+    const isInAssignedList = assignedToIds ? assignedToIds.includes(Number(user?.id)) : false;
+    const isCreator = Number(user?.id) === Number(creatorId);
+
+    const canInteract = isExplicitlyAssigned || isInAssignedList || isCreator;
 
     // Hook logic
     const {
@@ -68,7 +74,7 @@ export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
     };
 
     // Handler when Modal confirms decision/user
-    const handleTransitionConfirm = async (transitionKeyOrStepId: string, targetUserId?: number) => {
+    const handleTransitionConfirm = async (transitionKeyOrStepId: string, targetUserId?: number, manualAssignments?: Record<string, number>) => {
         setIsSubmitting(true);
         try {
             const dto: TransitionTicketDto = {
@@ -76,6 +82,7 @@ export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
                 transitionKeyOrStepId,
                 comentario: comment,
                 targetUserId,
+                manualAssignments,
                 templateValues: dynamicValues.length > 0 ? dynamicValues : undefined,
                 signature: signature || undefined
             };
@@ -173,7 +180,7 @@ export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
                 transitionData={transitionData}
                 onConfirm={handleTransitionConfirm}
                 isLoading={isSubmitting}
-                isAssignedUser={Number(user?.id) === Number(assignedToId)}
+                isAssignedUser={isExplicitlyAssigned || isInAssignedList}
             />
 
             <SignatureModal
