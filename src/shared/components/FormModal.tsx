@@ -14,8 +14,8 @@ export interface FormModalProps {
     title: string;
     /** Contenido del formulario */
     children: ReactNode;
-    /** Callback al enviar el formulario */
-    onSubmit: (e: React.FormEvent) => void;
+    /** Callback al enviar el formulario (opcional si showFooter es false) */
+    onSubmit?: (e: React.FormEvent) => void;
     /** Texto del botón de envío */
     submitText?: string;
     /** Texto del botón de cancelación */
@@ -24,6 +24,8 @@ export interface FormModalProps {
     loading?: boolean;
     /** Tamaño del modal */
     size?: 'sm' | 'md' | 'lg' | 'xl';
+    /** Mostrar el footer con botones por defecto */
+    showFooter?: boolean;
 }
 
 /**
@@ -53,7 +55,8 @@ export function FormModal({
     submitText = 'Guardar',
     cancelText = 'Cancelar',
     loading = false,
-    size = 'md'
+    size = 'md',
+    showFooter = true
 }: FormModalProps) {
     const sizeClasses = {
         sm: 'max-w-md',
@@ -64,7 +67,7 @@ export function FormModal({
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onSubmit(e);
+        if (onSubmit) onSubmit(e);
     };
 
     return (
@@ -79,23 +82,25 @@ export function FormModal({
                     {children}
                 </div>
 
-                <div className="mt-8 flex justify-end gap-3">
-                    <Button
-                        type="button"
-                        onClick={onClose}
-                        variant="outline"
-                        disabled={loading}
-                    >
-                        {cancelText}
-                    </Button>
-                    <Button
-                        type="submit"
-                        disabled={loading}
-                        variant="brand"
-                    >
-                        {loading ? 'Guardando...' : submitText}
-                    </Button>
-                </div>
+                {showFooter && (
+                    <div className="mt-8 flex justify-end gap-3">
+                        <Button
+                            type="button"
+                            onClick={onClose}
+                            variant="outline"
+                            disabled={loading}
+                        >
+                            {cancelText}
+                        </Button>
+                        <Button
+                            type="submit"
+                            disabled={loading}
+                            variant="brand"
+                        >
+                            {loading ? 'Guardando...' : submitText}
+                        </Button>
+                    </div>
+                )}
             </form>
         </Modal>
     );

@@ -56,5 +56,26 @@ export const stepService = {
 
     async deleteStep(id: number): Promise<void> {
         await api.delete(`/workflows/steps/${id}`);
+    },
+
+    async uploadFile(id: number, file: File): Promise<void> {
+        const formData = new FormData();
+        formData.append('file', file);
+        await api.post(`/workflows/steps/${id}/upload`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+    },
+
+    async importSteps(flujoId: number, file: File): Promise<void> {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('flujoId', String(flujoId));
+        await api.post('/workflows/steps/import', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
     }
 };

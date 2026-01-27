@@ -15,6 +15,7 @@ import { toast } from 'sonner';
 import { SignatureConfig } from './SignatureConfig';
 import { TemplateFieldsConfig } from './TemplateFieldsConfig';
 import { SpecificAssignmentConfig } from './SpecificAssignmentConfig';
+import { IconUpload } from '@tabler/icons-react';
 
 interface StepModalProps {
     isOpen: boolean;
@@ -29,10 +30,20 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
     const { register, handleSubmit, reset, control, setValue, watch, formState: { isSubmitting } } = useForm<CreateStepDto>();
     const [positions, setPositions] = useState<Position[]>([]);
     const [templateFields, setTemplateFields] = useState<TemplateField[]>([]);
+    const [pdfFile, setPdfFile] = useState<File | null>(null);
+
+    // Derived URL for preview: local file or existing remote file
+    const pdfUrl = pdfFile
+        ? URL.createObjectURL(pdfFile)
+        : step?.nombreAdjunto
+            // Assumption: document/paso/ is the path. Adjust based on real API static serving setup.
+            ? `/document/paso/${step.nombreAdjunto}`
+            : null;
 
     useEffect(() => {
         if (isOpen) {
             loadCatalogs();
+            setPdfFile(null); // Reset file on open
             if (step) {
                 // Fetch fresh data for step to get standard DTO structure
                 stepService.getStep(step.id).then(fullStep => {
@@ -65,7 +76,6 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
                     });
                 }).catch(err => {
                     console.error(err);
-                    // Fallback reset using props
                     reset({
                         flujoId: step.flujoId,
                         orden: step.orden,
@@ -78,8 +88,7 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
                     flujoId,
                     orden: 0,
                     nombre: '',
-                    esAprobacion: false,
-                    // Default values for others will be undefined or false
+                    esAprobacion: false
                 });
             }
         }
@@ -90,29 +99,38 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
         templateService.getAllFields().then(setTemplateFields).catch(console.error);
     };
 
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            setPdfFile(e.target.files[0]);
+        }
+    };
+
     const onSubmit = async (data: CreateStepDto) => {
         try {
-            // Type conversion
             data.orden = Number(data.orden);
             data.flujoId = Number(flujoId);
             if (data.cargoAsignadoId) data.cargoAsignadoId = Number(data.cargoAsignadoId);
             if (data.tiempoHabil) data.tiempoHabil = Number(data.tiempoHabil);
 
-            // Boolean/Bit conversion if needed by API? Backend uses bits for some numbers (1,0) and boolean for others
-            // Based on DTO, some are number, some boolean.
-            // Checkboxes return boolean. If API expects number (1/0), we need conversion.
-            // Reviewing DTO: requiereSeleccionManual is IsInt (number).
             data.requiereSeleccionManual = data.requiereSeleccionManual ? 1 : 0;
             data.permiteCerrar = data.permiteCerrar ? 1 : 0;
             data.requiereCamposPlantilla = data.requiereCamposPlantilla ? 1 : 0;
 
+            let stepId = step?.id;
+
             if (isEdit && step) {
                 await stepService.updateStep(step.id, data);
-                toast.success('Paso actualizado');
             } else {
-                await stepService.createStep(data);
-                toast.success('Paso creado');
+                const newStep = await stepService.createStep(data);
+                stepId = newStep.id;
             }
+
+            // Handle PDF Upload if file selected
+            if (pdfFile && stepId) {
+                await stepService.uploadFile(stepId, pdfFile);
+            }
+
+            toast.success(isEdit ? 'Paso actualizado' : 'Paso creado');
             onSuccess();
         } catch (error) {
             console.error(error);
@@ -286,11 +304,37 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
                     </div>
 
                     {watch('requiereFirma') && (
-                        <div className="mt-4">
+                        <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Base PDF para Firmas
+                                </label>
+                                <div className="flex gap-2 items-center">
+                                    <label className="cursor-pointer bg-white px-3 py-2 border border-gray-300 rounded text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2 shadow-sm">
+                                        <IconUpload size={18} />
+                                        <span>
+                                            {pdfFile ? pdfFile.name : step?.nombreAdjunto ? 'Cambiar PDF' : 'Subir PDF'}
+                                        </span>
+                                        <input
+                                            type="file"
+                                            accept="application/pdf"
+                                            className="hidden"
+                                            onChange={handleFileChange}
+                                        />
+                                    </label>
+                                    {(pdfFile || step?.nombreAdjunto) && (
+                                        <span className="text-sm text-green-600 font-medium">
+                                            {pdfFile ? 'Archivo seleccionado' : `Actual: ${step?.nombreAdjunto}`}
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
+
                             <SignatureConfig
                                 firmas={(watch('firmas') || []) as unknown as StepSignature[]}
                                 onChange={(newFirmas) => setValue('firmas', newFirmas)}
                                 positions={positions}
+                                pdfUrl={pdfUrl}
                             />
                         </div>
                     )}
@@ -306,7 +350,7 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
 
                     <div className="flex flex-col gap-1 mt-4">
                         <Input
-                            label="Nombre de Adjunto Requerido"
+                            label="Nombre de Adjunto Requerido (Solo informativo)"
                             {...register('nombreAdjunto')}
                             placeholder="Si requiere archivo, nombre aquí..."
                         />

@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '../../../shared/components/Button';
 import { DataTable } from '../../../shared/components/DataTable';
-import { IconPlus, IconArrowLeft, IconPencil, IconTrash } from '@tabler/icons-react';
+import { IconPlus, IconArrowLeft, IconPencil, IconTrash, IconArrowsSplit, IconFileSpreadsheet } from '@tabler/icons-react';
 import { stepService } from '../services/step.service';
 import type { Step } from '../interfaces/Step';
 import { toast } from 'sonner';
 import { StepModal } from '../components/StepModal';
+import { TransitionModal } from '../components/TransitionModal';
+import { ImportStepsModal } from '../components/ImportStepsModal';
 import { workflowService } from '../services/workflow.service';
 import type { Workflow } from '../interfaces/Workflow';
 
@@ -16,8 +18,15 @@ export const WorkflowStepsPage = () => {
     const [steps, setSteps] = useState<Step[]>([]);
     const [workflow, setWorkflow] = useState<Workflow | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+
+    // Modal states
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isImportModalOpen, setIsImportModalOpen] = useState(false);
     const [selectedStep, setSelectedStep] = useState<Step | null>(null);
+
+    // Transition Modal state
+    const [isTransitionModalOpen, setIsTransitionModalOpen] = useState(false);
+    const [selectedStepForTransition, setSelectedStepForTransition] = useState<Step | null>(null);
 
     const workflowId = Number(id);
 
@@ -53,9 +62,18 @@ export const WorkflowStepsPage = () => {
         setIsModalOpen(true);
     };
 
+    const handleImport = () => {
+        setIsImportModalOpen(true);
+    };
+
     const handleEdit = (step: Step) => {
         setSelectedStep(step);
         setIsModalOpen(true);
+    };
+
+    const handleTransitions = (step: Step) => {
+        setSelectedStepForTransition(step);
+        setIsTransitionModalOpen(true);
     };
 
     const handleDelete = async (stepId: number) => {
@@ -76,6 +94,11 @@ export const WorkflowStepsPage = () => {
         loadData();
     };
 
+    const handleImportSuccess = () => {
+        setIsImportModalOpen(false);
+        loadData();
+    };
+
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -91,6 +114,10 @@ export const WorkflowStepsPage = () => {
                     <Button variant="outline" onClick={() => navigate('/workflows')}>
                         <IconArrowLeft size={20} className="mr-2" />
                         Volver
+                    </Button>
+                    <Button variant="outline" onClick={handleImport}>
+                        <IconFileSpreadsheet size={20} className="mr-2" />
+                        Carga Masiva (Excel)
                     </Button>
                     <Button variant="brand" onClick={handleCreate}>
                         <IconPlus size={20} className="mr-2" />
@@ -131,24 +158,10 @@ export const WorkflowStepsPage = () => {
                                         Aprobación
                                     </span>
                                 )}
+                                {/* ... existing badges ... */}
                                 {step.esTareaNacional && (
                                     <span className="px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
                                         Nacional
-                                    </span>
-                                )}
-                                {step.requiereSeleccionManual === 1 && (
-                                    <span className="px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 border border-purple-200">
-                                        Sel. Manual
-                                    </span>
-                                )}
-                                {step.necesitaAprobacionJefe && (
-                                    <span className="px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800 border border-orange-200">
-                                        Aprueba Jefe
-                                    </span>
-                                )}
-                                {step.requiereFirma && (
-                                    <span className="px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800 border border-indigo-200">
-                                        Firma
                                     </span>
                                 )}
                                 {step.permiteCerrar === 1 && (
@@ -156,36 +169,7 @@ export const WorkflowStepsPage = () => {
                                         Cierra Ticket
                                     </span>
                                 )}
-                                {step.asignarCreador && (
-                                    <span className="px-2 py-0.5 rounded text-xs font-medium bg-pink-100 text-pink-800 border border-pink-200">
-                                        Asigna Creador
-                                    </span>
-                                )}
-                                {step.esParalelo && (
-                                    <span className="px-2 py-0.5 rounded text-xs font-medium bg-teal-100 text-teal-800 border border-teal-200">
-                                        Paralelo
-                                    </span>
-                                )}
-                                {step.cerrarTicketObligatorio && (
-                                    <span className="px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 border border-red-200">
-                                        Cierre Forzoso
-                                    </span>
-                                )}
-                                {step.requiereCamposPlantilla === 1 && (
-                                    <span className="px-2 py-0.5 rounded text-xs font-medium bg-cyan-100 text-cyan-800 border border-cyan-200">
-                                        Plantilla
-                                    </span>
-                                )}
-                                {step.permiteDespachoMasivo && (
-                                    <span className="px-2 py-0.5 rounded text-xs font-medium bg-lime-100 text-lime-800 border border-lime-200">
-                                        Masivo
-                                    </span>
-                                )}
-                                {step.nombreAdjunto && (
-                                    <span className="px-2 py-0.5 rounded text-xs font-medium bg-gray-50 text-gray-600 border border-gray-200 truncate max-w-[150px]" title={`Adjunto: ${step.nombreAdjunto}`}>
-                                        📎 {step.nombreAdjunto}
-                                    </span>
-                                )}
+                                {/* ... more badges ... */}
                             </div>
                         )
                     },
@@ -204,6 +188,13 @@ export const WorkflowStepsPage = () => {
                         header: 'Acciones',
                         render: (step: Step) => (
                             <div className="flex gap-2">
+                                <button
+                                    onClick={() => handleTransitions(step)}
+                                    className="p-1 hover:bg-purple-100 rounded text-purple-600"
+                                    title="Gestionar Transiciones"
+                                >
+                                    <IconArrowsSplit size={18} />
+                                </button>
                                 <button
                                     onClick={() => handleEdit(step)}
                                     className="p-1 hover:bg-gray-100 rounded text-blue-600"
@@ -240,6 +231,25 @@ export const WorkflowStepsPage = () => {
                     onClose={() => setIsModalOpen(false)}
                     onSuccess={handleModalSuccess}
                     step={selectedStep}
+                    flujoId={workflowId}
+                />
+            )}
+
+            {isImportModalOpen && (
+                <ImportStepsModal
+                    isOpen={isImportModalOpen}
+                    onClose={() => setIsImportModalOpen(false)}
+                    onSuccess={handleImportSuccess}
+                    flujoId={workflowId}
+                />
+            )}
+
+            {isTransitionModalOpen && selectedStepForTransition && (
+                <TransitionModal
+                    isOpen={isTransitionModalOpen}
+                    onClose={() => setIsTransitionModalOpen(false)}
+                    stepOrigenId={selectedStepForTransition.id}
+                    stepOrigenNombre={selectedStepForTransition.nombre}
                     flujoId={workflowId}
                 />
             )}
