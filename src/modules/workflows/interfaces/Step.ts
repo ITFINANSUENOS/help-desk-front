@@ -1,3 +1,5 @@
+import type { StepTemplateField } from './TemplateField';
+
 export interface Step {
     id: number;
     flujoId: number;
@@ -24,6 +26,7 @@ export interface Step {
     cerrarTicketObligatorio?: boolean;
     permiteDespachoMasivo?: boolean;
     firmas?: StepSignature[];
+    campos?: StepTemplateField[];
 }
 
 export interface StepSignature {
@@ -63,6 +66,7 @@ export interface CreateStepDto {
     cerrarTicketObligatorio?: boolean;
     permiteDespachoMasivo?: boolean;
     firmas?: StepSignature[];
+    campos?: StepTemplateField[];
 }
 
 export interface UpdateStepDto extends Partial<CreateStepDto> {

@@ -5,6 +5,7 @@ import 'react-quill-new/dist/quill.snow.css';
 import { FormModal } from '../../../shared/components/FormModal';
 import { Input } from '../../../shared/components/Input';
 import type { Step, CreateStepDto, StepSignature } from '../interfaces/Step';
+import type { StepTemplateField } from '../interfaces/TemplateField';
 import { stepService } from '../services/step.service';
 import { positionService } from '../../../shared/services/catalog.service';
 import type { Position } from '../../../shared/interfaces/Catalog';
@@ -12,6 +13,7 @@ import { templateService } from '../../templates/services/template.service';
 import type { TemplateField } from '../../templates/interfaces/TemplateField';
 import { toast } from 'sonner';
 import { SignatureConfig } from './SignatureConfig';
+import { TemplateFieldsConfig } from './TemplateFieldsConfig';
 
 interface StepModalProps {
     isOpen: boolean;
@@ -53,7 +55,8 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
                         asignarCreador: !!fullStep.asignarCreador,
                         cerrarTicketObligatorio: !!fullStep.cerrarTicketObligatorio,
                         permiteDespachoMasivo: !!fullStep.permiteDespachoMasivo,
-                        firmas: fullStep.firmas || []
+                        firmas: fullStep.firmas || [],
+                        campos: fullStep.campos || []
                     });
                 }).catch(err => {
                     console.error(err);
@@ -243,6 +246,21 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
                             <input type="checkbox" {...register('esParalelo')} className="rounded text-brand-teal focus:ring-brand-teal" />
                             <span className="text-sm text-gray-700">Es Paralelo</span>
                         </label>
+
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" {...register('cerrarTicketObligatorio')} className="rounded text-brand-teal focus:ring-brand-teal" />
+                            <span className="text-sm text-gray-700">Cerrar Ticket Obligatorio</span>
+                        </label>
+
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" {...register('permiteDespachoMasivo')} className="rounded text-brand-teal focus:ring-brand-teal" />
+                            <span className="text-sm text-gray-700">Permite Despacho Masivo</span>
+                        </label>
+
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" {...register('requiereCamposPlantilla')} className="rounded text-brand-teal focus:ring-brand-teal" />
+                            <span className="text-sm text-gray-700">Requiere Campos Plantilla</span>
+                        </label>
                     </div>
 
                     {watch('requiereFirma') && (
@@ -251,6 +269,15 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
                                 firmas={(watch('firmas') || []) as unknown as StepSignature[]}
                                 onChange={(newFirmas) => setValue('firmas', newFirmas)}
                                 positions={positions}
+                            />
+                        </div>
+                    )}
+
+                    {watch('requiereCamposPlantilla') && (
+                        <div className="mt-4">
+                            <TemplateFieldsConfig
+                                campos={(watch('campos') || []) as unknown as StepTemplateField[]}
+                                onChange={(newCampos) => setValue('campos', newCampos)}
                             />
                         </div>
                     )}
