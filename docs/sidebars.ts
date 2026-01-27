@@ -53,6 +53,13 @@ const sidebars: SidebarsConfig = {
         'administracion/gestion-respuestas-rapidas',
       ],
     },
+    {
+      type: 'category',
+      label: 'Workflows',
+      items: [
+        'workflows/gestion-pasos',
+      ],
+    },
   ],
 };
 

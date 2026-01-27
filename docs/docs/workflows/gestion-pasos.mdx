@@ -1,0 +1,98 @@
+---
+sidebar_position: 1
+---
+
+# Gestión de Pasos de Flujo
+
+El módulo de **Workflows** permite configurar el ciclo de vida de los tickets mediante Flujos, Pasos, Transiciones y Rutas.
+
+## Listado de Pasos
+
+Al ingresar a la configuración de un Flujo, visualizará el listado de pasos ordenados secuencialmente.
+Desde aquí puede:
+- Crear nuevos pasos.
+- Editar pasos existentes.
+- Gestionar transiciones.
+- Realizar carga masiva.
+
+## Creación y Edición de Pasos
+
+Al crear o editar un paso, dispone de varias pestañas o secciones de configuración:
+
+### Información Básica
+- **Orden**: Define la secuencia del paso.
+- **Nombre**: Nombre visible del paso.
+- **Descripción**: Instrucciones ricas para el usuario (editor de texto).
+- **Cargo Asignado**: Cargo por defecto responsable del ticket en este paso.
+- **Tiempo SLA**: Días hábiles para completar el paso.
+
+### Configuraciones Adicionales (Flags)
+- **Es Aprobación**: Marca el paso como una decisión de aprobación.
+- **Tarea Nacional**: Define si el alcance es nacional.
+- **Selección Manual**: Obliga al usuario a seleccionar manualmente el siguiente responsable.
+    - Si se activa, permite configurar **Usuarios y Cargos Específicos** que aparecerán en la lista de selección.
+- **Requiere Firma**: Habilita la configuración de zonas de firma PDF.
+- **Requiere Campos Plantilla**: Habilita la configuración de campos dinámicos sobre el PDF.
+
+---
+
+## Configuración de Firmas (PDF)
+
+Si el paso requiere firma:
+1. Active la casilla **Requiere Firma**.
+2. Aparecerá una sección para subir el **PDF Base**.
+3. Suba el archivo PDF que servirá de imagen de fondo.
+
+### Selector Visual de Coordenadas
+Para facilitar la ubicación de las firmas:
+1. Haga clic en **"Seleccionar Visualmente"** o en el icono de mira en una firma existente.
+2. Se abrirá el visor PDF.
+3. Haga clic en la ubicación deseada dentro del PDF.
+4. Las coordenadas (Página, X, Y) se capturarán automáticamente.
+
+Puede agregar múltiples zonas de firma, indicando página y coordenadas.
+
+---
+
+## Campos de Plantilla
+
+Si el paso requiere diligenciar datos sobre el PDF (Ej. Fechas, Nombres, Textos):
+1. Active **Requiere Campos Plantilla**.
+2. Agregue campos definiendo:
+   - **Nombre y Código**: Identificadores del campo.
+   - **Tipo**: Texto, Número, Fecha, etc.
+   - **Coordenadas**: Use el selector visual (similar a firmas).
+   - **Campo Query**: Para campos tipo `autocomplete` (Ej. `PRESET_USUARIOS`, `PRESET_REGIONAL`).
+
+---
+
+## Gestión de Transiciones
+
+Las transiciones definen a qué paso se mueve el ticket desde el paso actual.
+Haga clic en el icono de **Transiciones** (flechas divididas) en la lista de pasos.
+
+- **Paso Destino**: A donde va el ticket.
+- **Condición**: (Opcional) Regla lógica para activar la transición automáticamente.
+
+---
+
+## Gestión de Rutas
+
+Las Rutas agrupan una secuencia de pasos predefinida para ser reutilizada.
+1. Vaya a la gestión de Rutas.
+2. Cree una Ruta.
+3. Use el botón **"Gestionar Pasos"** para vincular pasos existentes a la ruta.
+4. Defina el orden de los pasos dentro de la ruta.
+
+---
+
+## Carga Masiva (Excel)
+
+Puede importar pasos masivamente usando un archivo Excel.
+1. Haga clic en **"Carga Masiva (Excel)"**.
+2. Descargue la plantilla de ejemplo si es necesario.
+3. Suba su archivo `.xlsx`.
+4. El sistema creará los pasos automáticamente.
+
+**Formato requerido:**
+- Columnas: `Orden`, `Nombre`, `Descripcion`, `EsAprobacion` (1/0), `TiempoHabil`.
