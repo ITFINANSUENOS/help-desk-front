@@ -27,9 +27,8 @@ export function useWorkflowTransition(ticketId: number) {
             if (result.transitionType === 'decision') {
                 shouldOpenModal = true;
             } else if (result.transitionType === 'linear') {
-                if (result.linear?.requiresManualAssignment) {
-                    shouldOpenModal = true;
-                }
+                // Always open modal to show "Next Step" info and allow verification
+                shouldOpenModal = true;
             } else if (result.transitionType === 'parallel_pending') {
                 toast.warning('Hay tareas paralelas pendientes. No se puede avanzar.');
                 shouldOpenModal = false;
