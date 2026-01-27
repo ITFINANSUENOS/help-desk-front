@@ -39,7 +39,7 @@ export const stepService = {
 
     async getStep(id: number): Promise<Step> {
         const response = await api.get<Step>(`/workflows/steps/${id}`, {
-            params: { included: 'cargoAsignado' }
+            params: { included: 'cargoAsignado,firmas,campos,usuarios' }
         });
         return response.data;
     },
