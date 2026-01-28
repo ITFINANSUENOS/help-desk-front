@@ -11,6 +11,7 @@ export interface CheckStartFlowResponse {
     candidates: UserCandidate[];
     initialStepId: number;
     initialStepName: string;
+    pdfTemplate?: string;
     templateFields?: {
         id: number;
         nombre: string;

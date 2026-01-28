@@ -37,6 +37,7 @@ export interface CreateTicketDto {
     categoriaId: number;
     subcategoriaId: number;
     prioridadId?: number;
+    empresaId?: number;
     usuarioAsignadoId?: number;
     templateValues?: { campoId: number; valor: string }[];
 }

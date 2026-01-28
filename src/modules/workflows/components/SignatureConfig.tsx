@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Button } from '../../../shared/components/Button';
 import { Input } from '../../../shared/components/Input';
-import { IconTrash, IconPlus, IconCrosshair } from '@tabler/icons-react';
+import { IconTrash, IconPlus, IconCrosshair, IconEdit } from '@tabler/icons-react';
 import type { StepSignature } from '../interfaces/Step';
 import type { Position } from '../../../shared/interfaces/Catalog';
 import { PdfCoordinateSelector } from './PdfCoordinateSelector';
@@ -19,12 +19,13 @@ export const SignatureConfig = ({ firmas, onChange, positions, pdfUrl }: Signatu
     // Local state for the form being added
     const [isAdding, setIsAdding] = useState(false);
     const [selectorOpen, setSelectorOpen] = useState(false);
-    // targetIndex: number (editing existing index) or 'new' (adding new one)
-    const [targetIndex, setTargetIndex] = useState<number | 'new' | null>(null);
+    const [editingIndex, setEditingIndex] = useState<number | null>(null);
+    // targetIndex: number (direct update list), 'form' (update form inputs)
+    const [targetIndex, setTargetIndex] = useState<number | 'form' | null>(null);
 
     const { register, handleSubmit, reset, setValue } = useForm<StepSignature>();
 
-    const handleAdd = (data: StepSignature) => {
+    const onSubmit = (data: StepSignature) => {
         const newFirma = {
             ...data,
             coordX: Number(data.coordX),
@@ -33,37 +34,68 @@ export const SignatureConfig = ({ firmas, onChange, positions, pdfUrl }: Signatu
             cargoId: data.cargoId ? Number(data.cargoId) : undefined,
             usuarioId: undefined
         };
-        onChange([...firmas, newFirma]);
+
+        if (editingIndex !== null) {
+            // Update existing
+            const newFirmas = [...firmas];
+            newFirmas[editingIndex] = newFirma;
+            onChange(newFirmas);
+            setEditingIndex(null);
+            toast.success('Zona actualizada');
+        } else {
+            // Add new
+            onChange([...firmas, newFirma]);
+            toast.success('Zona agregada');
+        }
+
         reset();
         setIsAdding(false);
     };
 
+    const handleEdit = (index: number) => {
+        const firma = firmas[index];
+        setEditingIndex(index);
+
+        setValue('etiqueta', firma.etiqueta || '');
+        setValue('pagina', firma.pagina);
+        setValue('coordX', firma.coordX);
+        setValue('coordY', firma.coordY);
+        setValue('cargoId', firma.cargoId);
+
+        setIsAdding(true);
+    };
+
+    const handleCancel = () => {
+        setIsAdding(false);
+        setEditingIndex(null);
+        reset();
+    };
+
     const handleRemove = (index: number) => {
+        if (editingIndex === index) handleCancel();
         const newFirmas = [...firmas];
         newFirmas.splice(index, 1);
         onChange(newFirmas);
     };
 
-    const openSelector = (index: number | 'new') => {
+    const openSelector = (target: number | 'form') => {
         if (!pdfUrl) {
             toast.error('Debe cargar un PDF base primero para usar el selector visual.');
             return;
         }
-        setTargetIndex(index);
+        setTargetIndex(target);
         setSelectorOpen(true);
     };
 
     const handleCoordinatesSelected = (page: number, x: number, y: number) => {
         setSelectorOpen(false);
-        if (targetIndex === 'new') {
+        if (targetIndex === 'form') {
             setValue('pagina', page);
             setValue('coordX', x);
             setValue('coordY', y);
-            toast.success('Coordenadas capturadas');
+            toast.success('Coordenadas capturadas en formulario');
         } else if (typeof targetIndex === 'number') {
-            // Updating existing signature?
-            // Current implementation doesn't support editing existing rows inline fully, 
-            // but we can update the 'firmas' array directly.
+            // Updating existing signature directly from list button
             const newFirmas = [...firmas];
             newFirmas[targetIndex] = {
                 ...newFirmas[targetIndex],
@@ -76,12 +108,14 @@ export const SignatureConfig = ({ firmas, onChange, positions, pdfUrl }: Signatu
         }
     };
 
+
+
     return (
         <div className="border rounded-lg p-4 bg-gray-50 space-y-4">
             <div className="flex justify-between items-center">
                 <h4 className="font-semibold text-gray-700">Zonas de Firma</h4>
                 {!isAdding && (
-                    <Button size="sm" variant="outline" onClick={() => setIsAdding(true)}>
+                    <Button type="button" size="sm" variant="outline" onClick={() => { setEditingIndex(null); reset(); setIsAdding(true); }}>
                         <IconPlus size={16} className="mr-1" />
                         Agregar Zona
                     </Button>
@@ -96,7 +130,7 @@ export const SignatureConfig = ({ firmas, onChange, positions, pdfUrl }: Signatu
 
             <div className="space-y-2">
                 {firmas.map((firma, idx) => (
-                    <div key={idx} className="flex items-center gap-2 bg-white p-2 rounded border border-gray-200 text-sm">
+                    <div key={idx} className={`flex items-center gap-2 p-2 rounded border text-sm ${editingIndex === idx ? 'bg-blue-50 border-blue-300 ring-1 ring-blue-300' : 'bg-white border-gray-200'}`}>
                         <div className="flex-1 grid grid-cols-5 gap-2 items-center">
                             <span>
                                 <span className="font-medium">Pág:</span> {firma.pagina}
@@ -108,7 +142,7 @@ export const SignatureConfig = ({ firmas, onChange, positions, pdfUrl }: Signatu
                                 <span className="font-medium">Y:</span> {firma.coordY}
                             </span>
                             {firma.etiqueta && (
-                                <span className="col-span-2 text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded truncate" title="Smart Tag">
+                                <span className="col-span-2 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded truncate" title="Smart Tag">
                                     🏷️ {firma.etiqueta}
                                 </span>
                             )}
@@ -118,34 +152,45 @@ export const SignatureConfig = ({ firmas, onChange, positions, pdfUrl }: Signatu
                                     : 'Cualquiera'}
                             </span>
                         </div>
-                        <button
-                            type="button"
-                            onClick={() => openSelector(idx)}
-                            className="text-blue-500 hover:bg-blue-50 p-1 rounded"
-                            title="Actualizar posición visualmente"
-                        >
-                            <IconCrosshair size={16} />
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => handleRemove(idx)}
-                            className="text-red-500 hover:bg-red-50 p-1 rounded"
-                        >
-                            <IconTrash size={16} />
-                        </button>
+                        <div className="flex gap-1">
+                            <button
+                                type="button"
+                                onClick={() => handleEdit(idx)}
+                                className="text-gray-500 hover:bg-gray-100 p-1 rounded"
+                                title="Editar configuración"
+                            >
+                                <IconEdit size={16} />
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => openSelector(idx)}
+                                className="text-blue-500 hover:bg-blue-50 p-1 rounded"
+                                title="Actualizar posición visualmente"
+                            >
+                                <IconCrosshair size={16} />
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => handleRemove(idx)}
+                                className="text-red-500 hover:bg-red-50 p-1 rounded"
+                                title="Eliminar"
+                            >
+                                <IconTrash size={16} />
+                            </button>
+                        </div>
                     </div>
                 ))}
             </div>
 
             {isAdding && (
-                <div className="bg-white p-3 rounded border border-blue-200 space-y-3">
+                <div className="bg-white p-3 rounded border border-blue-200 space-y-3 shadow-md">
                     <h5 className="text-xs font-bold uppercase text-blue-600 flex justify-between items-center">
-                        Nueva Zona
+                        {editingIndex !== null ? 'Editar Zona' : 'Nueva Zona'}
                         <Button
                             type="button"
                             size="sm"
                             variant="outline"
-                            onClick={() => openSelector('new')}
+                            onClick={() => openSelector('form')}
                         >
                             <IconCrosshair size={14} className="mr-1" />
                             Seleccionar Visualmente
@@ -191,8 +236,10 @@ export const SignatureConfig = ({ firmas, onChange, positions, pdfUrl }: Signatu
                         </select>
                     </div>
                     <div className="flex justify-end gap-2 pt-2">
-                        <Button size="sm" variant="ghost" onClick={() => setIsAdding(false)}>Cancelar</Button>
-                        <Button size="sm" variant="brand" onClick={handleSubmit(handleAdd)}>Agregar</Button>
+                        <Button type="button" size="sm" variant="ghost" onClick={handleCancel}>Cancelar</Button>
+                        <Button type="button" size="sm" variant="brand" onClick={handleSubmit(onSubmit)}>
+                            {editingIndex !== null ? 'Actualizar' : 'Agregar'}
+                        </Button>
                     </div>
                 </div>
             )}

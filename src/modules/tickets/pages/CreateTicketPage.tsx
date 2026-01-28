@@ -55,6 +55,7 @@ export default function CreateTicketPage() {
     // Workflow Logic State
     const [requiresManualSelection, setRequiresManualSelection] = useState(false);
     const [initialStepName, setInitialStepName] = useState<string>('');
+    const [pdfTemplate, setPdfTemplate] = useState<string | undefined>(undefined);
     const [templateFields, setTemplateFields] = useState<CheckStartFlowResponse['templateFields']>([]);
     const [templateValues, setTemplateValues] = useState<Record<number, string>>({});
 
@@ -114,6 +115,7 @@ export default function CreateTicketPage() {
             setRequiresManualSelection(false);
             setAssigneeCandidates([]);
             setInitialStepName('');
+            setPdfTemplate(undefined);
             setTemplateFields([]);
             setTemplateValues({});
             setAssigneeId('');
@@ -140,9 +142,10 @@ export default function CreateTicketPage() {
         const checkWorkflow = async () => {
             setCheckingFlow(true);
             try {
-                const result = await workflowService.checkStartFlow(subcategoryId as number);
+                const result = await workflowService.checkStartFlow(subcategoryId as number, companyId ? Number(companyId) : undefined);
                 setRequiresManualSelection(result.requiresManualSelection);
                 setInitialStepName(result.initialStepName);
+                setPdfTemplate(result.pdfTemplate);
 
                 if (result.requiresManualSelection) {
                     setAssigneeCandidates(result.candidates);
@@ -163,7 +166,7 @@ export default function CreateTicketPage() {
             }
         };
         checkWorkflow();
-    }, [subcategoryId, subcategories]);
+    }, [subcategoryId, subcategories, companyId]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -185,6 +188,7 @@ export default function CreateTicketPage() {
                 descripcion: description,
                 categoriaId: Number(categoryId),
                 subcategoriaId: Number(subcategoryId),
+                empresaId: companyId ? Number(companyId) : undefined,
                 prioridadId: priorityId ? Number(priorityId) : undefined,
                 usuarioAsignadoId: assigneeId ? Number(assigneeId) : undefined,
                 usuarioId: user?.id,
@@ -365,6 +369,29 @@ export default function CreateTicketPage() {
                             </div>
                         )}
 
+
+                        {/* PDF TEMPLATE DOWNLOAD */}
+                        {pdfTemplate && (
+                            <div className="rounded-xl border border-teal-100 bg-teal-50 p-4 flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <span className="material-symbols-outlined text-teal-600">description</span>
+                                    <div>
+                                        <p className="text-sm font-bold text-teal-900">Formato Requerido</p>
+                                        <p className="text-xs text-teal-700">Para este flujo se requiere un formato específico.</p>
+                                    </div>
+                                </div>
+                                <a
+                                    href={`${import.meta.env.VITE_API_URL || ''}/documents/template/${pdfTemplate}`}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="rounded-lg bg-white border border-teal-200 px-4 py-2 text-xs font-bold text-teal-700 shadow-sm hover:bg-teal-50 flex items-center gap-2"
+                                >
+                                    <span className="material-symbols-outlined text-sm">download</span>
+                                    Descargar Formato
+                                </a>
+                            </div>
+                        )}
+
                         {/* DYNAMIC TEMPLATE FIELDS */}
                         {templateFields && templateFields.length > 0 && (
                             <div className="rounded-xl border border-blue-100 bg-blue-50/50 p-6 space-y-4">
@@ -481,7 +508,7 @@ export default function CreateTicketPage() {
             </div >
 
             {/* SUCCESS MODAL */}
-            < InfoModal
+            <InfoModal
                 isOpen={showSuccessModal}
                 onClose={handleModalClose}
                 title="Ticket Creado Exitosamente"
