@@ -13,6 +13,7 @@ import { useAuth } from '../../auth/context/useAuth';
 
 import { ParallelSignatureModal } from './ParallelSignatureModal';
 import type { ParallelTask } from '../interfaces/Ticket';
+import { ErrorEventsPanel } from './ErrorEventsPanel';
 
 interface TicketResponsePanelProps {
     ticketId: number;
@@ -193,6 +194,11 @@ export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
                     fields={templateFields}
                     onChange={setDynamicValues}
                 />
+            )}
+
+            {/* Error Events Panel - Embedded */}
+            {(isExplicitlyAssigned || isInAssignedList) && (
+                <ErrorEventsPanel ticketId={ticketId} onSuccess={onSuccess} />
             )}
 
             {/* EDITOR AREA - Hidden for Parallel Step as it uses Modal */}

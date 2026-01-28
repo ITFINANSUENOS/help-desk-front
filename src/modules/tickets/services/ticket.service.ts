@@ -231,8 +231,33 @@ export const ticketService = {
             responseType: 'blob'
         });
         return response.data;
+    },
+
+    async getErrorTypes(): Promise<ErrorType[]> {
+        const response = await api.get<{ data: ErrorType[] }>('/error-types', {
+            params: { included: 'subtypes' }
+        });
+        return response.data.data || [];
+    },
+
+    async registerErrorEvent(ticketId: number, data: { errorTypeId: number; errorSubtypeId?: number; description?: string }): Promise<void> {
+        await api.post(`/tickets/${ticketId}/events`, data);
     }
 };
+
+export interface ErrorSubtype {
+    id: number;
+    title: string;
+    description: string;
+}
+
+export interface ErrorType {
+    id: number;
+    title: string;
+    description: string;
+    category: number; // 0=Info, 1=Process
+    subtypes?: ErrorSubtype[];
+}
 
 // Helper mappers
 function mapStatus(estado: string | number | undefined): TicketStatus {

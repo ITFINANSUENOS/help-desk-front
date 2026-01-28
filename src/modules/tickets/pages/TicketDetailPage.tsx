@@ -175,7 +175,6 @@ export default function TicketDetailPage() {
 
             <TicketWorkflow ticket={ticket} />
 
-
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
                 <div className="lg:col-span-3 space-y-6">
                     <div className="flex items-center justify-between">
