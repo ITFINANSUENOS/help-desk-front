@@ -114,6 +114,7 @@ export interface DecisionOption {
     requiresManualAssignment: boolean;
     candidates?: UserCandidate[];
     missingRoles?: { id: number; name: string }[];
+    isRoute?: boolean;
 }
 
 export interface ParallelStatus {

@@ -110,12 +110,22 @@ export const WorkflowDecisionModal: React.FC<WorkflowDecisionModalProps> = ({
                                     <button
                                         key={d.decisionId}
                                         onClick={() => setSelectedDecision(d.decisionId)}
-                                        className={`w-full text-left px-4 py-3 rounded-lg border transition-all ${selectedDecision === d.decisionId
+                                        className={`w-full text-left px-4 py-3 rounded-lg border transition-all flex items-center justify-between group ${selectedDecision === d.decisionId
                                             ? 'border-brand-teal bg-teal-50 text-brand-teal shadow-sm'
                                             : 'border-gray-200 hover:bg-slate-50 text-gray-700'
                                             }`}
                                     >
-                                        <div className="font-medium">{d.label}</div>
+                                        <div className="font-medium flex items-center gap-2">
+                                            <span className="material-symbols-outlined text-xl">
+                                                {d.isRoute ? 'alt_route' : 'arrow_forward'}
+                                            </span>
+                                            {d.label}
+                                        </div>
+                                        {d.isRoute && (
+                                            <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-medium">
+                                                Ruta
+                                            </span>
+                                        )}
                                     </button>
                                 ))}
                             </div>
