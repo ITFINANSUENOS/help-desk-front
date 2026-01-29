@@ -211,6 +211,29 @@ export const ticketService = {
         return response.data;
     },
 
+    async getWorkflowGraph(subcategoryId: number): Promise<any> {
+        // Fetch the active flow for the subcategory, including steps and routes
+        const response = await api.get<any>('/workflows', {
+            params: {
+                'filter[subcategoria.id]': subcategoryId,
+                'included': [
+                    'pasos',
+                    'pasos.transicionesOrigen',
+                    'pasos.transicionesOrigen.pasoDestino',
+                    'rutas',
+                    'rutas.rutaPasos',
+                    'rutas.rutaPasos.paso',
+                    'rutas.rutaPasos.paso.transicionesOrigen',
+                    'rutas.rutaPasos.paso.transicionesOrigen.pasoDestino'
+                ].join(',')
+            }
+        });
+        // Assuming the list returns items in `data`. 
+        // We take the first one since subcategory <-> flow is 1:1 (or we want the active one).
+        const flows = response.data.data || [];
+        return flows.length > 0 ? flows[0] : null;
+    },
+
     async transitionTicket(dto: TransitionTicketDto): Promise<any> {
         const response = await api.post('/workflows/transition', dto);
         return response.data;
