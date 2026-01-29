@@ -70,10 +70,21 @@ export const TransitionModal = ({ isOpen, onClose, stepOrigenId, stepOrigenNombr
 
     const onSubmit = async (data: CreateTransitionDto) => {
         try {
-            await transitionService.createTransition({
-                ...data,
-                pasoOrigenId: stepOrigenId
-            });
+            // Sanitize payload
+            const cleanPayload: any = {
+                pasoOrigenId: stepOrigenId,
+                condicionNombre: data.condicionNombre,
+                condicionClave: data.condicionClave,
+                estado: 1
+            };
+
+            if (data.tipoDestino === 'paso' && data.pasoDestinoId) {
+                cleanPayload.pasoDestinoId = Number(data.pasoDestinoId);
+            } else if (data.tipoDestino === 'ruta' && data.rutaDestinoId) {
+                cleanPayload.rutaId = Number(data.rutaDestinoId);
+            }
+
+            await transitionService.createTransition(cleanPayload);
             toast.success('Transición añadida');
             reset({
                 tipoDestino: 'paso',
@@ -128,6 +139,7 @@ export const TransitionModal = ({ isOpen, onClose, stepOrigenId, stepOrigenNombr
                 title={`Transiciones: ${stepOrigenNombre}`}
                 size="lg"
                 showFooter={false}
+                onSubmit={handleSubmit(onSubmit)}
             >
                 <div className="space-y-6">
 
@@ -158,7 +170,11 @@ export const TransitionModal = ({ isOpen, onClose, stepOrigenId, stepOrigenNombr
                                                 </p>
                                             </div>
                                         </div>
-                                        <button onClick={() => handleDelete(t.id)} className="text-red-500 hover:bg-red-50 p-1.5 rounded transition-colors">
+                                        <button
+                                            type="button"
+                                            onClick={() => handleDelete(t.id)}
+                                            className="text-red-500 hover:bg-red-50 p-1.5 rounded transition-colors"
+                                        >
                                             <IconTrash size={16} />
                                         </button>
                                     </div>
@@ -170,7 +186,8 @@ export const TransitionModal = ({ isOpen, onClose, stepOrigenId, stepOrigenNombr
                     {/* Add new transition form */}
                     <div className="border-t border-gray-200 pt-4">
                         <h4 className="font-medium text-gray-900 mb-4">Añadir Nueva Transición</h4>
-                        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                        {/* Changed form to div because FormModal already wraps in form */}
+                        <div className="space-y-4">
                             <div className="flex gap-4">
                                 <div className="w-1/3">
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Tipo Destino</label>
@@ -179,8 +196,8 @@ export const TransitionModal = ({ isOpen, onClose, stepOrigenId, stepOrigenNombr
                                             type="button"
                                             onClick={() => setValue('tipoDestino', 'paso')}
                                             className={`flex-1 px-3 py-2 text-sm font-medium rounded-l-md border ${tipoDestino === 'paso'
-                                                    ? 'bg-blue-50 text-blue-700 border-blue-200 z-10'
-                                                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                                                ? 'bg-blue-50 text-blue-700 border-blue-200 z-10'
+                                                : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
                                                 }`}
                                         >
                                             Paso
@@ -189,8 +206,8 @@ export const TransitionModal = ({ isOpen, onClose, stepOrigenId, stepOrigenNombr
                                             type="button"
                                             onClick={() => setValue('tipoDestino', 'ruta')}
                                             className={`flex-1 px-3 py-2 text-sm font-medium rounded-r-md border-t border-b border-r ${tipoDestino === 'ruta'
-                                                    ? 'bg-purple-50 text-purple-700 border-purple-200 z-10'
-                                                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                                                ? 'bg-purple-50 text-purple-700 border-purple-200 z-10'
+                                                : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
                                                 }`}
                                         >
                                             Ruta
@@ -263,7 +280,7 @@ export const TransitionModal = ({ isOpen, onClose, stepOrigenId, stepOrigenNombr
                                     Añadir Transición
                                 </Button>
                             </div>
-                        </form>
+                        </div>
                     </div>
                 </div>
             </FormModal>
