@@ -265,6 +265,14 @@ export const ticketService = {
 
     async registerErrorEvent(ticketId: number, data: { errorTypeId: number; errorSubtypeId?: number; description?: string }): Promise<void> {
         await api.post(`/tickets/${ticketId}/events`, data);
+    },
+
+    async createNovelty(ticketId: number, data: { usuarioAsignadoId: number; descripcion: string }): Promise<void> {
+        await api.post(`/tickets/${ticketId}/novelties`, data);
+    },
+
+    async resolveNovelty(ticketId: number): Promise<void> {
+        await api.put(`/tickets/${ticketId}/novelties/resolve`);
     }
 };
 

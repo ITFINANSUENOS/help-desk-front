@@ -12,8 +12,9 @@ import { toast } from 'sonner';
 import { useAuth } from '../../auth/context/useAuth';
 
 import { ParallelSignatureModal } from './ParallelSignatureModal';
-import type { ParallelTask } from '../interfaces/Ticket';
+import type { ParallelTask, TicketStatus } from '../interfaces/Ticket'; // Added TicketStatus
 import { ErrorEventsPanel } from './ErrorEventsPanel';
+import { CreateNoveltyModal } from './CreateNoveltyModal'; // Added Import
 
 interface TicketResponsePanelProps {
     ticketId: number;
@@ -24,7 +25,8 @@ interface TicketResponsePanelProps {
     creatorName: string;
     onSuccess: () => void;
     templateFields?: TemplateField[];
-    isParallelStep?: boolean; // NEW: Indicates if current step is parallel
+    isParallelStep?: boolean;
+    status: TicketStatus; // Added status prop
 }
 
 export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
@@ -36,7 +38,8 @@ export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
     creatorName,
     onSuccess,
     templateFields = [],
-    isParallelStep = false
+    isParallelStep = false,
+    status
 }) => {
     const { user } = useAuth();
     const [comment, setComment] = useState('');
@@ -52,6 +55,9 @@ export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
 
     // Parallel Modal State
     const [isParallelModalOpen, setIsParallelModalOpen] = useState(false);
+
+    // Novelty Modal State
+    const [isCreateNoveltyModalOpen, setIsCreateNoveltyModalOpen] = useState(false);
 
     // Parallel Task State
     const [parallelTasks, setParallelTasks] = React.useState<ParallelTask[]>([]);
@@ -165,6 +171,41 @@ export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
         }
     };
 
+    // Handler: Create Novelty
+    const handleCreateNovelty = async (data: { usuarioAsignadoId: number; descripcion: string }) => {
+        setIsSubmitting(true);
+        try {
+            await ticketService.createNovelty(ticketId, data);
+            toast.success('Novedad creada. El ticket ha sido pausado.');
+            setIsCreateNoveltyModalOpen(false);
+            onSuccess();
+        } catch (error: any) {
+            console.error(error);
+            toast.error(error.response?.data?.message || 'Error al crear la novedad');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    // Handler: Resolve Novelty
+    const handleResolveNovelty = async () => {
+        if (!confirm('¿Está seguro de resolver la novedad y reanudar el ticket?')) return;
+
+        setIsSubmitting(true);
+        try {
+            await ticketService.resolveNovelty(ticketId);
+            toast.success('Novedad resuelta. El ticket ha sido reanudado.');
+            onSuccess();
+        } catch (error: any) {
+            console.error(error);
+            toast.error(error.response?.data?.message || 'Error al resolver la novedad');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const isPaused = status === 'Pausado';
+
     if (!canInteract) {
         return (
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 mb-8 flex flex-col items-center justify-center text-center">
@@ -201,8 +242,8 @@ export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
                 <ErrorEventsPanel ticketId={ticketId} onSuccess={onSuccess} />
             )}
 
-            {/* EDITOR AREA - Hidden for Parallel Step as it uses Modal */}
-            {!isParallelStep && (
+            {/* EDITOR AREA - Hidden for Parallel Step as it uses Modal. Also hidden if Paused? No, allow comments? maybe not needed if paused. */}
+            {!isParallelStep && !isPaused && (
                 <div className="mb-4 space-y-3">
                     <ReactQuill
                         theme="snow"
@@ -270,26 +311,70 @@ export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
                 </div>
             )}
 
+            {/* Paused Banner */}
+            {isPaused && (
+                <div className="border border-orange-200 bg-orange-50 rounded-lg p-4 mb-4">
+                    <div className="flex items-start gap-3">
+                        <span className="material-symbols-outlined text-orange-600 mt-0.5">pause_circle</span>
+                        <div>
+                            <p className="text-sm font-medium text-orange-800">
+                                Ticket Pausado (Novedad Abierta)
+                            </p>
+                            <p className="text-sm mt-1 text-orange-600">
+                                Se ha registrado una novedad que impide continuar con el flujo normal.
+                                Debe resolver la novedad para reanudar el ticket.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* ACTION BUTTONS */}
             <div className="flex justify-end gap-3">
-                {isParallelStep ? (
+                {isPaused ? (
                     <Button
                         variant="brand"
-                        onClick={() => setIsParallelModalOpen(true)}
-                        disabled={isChecking || isSubmitting || hasSigned || !isPending}
+                        onClick={handleResolveNovelty}
+                        disabled={isSubmitting}
+                        className="bg-orange-600 hover:bg-orange-700 text-white"
                     >
-                        {hasSigned
-                            ? 'Firma Completada'
-                            : (isSubmitting ? 'Procesando...' : 'Firmar mi parte')}
+                        {isSubmitting ? 'Procesando...' : 'Resolver Novedad (Reanudar)'}
                     </Button>
                 ) : (
-                    <Button
-                        variant="brand"
-                        onClick={handleMainAction}
-                        disabled={isChecking || isSubmitting}
-                    >
-                        {isSubmitting ? 'Procesando...' : (isChecking ? 'Verificando...' : 'Enviar y Avanzar')}
-                    </Button>
+                    <>
+                        {/* Show "Crear Novedad" if not parallel step and active */}
+                        {!isParallelStep && (
+                            <Button
+                                variant="secondary"
+                                onClick={() => setIsCreateNoveltyModalOpen(true)}
+                                disabled={isSubmitting || isChecking}
+                                className="text-orange-600 hover:text-orange-700 hover:bg-orange-50 border-orange-200"
+                            >
+                                <span className="material-symbols-outlined text-sm mr-2">pause_circle</span>
+                                Crear Novedad
+                            </Button>
+                        )}
+
+                        {isParallelStep ? (
+                            <Button
+                                variant="brand"
+                                onClick={() => setIsParallelModalOpen(true)}
+                                disabled={isChecking || isSubmitting || hasSigned || !isPending}
+                            >
+                                {hasSigned
+                                    ? 'Firma Completada'
+                                    : (isSubmitting ? 'Procesando...' : 'Firmar mi parte')}
+                            </Button>
+                        ) : (
+                            <Button
+                                variant="brand"
+                                onClick={handleMainAction}
+                                disabled={isChecking || isSubmitting}
+                            >
+                                {isSubmitting ? 'Procesando...' : (isChecking ? 'Verificando...' : 'Enviar y Avanzar')}
+                            </Button>
+                        )}
+                    </>
                 )}
             </div>
 
@@ -313,6 +398,13 @@ export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
                 isOpen={isParallelModalOpen}
                 onClose={() => setIsParallelModalOpen(false)}
                 onConfirm={handleSignParallelTask}
+                isLoading={isSubmitting}
+            />
+
+            <CreateNoveltyModal
+                isOpen={isCreateNoveltyModalOpen}
+                onClose={() => setIsCreateNoveltyModalOpen(false)}
+                onConfirm={handleCreateNovelty}
                 isLoading={isSubmitting}
             />
         </div>
