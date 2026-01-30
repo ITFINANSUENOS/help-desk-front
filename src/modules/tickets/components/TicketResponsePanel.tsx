@@ -205,6 +205,21 @@ export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
     };
 
     const isPaused = status === 'Pausado';
+    const isClosed = status === 'Cerrado';
+
+    if (isClosed) {
+        return (
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 mb-8 flex flex-col items-center justify-center text-center">
+                <div className="bg-gray-100 p-3 rounded-full mb-3">
+                    <span className="material-symbols-outlined text-gray-500 text-2xl">lock_clock</span>
+                </div>
+                <h3 className="text-gray-900 font-semibold mb-1">Ticket Cerrado</h3>
+                <p className="text-gray-500 text-sm max-w-md">
+                    Este ticket se encuentra cerrado. No se pueden realizar más acciones sobre él.
+                </p>
+            </div>
+        );
+    }
 
     if (!canInteract) {
         return (

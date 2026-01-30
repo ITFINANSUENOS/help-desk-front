@@ -70,7 +70,7 @@ export interface TicketDetail extends Ticket {
 
 export interface TicketTimelineItem {
     id: number;
-    type: 'comment' | 'status_change' | 'assignment' | 'field_update' | 'creation';
+    type: 'comment' | 'status_change' | 'assignment' | 'field_update' | 'creation' | 'error_report';
     content: string; // The comment or description of the event
     author: string;
     authorRole?: string;
@@ -84,7 +84,13 @@ export interface TicketTimelineItem {
         fileUrl?: string;
         fileName?: string;
         attachments?: { id: number; nombre: string; url: string }[];
-        estadoTiempoPaso?: string; // Add this line
+        estadoTiempoPaso?: string;
+        error?: {
+            id: number;
+            title: string;
+            description: string;
+            isProcessError: boolean;
+        };
     };
     asignadoA?: { id: number; nombre: string };
 }
