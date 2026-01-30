@@ -16,7 +16,7 @@ export function useWorkflowTransition(ticketId: number) {
         modalOpen: false
     });
 
-    const checkTransition = useCallback(async () => {
+    const checkTransition = useCallback(async (silent = false) => {
         setState(prev => ({ ...prev, isLoading: true }));
         try {
             const result = await ticketService.checkNextStep(ticketId);
@@ -24,14 +24,16 @@ export function useWorkflowTransition(ticketId: number) {
             // Logic to determine if we need to open modal
             let shouldOpenModal = false;
 
-            if (result.transitionType === 'decision') {
-                shouldOpenModal = true;
-            } else if (result.transitionType === 'linear') {
-                // Always open modal to show "Next Step" info and allow verification
-                shouldOpenModal = true;
-            } else if (result.transitionType === 'parallel_pending') {
-                toast.warning('Hay tareas paralelas pendientes. No se puede avanzar.');
-                shouldOpenModal = false;
+            if (!silent) {
+                if (result.transitionType === 'decision') {
+                    shouldOpenModal = true;
+                } else if (result.transitionType === 'linear') {
+                    // Always open modal to show "Next Step" info and allow verification
+                    shouldOpenModal = true;
+                } else if (result.transitionType === 'parallel_pending') {
+                    toast.warning('Hay tareas paralelas pendientes. No se puede avanzar.');
+                    shouldOpenModal = false;
+                }
             }
 
             setState({

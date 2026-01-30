@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { useAuth } from '../../auth/context/useAuth';
 
 import { ParallelSignatureModal } from './ParallelSignatureModal';
+import { Modal } from '../../../shared/components/Modal';
 import type { ParallelTask, TicketStatus } from '../interfaces/Ticket'; // Added TicketStatus
 import { ErrorEventsPanel } from './ErrorEventsPanel';
 import { CreateNoveltyModal } from './CreateNoveltyModal'; // Added Import
@@ -45,6 +46,9 @@ export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
     const [comment, setComment] = useState('');
     const [dynamicValues, setDynamicValues] = useState<{ campoId: number; valor: string }[]>([]);
 
+    const isPaused = status === 'Pausado';
+    const isClosed = status === 'Cerrado';
+
     // DEBUG: Check isParallelStep value
     console.log('🔍 TicketResponsePanel - isParallelStep:', isParallelStep, 'ticketId:', ticketId);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -58,6 +62,9 @@ export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
 
     // Novelty Modal State
     const [isCreateNoveltyModalOpen, setIsCreateNoveltyModalOpen] = useState(false);
+
+    // Close Confirmation Modal State
+    const [isCloseConfirmationOpen, setIsCloseConfirmationOpen] = useState(false);
 
     // Parallel Task State
     const [parallelTasks, setParallelTasks] = React.useState<ParallelTask[]>([]);
@@ -91,6 +98,43 @@ export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
         isLoading: isChecking
     } = useWorkflowTransition(ticketId);
 
+    // Check for Final Step on Mount
+    React.useEffect(() => {
+        if (!isParallelStep && !isPaused && !isClosed && !transitionData && !isChecking) {
+            checkTransition(true); // Silent check
+        }
+    }, [ticketId, isParallelStep, isPaused, isClosed]);
+
+    const isFinalStep = transitionData?.transitionType === 'final';
+
+    // Handler: Open Close Modal
+    const handleCloseTicket = () => {
+        setIsCloseConfirmationOpen(true);
+    };
+
+    // Handler: Confirm Close
+    const handleConfirmClose = async () => {
+        const cleanComment = comment.replace(/<[^>]*>/g, '').trim();
+        if (!cleanComment) {
+            toast.warning('Por favor escriba una nota de cierre.');
+            return;
+        }
+
+        setIsSubmitting(true);
+        try {
+            await ticketService.closeTicket(ticketId, comment);
+            toast.success('Ticket cerrado exitosamente (Ciclo Finalizado)');
+            setComment('');
+            setIsCloseConfirmationOpen(false);
+            onSuccess();
+        } catch (error: any) {
+            console.error(error);
+            toast.error(error.response?.data?.message || 'Error al cerrar el ticket');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
     // Handler for "Enviar" / "Avanzar" click
     const handleMainAction = async () => {
         const cleanComment = comment.replace(/<[^>]*>/g, '').trim();
@@ -100,6 +144,7 @@ export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
         }
         await checkTransition();
     };
+
 
     // Handler: Confirm Signature
     const handleSignatureConfirm = (base64: string) => {
@@ -187,7 +232,6 @@ export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
         }
     };
 
-    // Handler: Resolve Novelty
     const handleResolveNovelty = async () => {
         if (!confirm('¿Está seguro de resolver la novedad y reanudar el ticket?')) return;
 
@@ -203,9 +247,6 @@ export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
             setIsSubmitting(false);
         }
     };
-
-    const isPaused = status === 'Pausado';
-    const isClosed = status === 'Cerrado';
 
     if (isClosed) {
         return (
@@ -241,11 +282,15 @@ export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
     return (
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 mb-8">
             <h3 className="text-lg font-bold text-gray-900 mb-4">
-                {isParallelStep ? 'Tarea Paralela Asignada' : 'Responder / Avanzar Flujo'}
+                {isParallelStep ? 'Tarea Paralela Asignada' : (isFinalStep ? 'Finalizar Ticket' : 'Responder / Avanzar Flujo')}
             </h3>
 
-            {/* DYNAMIC FORM AREA */}
-            {templateFields.length > 0 && (
+            {/* DYNAMIC FORM AREA - Hide on Final Step? User said "desapareeria description" but meant generic fields? 
+                Usually Final Step has no fields, but if it did, we might want to hide them. 
+                User said: "desapareeria cuando sea el ultimpo paso del ticket la descripcion".
+                Assuming dynamic form is fine if empty.
+            */}
+            {!isFinalStep && templateFields.length > 0 && (
                 <DynamicStepForm
                     fields={templateFields}
                     onChange={setDynamicValues}
@@ -257,18 +302,18 @@ export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
                 <ErrorEventsPanel ticketId={ticketId} onSuccess={onSuccess} />
             )}
 
-            {/* EDITOR AREA - Hidden for Parallel Step as it uses Modal. Also hidden if Paused? No, allow comments? maybe not needed if paused. */}
+            {/* EDITOR AREA */}
             {!isParallelStep && !isPaused && (
                 <div className="mb-4 space-y-3">
                     <ReactQuill
                         theme="snow"
                         value={comment}
                         onChange={setComment}
-                        placeholder="Escriba su respuesta o notas internas..."
+                        placeholder={isFinalStep ? "Escriba la nota de cierre y conclusiones..." : "Escriba su respuesta o notas internas..."}
                         className="bg-white"
                     />
 
-                    {/* Signature Preview or Button */}
+
                     {signature ? (
                         <div className="flex items-center gap-4 p-3 bg-gray-50 border border-gray-200 rounded-lg">
                             <div className="flex-1">
@@ -291,6 +336,7 @@ export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
             {/* Parallel info message */}
             {isParallelStep && (
                 <div className={`border rounded-lg p-4 mb-4 ${hasSigned ? 'bg-green-50 border-green-100' : 'bg-blue-50 border-blue-100'}`}>
+
                     <div className="flex items-start gap-3">
                         <span className={`material-symbols-outlined mt-0.5 ${hasSigned ? 'text-green-600' : 'text-blue-600'}`}>
                             {hasSigned ? 'check_circle' : 'info'}
@@ -380,6 +426,16 @@ export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
                                     ? 'Firma Completada'
                                     : (isSubmitting ? 'Procesando...' : 'Firmar mi parte')}
                             </Button>
+                        ) : isFinalStep ? (
+                            <Button
+                                variant="brand"
+                                onClick={handleCloseTicket}
+                                disabled={isChecking || isSubmitting}
+                                className="bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-600"
+                            >
+                                <span className="material-symbols-outlined text-sm mr-2">check_circle</span>
+                                {isSubmitting ? 'Cerrando...' : 'Finalizar Ticket & Cerrar'}
+                            </Button>
                         ) : (
                             <Button
                                 variant="brand"
@@ -422,6 +478,46 @@ export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
                 onConfirm={handleCreateNovelty}
                 isLoading={isSubmitting}
             />
+
+            {/* Close Confirmation Modal */}
+            <Modal
+                isOpen={isCloseConfirmationOpen}
+                onClose={() => setIsCloseConfirmationOpen(false)}
+                title="Finalizar y Cerrar Ticket"
+                className="max-w-md"
+            >
+                <div>
+                    <div className="bg-yellow-50 border border-yellow-100 rounded-lg p-4 mb-6 flex gap-3">
+                        <span className="material-symbols-outlined text-yellow-600 mt-0.5">warning</span>
+                        <div>
+                            <p className="font-medium text-yellow-800 mb-1">Atención</p>
+                            <p className="text-sm text-yellow-700">
+                                Para finalizar el ticket, es <strong>obligatorio</strong> registrar una nota de cierre y conclusiones en el editor.
+                                <br /><br />
+                                ¿Está seguro de que desea cerrar este ticket definitivamente? Esta acción no se puede deshacer.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="flex justify-end gap-3">
+                        <Button
+                            variant="secondary"
+                            onClick={() => setIsCloseConfirmationOpen(false)}
+                            disabled={isSubmitting}
+                        >
+                            Cancelar
+                        </Button>
+                        <Button
+                            variant="brand"
+                            onClick={handleConfirmClose}
+                            disabled={isSubmitting}
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-600"
+                        >
+                            {isSubmitting ? 'Cerrando...' : 'Confirmar Cierre'}
+                        </Button>
+                    </div>
+                </div>
+            </Modal>
         </div>
     );
 };

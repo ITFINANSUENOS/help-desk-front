@@ -29,7 +29,7 @@ export const CreateNoveltyModal: React.FC<CreateNoveltyModalProps> = ({
             setLoadingUsers(true);
             userService.getUsers({ limit: 100 }) // Fetch top 100 users for simple selection
                 .then(res => setUsers(res.data))
-                .catch(err => toast.error('Error al cargar usuarios'))
+                .catch(() => toast.error('Error al cargar usuarios'))
                 .finally(() => setLoadingUsers(false));
 
             // Reset form

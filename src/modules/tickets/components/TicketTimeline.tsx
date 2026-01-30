@@ -128,10 +128,20 @@ export function TicketTimeline({ items }: TicketTimelineProps) {
                                     </div>
                                 </div>
                             ) : (
-                                <div
-                                    className="text-sm text-gray-600 leading-relaxed [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg [&_p]:mb-2 [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4"
+                                className = "text-sm text-gray-600 leading-relaxed [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg [&_p]:mb-2 [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4"
                                     dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(item.content) }}
                                 />
+                            {item.metadata?.estadoTiempoPaso && (
+                                <div className={`mt-2 flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border w-fit ${['Atrasado', 'Vencido'].includes(item.metadata.estadoTiempoPaso)
+                                    ? 'bg-red-50 text-red-700 border-red-100'
+                                    : 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                                    }`}>
+                                    <span className="material-symbols-outlined text-[14px]">
+                                        {['Atrasado', 'Vencido'].includes(item.metadata.estadoTiempoPaso) ? 'warning' : 'check_circle'}
+                                    </span>
+                                    {item.metadata.estadoTiempoPaso}
+                                </div>
+                            )}
                             )}
 
                             {item.metadata?.attachments && item.metadata.attachments.length > 0 && (

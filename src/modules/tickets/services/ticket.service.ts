@@ -273,6 +273,10 @@ export const ticketService = {
 
     async resolveNovelty(ticketId: number): Promise<void> {
         await api.put(`/tickets/${ticketId}/novelties/resolve`);
+    },
+
+    async closeTicket(ticketId: number, comentario: string): Promise<void> {
+        await api.post(`/tickets/${ticketId}/close`, { comentario });
     }
 };
 
