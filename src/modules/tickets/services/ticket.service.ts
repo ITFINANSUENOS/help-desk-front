@@ -351,9 +351,21 @@ export const ticketService = {
         await api.put(`/tickets/${ticketId}/novelties/resolve`, payload, { headers });
     },
 
-    async closeTicket(ticketId: number, comentario: string): Promise<Ticket> {
-        const response = await api.post(`/tickets/${ticketId}/close`, { comentario });
-        return response.data;
+    async closeTicket(id: number, comentario: string, files: File[] = []): Promise<void> {
+        let payload: any = { comentario };
+        let headers = {};
+
+        if (files.length > 0) {
+            const formData = new FormData();
+            formData.append('comentario', comentario);
+            files.forEach(file => {
+                formData.append('files', file);
+            });
+            payload = formData;
+            headers = { 'Content-Type': 'multipart/form-data' };
+        }
+
+        await api.post(`/tickets/${id}/close`, payload, { headers });
     },
 
     async addTag(ticketId: number, tagId: number): Promise<void> {

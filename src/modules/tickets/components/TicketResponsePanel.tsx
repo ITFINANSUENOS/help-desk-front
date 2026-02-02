@@ -111,6 +111,8 @@ export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
 
     const isFinalStep = transitionData?.transitionType === 'final';
 
+    const [filesForClose, setFilesForClose] = useState<File[]>([]);
+
     // Handler: Open Close Modal
     const handleCloseTicket = () => {
         setIsCloseConfirmationOpen(true);
@@ -126,9 +128,10 @@ export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
 
         setIsSubmitting(true);
         try {
-            await ticketService.closeTicket(ticketId, comment);
+            await ticketService.closeTicket(ticketId, comment, filesForClose);
             toast.success('Ticket cerrado exitosamente (Ciclo Finalizado)');
             setComment('');
+            setFilesForClose([]);
             setIsCloseConfirmationOpen(false);
             onSuccess();
         } catch (error: any) {
@@ -519,6 +522,16 @@ export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
                                 ¿Está seguro de que desea cerrar este ticket definitivamente? Esta acción no se puede deshacer.
                             </p>
                         </div>
+                    </div>
+
+                    <div className="mb-6">
+                        <FileUploader
+                            files={filesForClose}
+                            onFilesChange={setFilesForClose}
+                            label="Adjuntar Evidencias de Cierre (Opcional)"
+                            maxFiles={5}
+                            accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.xls,.xlsx"
+                        />
                     </div>
 
                     <div className="flex justify-end gap-3">
