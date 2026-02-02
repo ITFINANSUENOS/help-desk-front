@@ -16,11 +16,40 @@ export const responseSuccessHandler = (response: AxiosResponse) => response;
  * @returns Promesa rechazada con el error.
  */
 export const responseErrorHandler = (error: AxiosError) => {
-    // Optional: Redirect to login on 401, but careful with loops
-    if (error.response?.status === 401) {
+    const status = error.response?.status;
+    const data = error.response?.data as any;
+
+    // Default error details
+    let title = 'Error';
+    let message = 'Ha ocurrido un error inesperado.';
+    let variant: 'error' | 'info' | 'success' = 'error';
+    let shouldShowModal = false;
+
+    if (status === 401) {
         // console.warn('Sesión expirada o inválida. Redirigiendo...');
         // localStorage.removeItem('token');
         // window.location.href = '/login';
+    } else if (status === 403) {
+        title = 'Acceso Denegado';
+        message = data?.message || 'No tienes permisos para realizar esta acción.';
+        shouldShowModal = true;
+    } else if (status === 404) {
+        title = 'Recurso no encontrado';
+        message = data?.message || 'El recurso solicitado no existe.';
+        variant = 'info';
+        shouldShowModal = true;
     }
+
+    if (shouldShowModal) {
+        const event = new CustomEvent('global-api-error', {
+            detail: {
+                title,
+                message,
+                variant
+            }
+        });
+        window.dispatchEvent(event);
+    }
+
     return Promise.reject(error);
 };

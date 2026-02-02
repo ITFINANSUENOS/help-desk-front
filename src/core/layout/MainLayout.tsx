@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import { Outlet} from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
 import { LayoutContext } from './context/LayoutContext';
+
+import { GlobalErrorListener } from '../../shared/components/GlobalErrorListener';
 
 export function MainLayout() {
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -14,6 +16,7 @@ export function MainLayout() {
 
     return (
         <LayoutContext.Provider value={{ setTitle }}>
+            <GlobalErrorListener />
             <div className="flex h-screen w-full flex-row overflow-hidden bg-[#f6f8f8]">
                 <Sidebar
                     isCollapsed={isSidebarCollapsed}
