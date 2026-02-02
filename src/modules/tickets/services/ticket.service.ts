@@ -84,6 +84,7 @@ interface RawTimelineItem {
     fecha: string;
     metadata?: Record<string, unknown>;
     adjuntos?: RawAttachment[];
+    documentos?: RawAttachment[];
     asignadoA?: { id: number; nombre: string }; // New field
 }
 
@@ -225,7 +226,7 @@ export const ticketService = {
                 date: item.fecha,
                 metadata: {
                     ...item.metadata,
-                    attachments: item.adjuntos
+                    attachments: item.documentos || item.adjuntos || []
                 },
                 asignadoA: item.asignadoA // Map the new field
             };
@@ -374,6 +375,30 @@ export const ticketService = {
 
     async removeTag(ticketId: number, tagId: number): Promise<void> {
         await api.delete(`/tickets/${ticketId}/tags/${tagId}`);
+    },
+
+    async downloadFile(url: string, filename: string): Promise<void> {
+        // If the URL is absolute, api.get should handle it.
+        const response = await api.get(url, { responseType: 'blob' });
+        const mimeType = response.headers['content-type'] || 'application/octet-stream';
+        const blob = new Blob([response.data], { type: mimeType });
+        const blobUrl = window.URL.createObjectURL(blob);
+
+        const isViewable = mimeType.includes('pdf') || mimeType.includes('image');
+
+        if (isViewable) {
+            window.open(blobUrl, '_blank');
+            // Clean up later (browser handles it mostly for new tabs, but good practice to revoke if SPA)
+            // setTimeout(() => window.URL.revokeObjectURL(blobUrl), 60000); 
+        } else {
+            const link = document.createElement('a');
+            link.href = blobUrl;
+            link.setAttribute('download', filename);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(blobUrl);
+        }
     }
 };
 export interface ErrorSubtype {
@@ -459,7 +484,8 @@ function mapTimelineType(tipo: string): TicketTimelineItem['type'] {
         'status_change': 'status_change',
         'sistema': 'field_update',
         'apertura': 'creation',
-        'created': 'creation'
+        'created': 'creation',
+        'creation': 'creation'
     };
     return map[normalize] || 'comment';
 }

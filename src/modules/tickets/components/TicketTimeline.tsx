@@ -1,4 +1,5 @@
 import type { TicketTimelineItem } from '../interfaces/Ticket';
+import { ticketService } from '../services/ticket.service';
 import DOMPurify from 'dompurify';
 
 interface TicketTimelineProps {
@@ -152,11 +153,10 @@ export function TicketTimeline({ items }: TicketTimelineProps) {
                                     <h4 className={`mb-2 text-xs font-semibold uppercase tracking-wider ${isError ? 'text-red-500' : 'text-gray-500'}`}>Adjuntos</h4>
                                     <div className="flex flex-wrap gap-2">
                                         {item.metadata.attachments.map((att) => (
-                                            <a
+                                            <button
                                                 key={att.id}
-                                                href={att.url}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
+                                                onClick={() => ticketService.downloadFile(att.url, att.nombre)}
+                                                type="button"
                                                 className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors hover:shadow-sm
                                                     ${isError
                                                         ? 'border-red-200 bg-red-100 text-red-700 hover:bg-red-50 hover:text-red-900'
@@ -164,7 +164,7 @@ export function TicketTimeline({ items }: TicketTimelineProps) {
                                             >
                                                 <span className="material-symbols-outlined text-[18px]">description</span>
                                                 {att.nombre}
-                                            </a>
+                                            </button>
                                         ))}
                                     </div>
                                 </div>
