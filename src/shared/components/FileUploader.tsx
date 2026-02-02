@@ -103,7 +103,7 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
                 onClick={() => fileInputRef.current?.click()}
             >
                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                    <span className="material-symbols-rounded text-gray-400 text-3xl mb-2">cloud_upload</span>
+                    <span className="material-symbols-outlined text-gray-400 text-3xl mb-2">cloud_upload</span>
                     <p className="mb-2 text-sm text-gray-500">
                         <span className="font-semibold">Haz clic para subir</span> o arrastra y suelta
                     </p>
@@ -126,7 +126,7 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
                     {files.map((file, index) => (
                         <li key={`${file.name}-${index}`} className="flex items-center justify-between p-2 bg-white border border-gray-200 rounded-md shadow-sm">
                             <div className="flex items-center space-x-2 truncate">
-                                <span className="material-symbols-rounded text-blue-500">description</span>
+                                <span className="material-symbols-outlined text-blue-500">description</span>
                                 <span className="text-sm text-gray-700 truncate max-w-xs">{file.name}</span>
                                 <span className="text-xs text-gray-400">({(file.size / 1024).toFixed(1)} KB)</span>
                             </div>
@@ -135,7 +135,7 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
                                 onClick={() => removeFile(index)}
                                 className="text-gray-400 hover:text-red-500 transition-colors p-1"
                             >
-                                <span className="material-symbols-rounded">close</span>
+                                <span className="material-symbols-outlined">close</span>
                             </button>
                         </li>
                     ))}

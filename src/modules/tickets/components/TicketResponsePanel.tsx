@@ -321,25 +321,7 @@ export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
                     />
 
 
-                    {signature ? (
-                        <div className="flex items-center gap-4 p-3 bg-gray-50 border border-gray-200 rounded-lg">
-                            <div className="flex-1">
-                                <span className="text-xs text-gray-500 font-medium block mb-1">Firma Adjunta:</span>
-                                <img src={signature} alt="Firma" className="h-16 border bg-white rounded object-contain p-1" />
-                            </div>
-                            <Button variant="ghost" className="text-red-500 hover:text-red-700" onClick={() => setSignature(null)}>
-                                <span className="material-symbols-outlined">delete</span>
-                            </Button>
-                        </div>
-                    ) : (
-                        <div className="flex justify-between items-center bg-gray-50 p-2 rounded-lg border border-dashed border-gray-300">
-                            <Button variant="secondary" size="sm" onClick={() => setIsSignatureModalOpen(true)}>
-                                <span className="material-symbols-outlined text-sm mr-2">ink_pen</span>
-                                Agregar Firma
-                            </Button>
-                            <span className="text-xs text-gray-400">Opcionalmente, puedes adjuntar archivos abajo</span>
-                        </div>
-                    )}
+
 
                     <FileUploader
                         files={files}
