@@ -75,5 +75,27 @@ export const userService = {
 
     async deleteUser(id: number): Promise<void> {
         await api.delete(`/users/${id}`);
+    },
+
+    /**
+     * Sube la firma de perfil del usuario
+     */
+    async uploadProfileSignature(userId: number, file: File): Promise<{ success: boolean; path: string }> {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = await api.post<{ success: boolean; path: string }>(`/users/${userId}/profile/signature`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+        return response.data;
+    },
+
+    /**
+     * Obtiene la URL de la firma de perfil del usuario
+     */
+    getProfileSignatureUrl(userId: number): string {
+        return `${import.meta.env.VITE_API_URL}/users/${userId}/profile/signature`;
     }
 };

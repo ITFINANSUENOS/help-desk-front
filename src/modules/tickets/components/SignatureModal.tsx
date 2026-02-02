@@ -1,6 +1,9 @@
 import React, { useRef, useState } from 'react';
 import SignatureCanvas from 'react-signature-canvas';
 import { Button } from '../../../shared/components/Button';
+import { userService } from '../../users/services/user.service';
+import { toast } from 'sonner';
+import { useAuth } from '../../auth/context/useAuth';
 
 interface SignatureModalProps {
     isOpen: boolean;
@@ -19,6 +22,8 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
 }) => {
     const sigCanvas = useRef<SignatureCanvas>(null);
     const [isEmpty, setIsEmpty] = useState(true);
+    const [isLoadingSignature, setIsLoadingSignature] = useState(false);
+    const { user } = useAuth();
 
     if (!isOpen) return null;
 
@@ -40,6 +45,61 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
     const handleEnd = () => {
         if (sigCanvas.current) {
             setIsEmpty(sigCanvas.current.isEmpty());
+        }
+    };
+
+    const handleLoadProfileSignature = async () => {
+        if (!user?.id) {
+            toast.error('No se pudo identificar al usuario');
+            return;
+        }
+
+        setIsLoadingSignature(true);
+        try {
+            const signatureUrl = userService.getProfileSignatureUrl(user.id);
+
+            // Fetch the image and load it into the canvas
+            const response = await fetch(signatureUrl, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Firma de perfil no encontrada');
+            }
+
+            const blob = await response.blob();
+            const img = new Image();
+            const objectUrl = URL.createObjectURL(blob);
+
+            img.onload = () => {
+                if (sigCanvas.current) {
+                    const canvas = sigCanvas.current.getCanvas();
+                    const ctx = canvas.getContext('2d');
+                    if (ctx) {
+                        // Clear canvas first
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        // Draw the image scaled to fit
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        setIsEmpty(false);
+                    }
+                }
+                URL.revokeObjectURL(objectUrl);
+                toast.success('Firma de perfil cargada');
+            };
+
+            img.onerror = () => {
+                URL.revokeObjectURL(objectUrl);
+                toast.error('Error al cargar la imagen de la firma');
+            };
+
+            img.src = objectUrl;
+        } catch (error) {
+            console.error('Error loading profile signature:', error);
+            toast.error('No se pudo cargar la firma de perfil');
+        } finally {
+            setIsLoadingSignature(false);
         }
     };
 
@@ -76,6 +136,18 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
                                     <p className="text-xs text-gray-400 mt-2 text-center">
                                         Dibuje su firma encima de la línea.
                                     </p>
+
+                                    {/* Load Profile Signature Button */}
+                                    <div className="mt-3 flex justify-center">
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={handleLoadProfileSignature}
+                                            disabled={isLoadingSignature}
+                                        >
+                                            {isLoadingSignature ? 'Cargando...' : 'Cargar firma de perfil'}
+                                        </Button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
