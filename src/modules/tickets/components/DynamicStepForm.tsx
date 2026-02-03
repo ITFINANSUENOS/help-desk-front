@@ -83,6 +83,24 @@ export const DynamicStepForm: React.FC<DynamicStepFormProps> = ({ fields, onChan
         }
     };
 
+    // Auto-fill specialized presets on mount
+    useEffect(() => {
+        if (!fields) return;
+        fields.forEach(async (f) => {
+            if (f.campoQuery === 'PRESET_FECHA_ACTUAL') {
+                try {
+                    const results = await templateService.executeFieldQuery(f.id, '');
+                    if (results && results.length > 0) {
+                        const val = results[0].value || results[0].id; // Expecting { value: 'dd/mm/yyyy' }
+                        setValue(`field_${f.id}`, String(val));
+                    }
+                } catch (e) {
+                    console.error('Error pre-fetching field', f.nombre, e);
+                }
+            }
+        });
+    }, [fields, setValue]);
+
     return (
         <div className="space-y-4 p-4 border border-gray-100 rounded-lg bg-slate-50/50 mb-4 transition-all">
             <h4 className="font-semibold text-sm text-[#121617] mb-2 uppercase tracking-wide">Información del Paso</h4>
@@ -91,6 +109,9 @@ export const DynamicStepForm: React.FC<DynamicStepFormProps> = ({ fields, onChan
                     const fieldName = `field_${field.id}`;
                     const hasQuery = field.campoQuery && field.campoQuery.trim().length > 0;
 
+                    // Special handling for System Presets that should be read-only
+                    const isSystemPreset = field.campoQuery === 'PRESET_FECHA_ACTUAL';
+
                     return (
                         <div key={field.id} className={field.tipo === 'textarea' ? 'col-span-2' : ''}>
                             <Controller
@@ -98,6 +119,26 @@ export const DynamicStepForm: React.FC<DynamicStepFormProps> = ({ fields, onChan
                                 control={control}
                                 rules={{ required: field.required ? 'Este campo es obligatorio' : false }}
                                 render={({ field: { onChange: rhfChange, value } }) => {
+
+                                    // 1. SYSTEM PRESETS (Read-only)
+                                    if (isSystemPreset) {
+                                        return (
+                                            <div className="flex flex-col gap-2">
+                                                <label htmlFor={fieldName} className="text-[#121617] text-sm font-semibold">
+                                                    {field.nombre}
+                                                </label>
+                                                <input
+                                                    id={fieldName}
+                                                    type="text"
+                                                    value={value || ''}
+                                                    disabled
+                                                    className="w-full rounded-lg border border-gray-200 bg-gray-100 px-4 py-2 text-sm text-gray-500 cursor-not-allowed"
+                                                />
+                                            </div>
+                                        );
+                                    }
+
+                                    // 2. QUERY FIELDS (Async Select)
                                     if (hasQuery) {
                                         return (
                                             <div className="flex flex-col gap-2">
