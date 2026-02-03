@@ -31,7 +31,7 @@ export const routeService = {
             params: {
                 'filter[ruta.id]': rutaId,
                 included: 'paso,ruta',
-                sort: 'orden:ASC'
+                sort: 'orden'
             }
         });
         return response.data.data;

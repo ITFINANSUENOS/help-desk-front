@@ -84,7 +84,12 @@ export const RouteStepsModal = ({ isOpen, onClose, route, flujoId }: RouteStepsM
                 {/* Add Step Form */}
                 <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
                     <h5 className="text-sm font-bold text-blue-800 mb-3">Añadir Paso a la Secuencia</h5>
-                    <form onSubmit={handleAdd} className="flex gap-4 items-end">
+                    <div className="flex gap-4 items-end" onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleAdd(e);
+                        }
+                    }}>
                         <div className="w-20">
                             <label className="block text-xs font-semibold text-blue-700 mb-1">Orden</label>
                             <input
@@ -110,11 +115,11 @@ export const RouteStepsModal = ({ isOpen, onClose, route, flujoId }: RouteStepsM
                                 ))}
                             </select>
                         </div>
-                        <Button type="submit" variant="brand" disabled={!selectedStepId}>
+                        <Button type="button" variant="brand" disabled={!selectedStepId} onClick={handleAdd}>
                             <IconPlus size={18} />
                             Añadir
                         </Button>
-                    </form>
+                    </div>
                 </div>
 
                 {/* List of Steps in Route */}
