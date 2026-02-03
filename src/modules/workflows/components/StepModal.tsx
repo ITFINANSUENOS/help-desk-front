@@ -367,6 +367,7 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
                             <TemplateFieldsConfig
                                 campos={(watch('campos') || []) as unknown as StepTemplateField[]}
                                 onChange={(newCampos) => setValue('campos', newCampos)}
+                                flujoId={Number(flujoId)}
                             />
                         </div>
                     )}

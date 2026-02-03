@@ -21,6 +21,7 @@ import type { UserCandidate, CheckStartFlowResponse } from '../interfaces/Workfl
 import type { Department } from '../interfaces/Department';
 import type { Company } from '../interfaces/Company';
 import { useLayout } from '../../../core/layout/context/LayoutContext';
+import { DynamicStepForm } from '../components/DynamicStepForm';
 
 
 export default function CreateTicketPage() {
@@ -393,32 +394,16 @@ export default function CreateTicketPage() {
 
                         {/* DYNAMIC TEMPLATE FIELDS */}
                         {templateFields && templateFields.length > 0 && (
-                            <div className="rounded-xl border border-blue-100 bg-blue-50/50 p-6 space-y-4">
-                                <h3 className="text-sm font-bold text-blue-900 flex items-center gap-2">
-                                    <span className="material-symbols-outlined text-blue-600">assignment</span>
-                                    Información Adicional Requerida
-                                </h3>
-                                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                                    {templateFields.map(field => (
-                                        <div key={field.id} className="space-y-2">
-                                            <label className="text-sm font-bold text-gray-700">
-                                                {field.nombre}
-                                            </label>
-                                            <input
-                                                type={field.tipo === 'number' ? 'number' : field.tipo === 'date' ? 'date' : 'text'}
-                                                className="w-full rounded-lg border-blue-200 px-4 py-3 text-sm focus:border-blue-500 focus:ring-blue-500 shadow-sm bg-white"
-                                                placeholder={`Ingrese ${field.nombre}`}
-                                                value={templateValues[field.id] || ''}
-                                                onChange={(e) => setTemplateValues(prev => ({
-                                                    ...prev,
-                                                    [field.id]: e.target.value
-                                                }))}
-                                                required
-                                            />
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
+                            <DynamicStepForm
+                                fields={templateFields as any}
+                                onChange={(values) => {
+                                    const newValues: Record<number, string> = {};
+                                    values.forEach(v => {
+                                        newValues[v.campoId] = v.valor;
+                                    });
+                                    setTemplateValues(newValues);
+                                }}
+                            />
                         )}
 
                         {/* DESCRIPTION (Rich Text) */}

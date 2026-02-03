@@ -18,5 +18,7 @@ export interface CheckStartFlowResponse {
         codigo: string;
         tipo: string;
         etiqueta?: string;
+        campoQuery?: string;
+        campoTrigger?: number;
     }[];
 }

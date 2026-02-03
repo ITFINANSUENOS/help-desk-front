@@ -1,20 +1,110 @@
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useState, useEffect } from 'react';
+import { useForm, useWatch, type Control,type UseFormSetValue } from 'react-hook-form';
 import { Button } from '../../../shared/components/Button';
 import { Input } from '../../../shared/components/Input';
 import type { StepTemplateField } from '../interfaces/TemplateField';
 import { FIELD_TYPES } from '../interfaces/TemplateField';
-
+import { excelDataService } from '../../imports/services/excel-data.service';
+import type { ExcelData } from '../../imports/interfaces/ExcelData';
+import { toast } from 'sonner';
 
 interface TemplateFieldsConfigProps {
     campos: StepTemplateField[];
     onChange: (campos: StepTemplateField[]) => void;
+    flujoId: number;
 }
 
-export const TemplateFieldsConfig = ({ campos, onChange }: TemplateFieldsConfigProps) => {
+const ExcelQueryConfig = ({ control, flujoId, setValue }: { control: Control<StepTemplateField>, flujoId: number, setValue: UseFormSetValue<StepTemplateField> }) => {
+    const [excelFiles, setExcelFiles] = useState<ExcelData[]>([]);
+    const [columns, setColumns] = useState<string[]>([]);
+    const [loadingFiles, setLoadingFiles] = useState(false);
+    const [loadingCols, setLoadingCols] = useState(false);
+
+    const campoQuery = useWatch({ control, name: 'campoQuery' }) || '';
+
+    // Parse current query
+    const isExcel = campoQuery.startsWith('EXCEL:');
+    const parts = isExcel ? campoQuery.split(':') : [];
+    const currentFileId = parts[1] ? Number(parts[1]) : '';
+    const currentCol = parts[2] || '';
+
+    useEffect(() => {
+        if (flujoId) {
+            setLoadingFiles(true);
+            excelDataService.getByFlow(flujoId)
+                .then(setExcelFiles)
+                .catch(err => {
+                    console.error(err);
+                    toast.error('Error cargando archivos Excel');
+                })
+                .finally(() => setLoadingFiles(false));
+        }
+    }, [flujoId]);
+
+    useEffect(() => {
+        if (currentFileId) {
+            setLoadingCols(true);
+            excelDataService.getColumns(Number(currentFileId))
+                .then(setColumns)
+                .catch(console.error)
+                .finally(() => setLoadingCols(false));
+        } else {
+            setColumns([]);
+        }
+    }, [currentFileId]);
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const fileId = e.target.value;
+        if (fileId) {
+            // Reset col, set file
+            setValue('campoQuery', `EXCEL:${fileId}:`);
+        } else {
+            setValue('campoQuery', '');
+        }
+    };
+
+    const handleColChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const col = e.target.value;
+        if (currentFileId) {
+            setValue('campoQuery', `EXCEL:${currentFileId}:${col}`);
+        }
+    };
+
+    return (
+        <div className="space-y-2 p-3 bg-gray-50 rounded border border-gray-200">
+            <label className="text-xs font-semibold text-gray-700 block">Configuración Excel</label>
+            <select
+                className="w-full rounded border border-gray-300 px-2 py-1 text-sm"
+                value={currentFileId}
+                onChange={handleFileChange}
+                disabled={loadingFiles}
+            >
+                <option value="">-- Seleccionar Archivo --</option>
+                {excelFiles.map(f => (
+                    <option key={f.id} value={f.id}>{f.nombreArchivo}</option>
+                ))}
+            </select>
+
+            <select
+                className="w-full rounded border border-gray-300 px-2 py-1 text-sm"
+                value={currentCol}
+                onChange={handleColChange}
+                disabled={!currentFileId || loadingCols}
+            >
+                <option value="">-- Seleccionar Columna --</option>
+                {columns.map(c => (
+                    <option key={c} value={c}>{c}</option>
+                ))}
+            </select>
+            {isExcel && <p className="text-xs text-gray-400 font-mono mt-1">{campoQuery}</p>}
+        </div>
+    );
+};
+
+export const TemplateFieldsConfig = ({ campos, onChange, flujoId }: TemplateFieldsConfigProps) => {
     const [isAdding, setIsAdding] = useState(false);
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
-    const { register, handleSubmit, reset } = useForm<StepTemplateField>();
+    const { register, handleSubmit, reset, setValue, control } = useForm<StepTemplateField>();
 
     // Filter only active campos (estado = 1)
     const activeCampos = campos.filter(campo => campo.estado === 1 || campo.estado === undefined);
@@ -24,7 +114,6 @@ export const TemplateFieldsConfig = ({ campos, onChange }: TemplateFieldsConfigP
             ...data,
             coordX: Number(data.coordX) || 0,
             coordY: Number(data.coordY) || 0,
-
             pagina: Number(data.pagina),
             fontSize: Number(data.fontSize) || 10,
             campoTrigger: data.campoTrigger ? 1 : 0,
@@ -46,17 +135,14 @@ export const TemplateFieldsConfig = ({ campos, onChange }: TemplateFieldsConfigP
     };
 
     const handleEdit = (index: number) => {
-        // Find the actual campo in the full list
         const campo = activeCampos[index];
         reset(campo);
-        // Find the index in the full campos array
         const actualIndex = campos.findIndex(c => c === campo);
         setEditingIndex(actualIndex);
         setIsAdding(true);
     };
 
     const handleDelete = (index: number) => {
-        // Soft delete: set estado to 0 instead of removing
         const campo = activeCampos[index];
         const actualIndex = campos.findIndex(c => c === campo);
         const updated = [...campos];
@@ -68,6 +154,24 @@ export const TemplateFieldsConfig = ({ campos, onChange }: TemplateFieldsConfigP
         reset();
         setIsAdding(false);
         setEditingIndex(null);
+    };
+
+    const watchedCampoQuery = useWatch({ control, name: 'campoQuery' }) || '';
+    const sourceType = watchedCampoQuery.startsWith('EXCEL:') ? 'EXCEL' :
+        (watchedCampoQuery === 'PRESET_FECHA_ACTUAL' ? 'PRESET_FECHA_ACTUAL' :
+            (watchedCampoQuery.length > 0 ? 'CUSTOM' : ''));
+
+    const handleSourceTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const val = e.target.value;
+        if (val === 'CUSTOM') {
+            setValue('campoQuery', ''); // Clear to let user type
+        } else if (val === 'EXCEL') {
+            setValue('campoQuery', 'EXCEL:'); // Init excel mode
+        } else if (val === 'PRESET_FECHA_ACTUAL') {
+            setValue('campoQuery', 'PRESET_FECHA_ACTUAL');
+        } else {
+            setValue('campoQuery', '');
+        }
     };
 
     return (
@@ -93,6 +197,9 @@ export const TemplateFieldsConfig = ({ campos, onChange }: TemplateFieldsConfigP
                                     Código: {campo.codigo} | Tipo: {campo.tipo} | Pág: {campo.pagina}
                                     {campo.etiqueta ? <span className="ml-2 text-blue-600 bg-blue-50 px-1 rounded">🏷️ {campo.etiqueta}</span> : ` | X: ${campo.coordX}, Y: ${campo.coordY}`}
                                 </p>
+                                {campo.campoQuery && (
+                                    <p className="text-xs text-gray-400 mt-1 font-mono">{campo.campoQuery}</p>
+                                )}
                             </div>
                             <div className="flex gap-2">
                                 <button
@@ -171,17 +278,43 @@ export const TemplateFieldsConfig = ({ campos, onChange }: TemplateFieldsConfigP
                         />
                     </div>
 
-                    <div className="space-y-1">
-                        <label className="text-sm font-semibold text-gray-700">Campo Query (Opcional)</label>
-                        <textarea
-                            {...register('campoQuery')}
+                    {/* Source Config */}
+                    <div className="space-y-2 border-t pt-2 mt-2">
+                        <label className="text-sm font-semibold text-gray-700">Fuente de Datos</label>
+                        <select
                             className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                            rows={2}
-                            placeholder="Ej. EXCEL:2:cedula o PRESET_FECHA_ACTUAL"
-                        />
+                            onChange={handleSourceTypeChange}
+                            value={sourceType}
+                        >
+                            <option value="">Ninguna</option>
+                            <option value="CUSTOM">Consulta Manual / SQL</option>
+                            <option value="EXCEL">Datos Excel</option>
+                            <option value="PRESET_FECHA_ACTUAL">Fecha Actual</option>
+                        </select>
+
+                        {/* Render specific config based on source */}
+                        {sourceType === 'CUSTOM' && (
+                            <div className="space-y-1">
+                                <label className="text-xs font-semibold text-gray-700">Query SQL / Valor</label>
+                                <textarea
+                                    {...register('campoQuery')}
+                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-mono"
+                                    rows={2}
+                                    placeholder="SELECT ip FROM..."
+                                />
+                            </div>
+                        )}
+
+                        {sourceType === 'EXCEL' && (
+                            <ExcelQueryConfig
+                                control={control}
+                                flujoId={flujoId}
+                                setValue={setValue}
+                            />
+                        )}
                     </div>
 
-                    <div className="flex gap-4">
+                    <div className="flex gap-4 pt-2">
                         <label className="flex items-center gap-2 cursor-pointer">
                             <input
                                 type="checkbox"
@@ -213,3 +346,4 @@ export const TemplateFieldsConfig = ({ campos, onChange }: TemplateFieldsConfigP
         </div>
     );
 };
+

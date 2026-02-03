@@ -21,6 +21,11 @@ class TemplateService {
         return response.data;
     }
 
+    async executeFieldQuery(fieldId: number, term = ''): Promise<any[]> {
+        const response = await api.get<any[]>(`${this.baseUrl}/query/${fieldId}?term=${encodeURIComponent(term)}`);
+        return response.data;
+    }
+
     async getTemplates(flujoId: number): Promise<any[]> {
         const response = await api.get(`${this.baseUrl}?filter[flujo.id]=${flujoId}&included=empresa`);
         return response.data.data;

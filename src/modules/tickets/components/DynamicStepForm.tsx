@@ -1,7 +1,9 @@
 import React, { useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
+import AsyncSelect from 'react-select/async';
 import { Input } from '../../../shared/components/Input';
 import type { TemplateField } from '../interfaces/Ticket';
+import { templateService } from '../../templates/services/template.service';
 
 interface DynamicStepFormProps {
     fields: TemplateField[]; // Schema
@@ -9,7 +11,7 @@ interface DynamicStepFormProps {
 }
 
 export const DynamicStepForm: React.FC<DynamicStepFormProps> = ({ fields, onChange }) => {
-    const { control, watch, formState: { errors } } = useForm();
+    const { control, watch, setValue, formState: { errors } } = useForm();
     const allValues = watch();
 
     // Propagate changes up to parent
@@ -17,18 +19,49 @@ export const DynamicStepForm: React.FC<DynamicStepFormProps> = ({ fields, onChan
         if (!fields || fields.length === 0) return;
 
         const formattedValues = Object.entries(allValues).map(([key, value]) => {
-            // key is "field_123" -> extract 123
-            const fieldId = parseInt(key.replace('field_', ''), 10);
-            return {
-                campoId: fieldId,
-                valor: String(value || '') // Ensure string
-            };
-        }).filter(v => v.valor !== '');
+            if (key.startsWith('field_')) {
+                const fieldId = parseInt(key.replace('field_', ''), 10);
+                return {
+                    campoId: fieldId,
+                    valor: String(value || '')
+                };
+            }
+            return null;
+        }).filter((v): v is { campoId: number; valor: string } => v !== null && v.valor !== '');
 
         onChange(formattedValues);
     }, [allValues, fields, onChange]);
 
     if (!fields || fields.length === 0) return null;
+
+    const loadOptions = async (inputValue: string, fieldId: number) => {
+        try {
+            const results = await templateService.executeFieldQuery(fieldId, inputValue);
+            return results.map(r => ({
+                label: r.label || r.nombre || Object.values(r).find(v => typeof v === 'string') || JSON.stringify(r),
+                value: String(r.id || r.code || Object.values(r)[0]),
+                data: r
+            }));
+        } catch (e) {
+            console.error('Error loading options', e);
+            return [];
+        }
+    };
+
+    const handleSelectChange = (selectedOption: any, field: TemplateField, reactHookFormChange: (val: any) => void) => {
+        const val = selectedOption ? selectedOption.value : '';
+        reactHookFormChange(val);
+
+        // TRIGGER LOGIC
+        if (field.campoTrigger === 1 && selectedOption?.data) {
+            const rowData = selectedOption.data;
+            fields.forEach(f => {
+                if (f.id !== field.id && rowData[f.codigo] !== undefined) {
+                    setValue(`field_${f.id}`, String(rowData[f.codigo]));
+                }
+            });
+        }
+    };
 
     return (
         <div className="space-y-4 p-4 border border-gray-100 rounded-lg bg-slate-50/50 mb-4 transition-all">
@@ -36,6 +69,7 @@ export const DynamicStepForm: React.FC<DynamicStepFormProps> = ({ fields, onChan
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {fields.map((field) => {
                     const fieldName = `field_${field.id}`;
+                    const hasQuery = field.campoQuery && field.campoQuery.trim().length > 0;
 
                     return (
                         <div key={field.id} className={field.tipo === 'textarea' ? 'col-span-2' : ''}>
@@ -43,7 +77,30 @@ export const DynamicStepForm: React.FC<DynamicStepFormProps> = ({ fields, onChan
                                 name={fieldName}
                                 control={control}
                                 rules={{ required: field.required ? 'Este campo es obligatorio' : false }}
-                                render={({ field: { onChange, value } }) => {
+                                render={({ field: { onChange: rhfChange, value } }) => {
+                                    if (hasQuery) {
+                                        return (
+                                            <div className="flex flex-col gap-2">
+                                                <label htmlFor={fieldName} className="text-[#121617] text-sm font-semibold">
+                                                    {field.nombre} {field.required && <span className="text-red-500">*</span>}
+                                                </label>
+                                                <AsyncSelect
+                                                    cacheOptions
+                                                    defaultOptions
+                                                    isClearable
+                                                    loadOptions={(v) => loadOptions(v, field.id)}
+                                                    onChange={(opt) => handleSelectChange(opt, field, rhfChange)}
+                                                    placeholder={`Buscar ${field.nombre}...`}
+                                                    noOptionsMessage={() => "No se encontraron resultados"}
+                                                    loadingMessage={() => "Buscando..."}
+                                                    className="react-select-container"
+                                                    classNamePrefix="react-select"
+                                                    value={value ? { label: value, value } : null} // Simple display, ideally we'd store the label too
+                                                />
+                                            </div>
+                                        );
+                                    }
+
                                     if (field.tipo === 'textarea') {
                                         return (
                                             <div className="flex flex-col gap-2">
@@ -54,7 +111,7 @@ export const DynamicStepForm: React.FC<DynamicStepFormProps> = ({ fields, onChan
                                                     id={fieldName}
                                                     className="form-textarea block w-full rounded-lg border border-gray-200 bg-slate-50 p-3 text-base text-[#121617] placeholder:text-gray-400 focus:border-brand-teal focus:bg-white focus:outline-none focus:ring-1 focus:ring-brand-teal min-h-[100px] transition-all hover:bg-slate-100"
                                                     value={value || ''}
-                                                    onChange={onChange}
+                                                    onChange={rhfChange}
                                                     placeholder={field.nombre}
                                                 />
                                             </div>
@@ -66,7 +123,7 @@ export const DynamicStepForm: React.FC<DynamicStepFormProps> = ({ fields, onChan
                                             label={`${field.nombre} ${field.required ? '*' : ''}`}
                                             id={fieldName}
                                             value={value || ''}
-                                            onChange={onChange}
+                                            onChange={rhfChange}
                                         />;
                                     }
                                     // Default text
@@ -75,7 +132,7 @@ export const DynamicStepForm: React.FC<DynamicStepFormProps> = ({ fields, onChan
                                         label={`${field.nombre} ${field.required ? '*' : ''}`}
                                         id={fieldName}
                                         value={value || ''}
-                                        onChange={onChange}
+                                        onChange={rhfChange}
                                         placeholder={field.nombre}
                                     />;
                                 }}

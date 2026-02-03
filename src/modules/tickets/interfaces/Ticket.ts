@@ -196,10 +196,11 @@ export interface TemplateField {
     id: number;
     nombre: string;
     codigo: string;
-    tipo: 'text' | 'number' | 'date' | 'select' | 'textarea' | 'checkbox' | 'file';
+    tipo: 'text' | 'number' | 'date' | 'select' | 'textarea' | 'checkbox' | 'file' | 'regional' | 'cargo' | string;
     required: boolean;
     options?: string[]; // For select types
-    // Add layout coords if needed
+    campoQuery?: string;
+    campoTrigger?: number;
 }
 
 export interface TemplateFieldValue {
