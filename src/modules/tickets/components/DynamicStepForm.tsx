@@ -59,11 +59,25 @@ export const DynamicStepForm: React.FC<DynamicStepFormProps> = ({ fields, onChan
         reactHookFormChange(val);
 
         // TRIGGER LOGIC
+        // TRIGGER LOGIC
         if (field.campoTrigger === 1 && selectedOption?.data) {
-            const rowData = selectedOption.data;
+            const rowData = selectedOption.data as Record<string, any>;
+
+            // Create a normalized map of the data for case-insensitive lookup
+            const normalizedData: Record<string, any> = {};
+            Object.keys(rowData).forEach(key => {
+                normalizedData[key.toUpperCase()] = rowData[key];
+            });
+
             fields.forEach(f => {
-                if (f.id !== field.id && rowData[f.codigo] !== undefined) {
-                    setValue(`field_${f.id}`, String(rowData[f.codigo]));
+                if (f.id !== field.id) {
+                    // Try to find the value using uppercase code
+                    const targetCode = f.codigo.toUpperCase();
+                    const value = normalizedData[targetCode];
+
+                    if (value !== undefined && value !== null) {
+                        setValue(`field_${f.id}`, String(value));
+                    }
                 }
             });
         }
