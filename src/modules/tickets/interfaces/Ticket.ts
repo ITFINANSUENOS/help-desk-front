@@ -19,7 +19,7 @@ export interface Ticket {
 }
 
 export interface TicketFilter {
-    view?: 'all' | 'created' | 'assigned' | 'observed';
+    view?: 'all' | 'created' | 'assigned' | 'observed' | 'history';
     search?: string;
     status?: TicketStatus | 'All Statuses';
     priority?: TicketPriority | 'All Priorities';

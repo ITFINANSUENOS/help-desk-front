@@ -27,7 +27,7 @@ export default function TicketsPage() {
     const [totalPages, setTotalPages] = useState(1);
 
     // Filters
-    const [viewFilter, setViewFilter] = useState<'all' | 'created' | 'assigned'>('all');
+    const [viewFilter, setViewFilter] = useState<'all' | 'created' | 'assigned' | 'observed' | 'history'>('all');
     const [statusFilter, setStatusFilter] = useState<TicketStatus | 'Todos'>('Todos');
     const [priorityFilter, setPriorityFilter] = useState<TicketPriority | 'Todas'>('Todas');
     const [searchQuery, setSearchQuery] = useState('');
@@ -127,6 +127,11 @@ export default function TicketsPage() {
         }
         if (can('view:observed', 'Ticket')) {
             options.push({ label: 'Observados', value: 'observed' });
+        }
+
+        // Historial: Participated tickets (not currently assigned)
+        if (can('view:assigned', 'Ticket') || can('view:created', 'Ticket')) {
+            options.push({ label: 'Historial', value: 'history' });
         }
 
         // Si no tiene ningún permiso específico, al menos mostrar 'creados'
