@@ -26,7 +26,7 @@ interface FilterFormValues {
 }
 
 export const AdvancedTicketFilter: React.FC<AdvancedTicketFilterProps> = ({ filters, onFilterChange, onClear }) => {
-    const { control, register, handleSubmit, reset, watch, setValue } = useForm<FilterFormValues>({
+    const { control, register, handleSubmit, reset, watch} = useForm<FilterFormValues>({
         defaultValues: {
             companyId: filters.companyId,
             subcategoryId: filters.subcategoryId,
@@ -117,12 +117,18 @@ export const AdvancedTicketFilter: React.FC<AdvancedTicketFilterProps> = ({ filt
                                 name="companyId"
                                 control={control}
                                 render={({ field }) => (
-                                    <select {...field} className="form-select block w-full text-sm border-gray-300 rounded-md focus:border-brand-blue focus:ring-brand-blue"
-                                        value={field.value || ''}
-                                        onChange={e => field.onChange(e.target.value ? Number(e.target.value) : undefined)}>
-                                        <option value="">Seleccionar</option>
-                                        {companies.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
-                                    </select>
+                                    <div className="relative">
+                                        <select {...field}
+                                            className="appearance-none block w-full rounded-lg border-gray-200 bg-white py-2.5 pl-4 pr-10 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:border-brand-teal focus:ring-brand-teal"
+                                            value={field.value || ''}
+                                            onChange={e => field.onChange(e.target.value ? Number(e.target.value) : undefined)}>
+                                            <option value="">Seleccionar</option>
+                                            {companies.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
+                                        </select>
+                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+                                            <span className="material-symbols-outlined text-lg">expand_more</span>
+                                        </div>
+                                    </div>
                                 )}
                             />
                         </div>
@@ -134,12 +140,18 @@ export const AdvancedTicketFilter: React.FC<AdvancedTicketFilterProps> = ({ filt
                                 name="subcategoryId"
                                 control={control}
                                 render={({ field }) => (
-                                    <select {...field} className="form-select block w-full text-sm border-gray-300 rounded-md focus:border-brand-blue focus:ring-brand-blue"
-                                        value={field.value || ''}
-                                        onChange={e => field.onChange(e.target.value ? Number(e.target.value) : undefined)}>
-                                        <option value="">Seleccionar Subcategoría</option>
-                                        {subcategories.map(s => <option key={s.id} value={s.id}>{s.nombre}</option>)}
-                                    </select>
+                                    <div className="relative">
+                                        <select {...field}
+                                            className="appearance-none block w-full rounded-lg border-gray-200 bg-white py-2.5 pl-4 pr-10 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:border-brand-teal focus:ring-brand-teal"
+                                            value={field.value || ''}
+                                            onChange={e => field.onChange(e.target.value ? Number(e.target.value) : undefined)}>
+                                            <option value="">Seleccionar</option>
+                                            {subcategories.map(s => <option key={s.id} value={s.id}>{s.nombre}</option>)}
+                                        </select>
+                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+                                            <span className="material-symbols-outlined text-lg">expand_more</span>
+                                        </div>
+                                    </div>
                                 )}
                             />
                         </div>
@@ -151,12 +163,18 @@ export const AdvancedTicketFilter: React.FC<AdvancedTicketFilterProps> = ({ filt
                                 name="tagId"
                                 control={control}
                                 render={({ field }) => (
-                                    <select {...field} className="form-select block w-full text-sm border-gray-300 rounded-md focus:border-brand-blue focus:ring-brand-blue"
-                                        value={field.value || ''}
-                                        onChange={e => field.onChange(e.target.value ? Number(e.target.value) : undefined)}>
-                                        <option value="">Seleccionar</option>
-                                        {tags.map(t => <option key={t.id} value={t.id}>{t.nombre}</option>)}
-                                    </select>
+                                    <div className="relative">
+                                        <select {...field}
+                                            className="appearance-none block w-full rounded-lg border-gray-200 bg-white py-2.5 pl-4 pr-10 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:border-brand-teal focus:ring-brand-teal"
+                                            value={field.value || ''}
+                                            onChange={e => field.onChange(e.target.value ? Number(e.target.value) : undefined)}>
+                                            <option value="">Seleccionar</option>
+                                            {tags.map(t => <option key={t.id} value={t.id}>{t.nombre}</option>)}
+                                        </select>
+                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+                                            <span className="material-symbols-outlined text-lg">expand_more</span>
+                                        </div>
+                                    </div>
                                 )}
                             />
                         </div>
@@ -168,7 +186,7 @@ export const AdvancedTicketFilter: React.FC<AdvancedTicketFilterProps> = ({ filt
                                 type="number"
                                 placeholder="ID"
                                 {...register('ticketId', { valueAsNumber: true })}
-                                className="form-input block w-full text-sm border-gray-300 rounded-md focus:border-brand-blue focus:ring-brand-blue"
+                                className="block w-full rounded-lg border-gray-200 bg-white py-2.5 px-4 text-sm font-medium text-gray-900 placeholder-gray-500 focus:border-brand-teal focus:ring-brand-teal"
                             />
                         </div>
                     </div>
@@ -180,7 +198,7 @@ export const AdvancedTicketFilter: React.FC<AdvancedTicketFilterProps> = ({ filt
                             <input
                                 type="date"
                                 {...register('dateFrom')}
-                                className="form-input block w-full text-sm border-gray-300 rounded-md focus:border-brand-blue focus:ring-brand-blue"
+                                className="block w-full rounded-lg border-gray-200 bg-white py-2.5 px-4 text-sm font-medium text-gray-900 focus:border-brand-teal focus:ring-brand-teal"
                             />
                         </div>
 
@@ -190,7 +208,7 @@ export const AdvancedTicketFilter: React.FC<AdvancedTicketFilterProps> = ({ filt
                             <input
                                 type="date"
                                 {...register('dateTo')}
-                                className="form-input block w-full text-sm border-gray-300 rounded-md focus:border-brand-blue focus:ring-brand-blue"
+                                className="block w-full rounded-lg border-gray-200 bg-white py-2.5 px-4 text-sm font-medium text-gray-900 focus:border-brand-teal focus:ring-brand-teal"
                             />
                         </div>
 
@@ -201,7 +219,7 @@ export const AdvancedTicketFilter: React.FC<AdvancedTicketFilterProps> = ({ filt
                                 type="number"
                                 placeholder="ID Usuario"
                                 {...register('creatorId', { valueAsNumber: true })}
-                                className="form-input block w-full text-sm border-gray-300 rounded-md focus:border-brand-blue focus:ring-brand-blue"
+                                className="block w-full rounded-lg border-gray-200 bg-white py-2.5 px-4 text-sm font-medium text-gray-900 placeholder-gray-500 focus:border-brand-teal focus:ring-brand-teal"
                             />
                         </div>
                     </div>
@@ -209,17 +227,20 @@ export const AdvancedTicketFilter: React.FC<AdvancedTicketFilterProps> = ({ filt
                     {/* Busqueda Mensajes (Full Width) */}
                     <div className="mb-4">
                         <label className="block text-xs font-medium text-gray-700 mb-1">Búsqueda en Mensajes</label>
-                        <div className="flex">
+                        <div className="flex relative">
+                            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                                <span className="material-symbols-outlined text-gray-400">search</span>
+                            </div>
                             <input
                                 type="text"
                                 placeholder="Buscar texto en historial de mensajes..."
                                 {...register('messageSearch')}
-                                className="form-input block w-full text-sm border-gray-300 rounded-l-md focus:border-brand-blue focus:ring-brand-blue"
+                                className="block w-full rounded-l-lg border-gray-200 bg-gray-50 py-2.5 pl-10 pr-4 text-sm font-medium text-gray-900 placeholder-gray-500 focus:border-brand-teal focus:bg-white focus:ring-brand-teal"
                             />
-                            <Button type="submit" variant="brand" className="rounded-l-none">
-                                <span className="material-symbols-outlined">search</span>
+                            <Button type="submit" variant="brand" className="rounded-l-none rounded-r-lg">
+                                Buscar
                             </Button>
-                            <Button type="button" variant="outline" onClick={handleClear} className="ml-2">
+                            <Button type="button" variant="outline" onClick={handleClear} className="ml-2 rounded-lg">
                                 <span className="material-symbols-outlined">filter_alt_off</span>
                             </Button>
                         </div>

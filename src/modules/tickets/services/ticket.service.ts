@@ -101,15 +101,17 @@ export const ticketService = {
 
         // Ensure specific mappings if needed (though spread handles most)
         // If view/status/priority are undefined in filter, they won't be in params or will be undefined.
-        // Clean undefined values, nulls, empty strings, and NaN to prevent 400 Bad Request
-        Object.keys(params).forEach(key => {
-            const value = params[key];
-            if (value === undefined || value === null || value === '' || (typeof value === 'number' && isNaN(value))) {
-                delete params[key];
-            }
-        });
+        // Limpiar parámetros (remover undefined, null, strings vacíos y NaN)
+        const cleanParams = Object.fromEntries(
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            Object.entries(params).filter(([_, v]) => {
+                if (v === undefined || v === null || v === '') return false;
+                if (typeof v === 'number' && isNaN(v)) return false;
+                return true;
+            })
+        );
 
-        const response = await api.get<any>('/tickets/list', { params });
+        const response = await api.get<any>('/tickets/list', { params: cleanParams });
         const rawData = response.data.data || [];
         const mappedTickets: Ticket[] = rawData.map((t: RawTicket) => ({
             id: t.id,
