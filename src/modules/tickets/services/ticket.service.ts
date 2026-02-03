@@ -92,13 +92,23 @@ export const ticketService = {
     async getTickets(filter: TicketFilter = {}): Promise<TicketListResponse> {
         // ... existing code ...
         // Map frontend filters to backend query params
-        const params: Record<string, string | number> = {};
-        if (filter.view) params.view = filter.view;
-        if (filter.search) params.search = filter.search;
-        if (filter.status) params.status = filter.status;
-        if (filter.priority) params.priority = filter.priority;
-        params.page = filter.page || 1;
-        params.limit = filter.limit || 10;
+        // Map frontend filters to backend query params
+        const params: Record<string, string | number | undefined> = {
+            page: filter.page || 1,
+            limit: filter.limit || 10,
+            ...filter // Spread all other filters (companyId, tagId, etc.)
+        };
+
+        // Ensure specific mappings if needed (though spread handles most)
+        // If view/status/priority are undefined in filter, they won't be in params or will be undefined.
+        // Clean undefined values, nulls, empty strings, and NaN to prevent 400 Bad Request
+        Object.keys(params).forEach(key => {
+            const value = params[key];
+            if (value === undefined || value === null || value === '' || (typeof value === 'number' && isNaN(value))) {
+                delete params[key];
+            }
+        });
+
         const response = await api.get<any>('/tickets/list', { params });
         const rawData = response.data.data || [];
         const mappedTickets: Ticket[] = rawData.map((t: RawTicket) => ({

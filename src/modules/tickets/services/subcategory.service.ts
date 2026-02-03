@@ -27,5 +27,17 @@ export const subcategoryService = {
             params: { departmentId }
         });
         return response.data;
+    },
+
+    async getByCompany(companyId: number): Promise<Subcategory[]> {
+        const response = await api.get('/subcategorias', {
+            params: {
+                'filter[empresaId]': companyId,
+                'filter[estado]': 1
+            }
+        });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const data = response.data as any;
+        return Array.isArray(data) ? data : (data.data || []);
     }
 };

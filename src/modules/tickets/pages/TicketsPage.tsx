@@ -8,6 +8,8 @@ import { DataTable } from '../../../shared/components/DataTable';
 import { usePermissions } from '../../../shared/hooks/usePermissions';
 import { useLayout } from '../../../core/layout/context/LayoutContext';
 import TagManagementModal from '../components/TagManagementModal';
+import { AdvancedTicketFilter } from '../components/AdvancedTicketFilter';
+import type { TicketFilter } from '../interfaces/Ticket';
 
 export default function TicketsPage() {
     const navigate = useNavigate();
@@ -31,6 +33,7 @@ export default function TicketsPage() {
     const [statusFilter, setStatusFilter] = useState<TicketStatus | 'Todos'>('Todos');
     const [priorityFilter, setPriorityFilter] = useState<TicketPriority | 'Todas'>('Todas');
     const [searchQuery, setSearchQuery] = useState('');
+    const [advancedFilters, setAdvancedFilters] = useState<Partial<TicketFilter>>({});
 
     useEffect(() => {
         setTitle('Gestión de Tickets');
@@ -39,14 +42,17 @@ export default function TicketsPage() {
     const fetchTickets = useCallback(async () => {
         try {
             setLoading(true);
-            const response = await ticketService.getTickets({
+            const params = {
                 view: viewFilter,
                 status: statusFilter === 'Todos' ? undefined : statusFilter,
                 priority: priorityFilter === 'Todas' ? undefined : priorityFilter,
                 search: searchQuery,
                 page,
-                limit
-            });
+                limit,
+                ...advancedFilters
+            };
+            console.log('[TicketsPage] Fetching with params:', params);
+            const response = await ticketService.getTickets(params);
             setTickets(response.data);
             setTotal(response.meta.total);
             setTotalPages(response.meta.totalPages);
@@ -55,7 +61,7 @@ export default function TicketsPage() {
         } finally {
             setLoading(false);
         }
-    }, [viewFilter, statusFilter, priorityFilter, searchQuery, page, limit]);
+    }, [viewFilter, statusFilter, priorityFilter, searchQuery, page, limit, advancedFilters]);
 
     useEffect(() => {
         setPage(1);
@@ -193,11 +199,25 @@ export default function TicketsPage() {
                     <h2 className="text-2xl font-bold text-gray-900">Tickets</h2>
                     <p className="mt-1 text-sm text-gray-500">Gestiona solicitudes de soporte y sigue su progreso.</p>
                 </div>
-                <Button variant="brand" className="shadow-sm" onClick={() => navigate('/tickets/create')}>
-                    <span className="material-symbols-outlined mr-2">add</span>
-                    Crear Ticket
-                </Button>
+                {can('create', 'Ticket') && (
+                    <Button variant="brand" className="shadow-sm" onClick={() => navigate('/tickets/create')}>
+                        <span className="material-symbols-outlined mr-2">add</span>
+                        Crear Ticket
+                    </Button>
+                )}
             </div>
+
+            <AdvancedTicketFilter
+                filters={advancedFilters}
+                onFilterChange={(newFilters) => {
+                    setAdvancedFilters(newFilters);
+                    setPage(1);
+                }}
+                onClear={() => {
+                    setAdvancedFilters({});
+                    setPage(1);
+                }}
+            />
 
             <FilterBar filters={filterConfig} className="mb-6" />
 

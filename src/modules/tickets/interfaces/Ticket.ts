@@ -25,6 +25,14 @@ export interface TicketFilter {
     priority?: TicketPriority | 'All Priorities';
     page?: number;
     limit?: number;
+    // Advanced Filters
+    messageSearch?: string;
+    creatorId?: number;
+    companyId?: number;
+    subcategoryId?: number;
+    tagId?: number;
+    dateFrom?: string;
+    dateTo?: string;
 }
 
 export interface TicketListResponse {

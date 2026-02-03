@@ -38,6 +38,15 @@ export const responseErrorHandler = (error: AxiosError) => {
         message = data?.message || 'El recurso solicitado no existe.';
         variant = 'info';
         shouldShowModal = true;
+    } else if (status === 400) {
+        title = 'Datos Inválidos';
+        shouldShowModal = true;
+        if (Array.isArray(data?.message)) {
+            // Join validation errors with newlines
+            message = data.message.join('\n');
+        } else {
+            message = data?.message || 'La solicitud contiene datos inválidos.';
+        }
     }
 
     if (shouldShowModal) {
