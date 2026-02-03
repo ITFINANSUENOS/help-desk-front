@@ -101,6 +101,30 @@ export function Sidebar({ isCollapsed, toggleCollapse, isMobileOpen, closeMobile
                     </button>
                 </div>
 
+
+                {/* Create Ticket Action */}
+                {hasPermission('Ticket', 'create') && (
+                    <div className={cn("px-3 pt-6 pb-2", isCollapsed ? "flex justify-center" : "")}>
+                        <Link
+                            to="/tickets/create"
+                            title="Crear Ticket"
+                            className={cn(
+                                "flex items-center justify-center rounded-lg bg-red-600 text-white font-medium shadow-lg hover:bg-red-700 transition-all hover:scale-[1.02] active:scale-[0.98]",
+                                isCollapsed ? "h-10 w-10 p-0" : "h-10 w-full gap-2 px-4"
+                            )}
+                            onClick={() => closeMobile()}
+                        >
+                            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>add</span>
+                            <span className={cn(
+                                "whitespace-nowrap transition-all duration-300",
+                                isCollapsed ? "w-0 opacity-0 hidden" : "w-auto opacity-100"
+                            )}>
+                                Crear Ticket
+                            </span>
+                        </Link>
+                    </div>
+                )}
+
                 {/* Navigation */}
                 <nav className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-6 no-scrollbar">
                     <ul className="space-y-2">
