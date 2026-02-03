@@ -34,23 +34,23 @@ export function Sidebar({ isCollapsed, toggleCollapse, isMobileOpen, closeMobile
 
     const menuItems: MenuItem[] = [
         { to: "/", icon: "dashboard", label: "Dashboard" },
-        { to: "/tickets", icon: "confirmation_number", label: "Tickets", subject: 'Ticket' },
-        { to: "/users", icon: "group", label: "Usuarios", subject: 'User' },
-        { to: "/roles", icon: "admin_panel_settings", label: "Roles y Permisos", subject: 'Role' },
-        { to: "/permissions", icon: "lock_open", label: "Catálogo Permisos", subject: 'Permission' },
-        { to: "/departments", icon: "corporate_fare", label: "Departamentos", subject: 'Department' },
-        { to: "/companies", icon: "business", label: "Empresas", subject: 'Company' as any },
-        { to: "/categories", icon: "category", label: "Categorías", subject: 'Category' },
-        { to: "/subcategories", icon: "segment", label: "Subcategorías", subject: 'Category' as any },
-        { to: "/workflows", icon: "schema", label: "Gestión de Flujos", subject: 'Workflow' as any }, // TODO: Define 'Workflow' subject in Permission enum
-        { to: "/regions", icon: "map", label: "Regionales", subject: 'Regional' as any }, // Assuming Regional permission subject exists or using similar
-        { to: "/zones", icon: "location_on", label: "Zonas", subject: 'Zone' as any },
-        { to: "/positions", icon: "badge", label: "Cargos", subject: 'Position' as any },
-        { to: "/profiles", icon: "badge", label: "Perfiles", subject: 'Profile' as any },
-        { to: "/organigrama", icon: "account_tree", label: "Organigrama", subject: 'Organigrama' as any },
-        { to: "/error-types", icon: "quick_phrases", label: "Tipos de Error", subject: 'FastAnswer' as any },
-        { to: "/mapping-rules", icon: "rule", label: "Reglas de Mapeo", subject: 'Rule' as any },
-        { to: "/reports", icon: "bar_chart", label: "Reports", subject: 'Report' },
+        { to: "/tickets", icon: "confirmation_number", label: "Tickets", subject: 'Ticket' }, // Keep as default (read)
+        { to: "/users", icon: "group", label: "Usuarios", subject: 'User', action: 'manage' },
+        { to: "/roles", icon: "admin_panel_settings", label: "Roles y Permisos", subject: 'Role', action: 'manage' },
+        { to: "/permissions", icon: "lock_open", label: "Catálogo Permisos", subject: 'Permission', action: 'manage' },
+        { to: "/departments", icon: "corporate_fare", label: "Departamentos", subject: 'Department', action: 'manage' },
+        { to: "/companies", icon: "business", label: "Empresas", subject: 'Company' as any, action: 'manage' },
+        { to: "/categories", icon: "category", label: "Categorías", subject: 'Category', action: 'manage' },
+        { to: "/subcategories", icon: "segment", label: "Subcategorías", subject: 'Category' as any, action: 'manage' },
+        { to: "/workflows", icon: "schema", label: "Gestión de Flujos", subject: 'Workflow' as any, action: 'manage' },
+        { to: "/regions", icon: "map", label: "Regionales", subject: 'Regional' as any, action: 'manage' },
+        { to: "/zones", icon: "location_on", label: "Zonas", subject: 'Zone' as any, action: 'manage' },
+        { to: "/positions", icon: "badge", label: "Cargos", subject: 'Position' as any, action: 'manage' },
+        { to: "/profiles", icon: "badge", label: "Perfiles", subject: 'Profile' as any, action: 'manage' },
+        { to: "/organigrama", icon: "account_tree", label: "Organigrama", subject: 'Organigrama' as any, action: 'manage' },
+        { to: "/error-types", icon: "quick_phrases", label: "Tipos de Error", subject: 'FastAnswer' as any, action: 'manage' },
+        { to: "/mapping-rules", icon: "rule", label: "Reglas de Mapeo", subject: 'Rule' as any, action: 'manage' },
+        { to: "/reports", icon: "bar_chart", label: "Reports", subject: 'Report' }, // Reports might be read-only? Leaving default for now unless specified.
 
         { to: "/settings", icon: "settings", label: "Settings" }
     ];
