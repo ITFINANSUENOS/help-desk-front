@@ -17,8 +17,7 @@ export function TicketWorkflow({ ticket }: TicketWorkflowProps) {
             <div className="relative mb-6">
                 {ticket.subcategoryId ? (
                     <MermaidGraph
-                        subcategoryId={ticket.subcategoryId}
-                        currentStepId={ticket.workflowStepId}
+                        ticketId={ticket.id}
                     />
                 ) : (
                     <div className="text-sm text-gray-400 italic">Este ticket no tiene un flujo asociado.</div>

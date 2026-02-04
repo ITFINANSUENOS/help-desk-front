@@ -275,6 +275,16 @@ export const ticketService = {
         return flows.length > 0 ? flows[0] : null;
     },
 
+    async getTicketMermaidGraph(ticketId: number): Promise<string> {
+        try {
+            const response = await api.get<{ timeline_graph: string }>(`/tickets/${ticketId}/timeline-graph`);
+            return response.data.timeline_graph;
+        } catch (error) {
+            console.error("Error fetching mermaid graph from backend", error);
+            return "";
+        }
+    },
+
     async transitionTicket(dto: TransitionTicketDto, files: File[] = []): Promise<any> {
         let payload: any = dto;
         let headers = {};

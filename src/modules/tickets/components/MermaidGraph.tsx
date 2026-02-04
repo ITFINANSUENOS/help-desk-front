@@ -1,22 +1,22 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type MouseEvent } from 'react';
 import mermaid from 'mermaid';
 import { ticketService } from '../services/ticket.service';
+import { IconZoomIn, IconZoomOut, IconReload, IconArrowsMove } from '@tabler/icons-react';
 
 interface MermaidGraphProps {
-    subcategoryId?: number;
-    currentStepId: number;
-    historyStepIds?: number[];
+    ticketId: number;
 }
 
-interface WorkflowData {
-    pasos: any[];
-    rutas: any[];
-}
 
-export function MermaidGraph({ subcategoryId, currentStepId, historyStepIds = [] }: MermaidGraphProps) {
-    const [flowData, setFlowData] = useState<WorkflowData | null>(null);
+
+export function MermaidGraph({ ticketId }: MermaidGraphProps) {
+    const [graphDefinition, setGraphDefinition] = useState<string>('');
     const [loading, setLoading] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
+
+    const [transform, setTransform] = useState({ scale: 1, x: 0, y: 0 });
+    const [dragging, setDragging] = useState(false);
+    const [startPos, setStartPos] = useState({ x: 0, y: 0 });
 
     useEffect(() => {
         mermaid.initialize({
@@ -40,130 +40,43 @@ export function MermaidGraph({ subcategoryId, currentStepId, historyStepIds = []
     }, []);
 
     useEffect(() => {
-        if (!subcategoryId) return;
+        if (!ticketId) return;
         setLoading(true);
-        ticketService.getWorkflowGraph(subcategoryId)
-            .then(data => setFlowData(data))
+        ticketService.getTicketMermaidGraph(ticketId)
+            .then(data => {
+                setGraphDefinition(data);
+                // Reset transform when new graph loads
+                setTransform({ scale: 1, x: 0, y: 0 });
+            })
             .catch(err => console.error("Error loading workflow graph", err))
             .finally(() => setLoading(false));
-    }, [subcategoryId, currentStepId]);
+    }, [ticketId]);
 
     useEffect(() => {
-        if (!flowData || !containerRef.current) return;
+        if (!graphDefinition || !containerRef.current) return;
 
-        const buildGraph = async () => {
-            const lines: string[] = ['graph TD'];
-            const allStepsMap = new Map<number, any>();
-            const edges: string[] = [];
-            const stepsInRoutes = new Set<number>();
-            const routeStartMap = new Map<number, number>();
-
-            // 1. Process Routes
-            if (flowData.rutas) {
-                flowData.rutas.forEach((ruta: any) => {
-                    const rutaPasos = ruta.rutaPasos?.sort((a: any, b: any) => a.orden - b.orden) || [];
-                    if (rutaPasos.length > 0) {
-                        routeStartMap.set(ruta.id, rutaPasos[0].paso.id);
-                        rutaPasos.forEach((rp: any, index: number) => {
-                            const step = rp.paso;
-                            stepsInRoutes.add(step.id);
-                            allStepsMap.set(step.id, { ...step, isRoute: true });
-
-                            // Define node
-                            lines.push(`  step${step.id}["${escapeLabel(step.nombre)}"]`);
-
-                            // Internal route connection
-                            if (index < rutaPasos.length - 1) {
-                                const nextStepId = rutaPasos[index + 1].paso.id;
-                                edges.push(`  step${step.id} --> step${nextStepId}`);
-                            }
-                        });
-                    }
-                });
-            }
-
-            // 2. Process Main Steps
-            flowData.pasos.forEach((p: any) => {
-                if (!allStepsMap.has(p.id)) {
-                    allStepsMap.set(p.id, { ...p, isRoute: false });
-                    lines.push(`  step${p.id}["${escapeLabel(p.nombre)}"]`);
-                }
-            });
-
-            // 3. Process Transitions
-            const processTransitions = (stepId: number, transitions: any[]) => {
-                if (!transitions) return;
-                transitions.forEach((t: any) => {
-                    let targetId: number | undefined;
-
-                    if (t.rutaId) {
-                        targetId = routeStartMap.get(t.rutaId);
-                    } else if (t.pasoDestinoId) {
-                        targetId = t.pasoDestinoId;
-                    }
-
-                    if (targetId) {
-                        const label = t.condicionNombre || t.condicionClave || '';
-                        const arrow = label ? `-->|"${escapeLabel(label)}"|` : '-->';
-                        edges.push(`  step${stepId} ${arrow} step${targetId}`);
-                    }
-                });
-            };
-
-            // Main steps transitions
-            flowData.pasos.forEach((p: any) => {
-                processTransitions(p.id, p.transicionesOrigen);
-            });
-
-            // Route steps transitions (exits)
-            if (flowData.rutas) {
-                flowData.rutas.forEach((ruta: any) => {
-                    ruta.rutaPasos?.forEach((rp: any) => {
-                        if (rp.paso && rp.paso.transicionesOrigen) {
-                            processTransitions(rp.paso.id, rp.paso.transicionesOrigen);
-                        }
-                    });
-                });
-            }
-
-            // 4. Implicit Linear Connections (Main Flow)
-            const sortedMainSteps = [...flowData.pasos]
-                .filter(p => !stepsInRoutes.has(p.id))
-                .sort((a, b) => a.orden - b.orden);
-
-            sortedMainSteps.forEach((p, idx) => {
-                if ((!p.transicionesOrigen || p.transicionesOrigen.length === 0) && idx < sortedMainSteps.length - 1) {
-                    const nextStep = sortedMainSteps[idx + 1];
-                    // Check if edge already exists
-                    const edgeExists = edges.some(e => e.includes(`step${p.id} `) && e.includes(`step${nextStep.id}`));
-                    if (!edgeExists) {
-                        edges.push(`  step${p.id} --> step${nextStep.id}`);
-                    }
-                }
-            });
-
-            // Add all edges to lines
-            lines.push(...Array.from(new Set(edges)));
-
-            // 5. Styles
-            // Current Step
-            lines.push(`  style step${currentStepId} fill:#0ea5e9,stroke:#0369a1,stroke-width:3px,color:#fff`);
-
-            // Visited Steps
-            historyStepIds.forEach(id => {
-                if (id !== currentStepId) {
-                    lines.push(`  style step${id} fill:#dcfce7,stroke:#16a34a,stroke-width:2px`);
-                }
-            });
-
-            // Render
-            const graphDefinition = lines.join('\n');
+        const renderGraph = async () => {
             try {
                 // Clear previous result
                 if (containerRef.current) {
                     containerRef.current.innerHTML = '';
                     const { svg } = await mermaid.render(`mermaid-${Date.now()}`, graphDefinition);
                     containerRef.current.innerHTML = svg;
+
+                    // Remove fixed width/height attributes but DO NOT force 100% to avoid squashing
+                    const svgElement = containerRef.current.querySelector('svg');
+                    if (svgElement) {
+                        const viewBox = svgElement.getAttribute('viewBox');
+                        if (viewBox) {
+                            const [, , w, h] = viewBox.split(' ').map(Number);
+                            // Force physical size matching internal coordinates so it renders fully
+                            svgElement.setAttribute('width', `${w}px`);
+                            svgElement.setAttribute('height', `${h}px`);
+                        }
+
+                        // Let it be natural size so we can pan/zoom it
+                        svgElement.style.maxWidth = 'none';
+                    }
                 }
             } catch (error) {
                 console.error('Mermaid render error:', error);
@@ -173,23 +86,98 @@ export function MermaidGraph({ subcategoryId, currentStepId, historyStepIds = []
             }
         };
 
-        buildGraph();
+        renderGraph();
 
-    }, [flowData, currentStepId, historyStepIds]);
+    }, [graphDefinition]);
 
-    const escapeLabel = (str: string) => {
-        if (!str) return '';
-        return str.replace(/["#]/g, '');
+    useEffect(() => {
+        const node = containerRef.current;
+        if (!node) return;
+
+        const onWheel = (e: globalThis.WheelEvent) => {
+            e.preventDefault();
+            const scaleAmount = -e.deltaY * 0.001;
+            const newScale = Math.min(Math.max(0.1, transform.scale + scaleAmount), 20);
+
+            setTransform(prev => ({
+                ...prev,
+                scale: newScale
+            }));
+        };
+
+        // Attach non-passive listener to prevent default scrolling
+        node.addEventListener('wheel', onWheel, { passive: false });
+
+        return () => {
+            node.removeEventListener('wheel', onWheel);
+        };
+    }, [transform.scale]); // Re-bind if scale changes or use functional state update in handler (which we did) using ref might be better but dependency is fine here
+
+    const handleMouseDown = (e: MouseEvent) => {
+        setDragging(true);
+        setStartPos({ x: e.clientX - transform.x, y: e.clientY - transform.y });
     };
 
+    const handleMouseMove = (e: MouseEvent) => {
+        if (!dragging) return;
+        setTransform(prev => ({
+            ...prev,
+            x: e.clientX - startPos.x,
+            y: e.clientY - startPos.y
+        }));
+    };
+
+    const handleMouseUp = () => {
+        setDragging(false);
+    };
+
+    const zoomIn = () => setTransform(prev => ({ ...prev, scale: Math.min(prev.scale + 0.5, 20) }));
+    const zoomOut = () => setTransform(prev => ({ ...prev, scale: Math.max(prev.scale - 0.5, 0.1) }));
+    const resetZoom = () => setTransform({ scale: 1, x: 0, y: 0 });
+
     if (loading) return <div className="text-gray-400 text-xs text-center py-4">Cargando visualización del flujo...</div>;
-    if (!flowData) return <div className="text-gray-400 text-xs text-center py-4">No se encontraron datos del flujo.</div>;
+    if (!graphDefinition) return <div className="text-gray-400 text-xs text-center py-4">No se encontraron datos del flujo para visualizar.</div>;
 
     return (
-        <div
-            className="w-full overflow-x-auto p-4 bg-slate-50 border border-slate-100 rounded-lg flex justify-center min-h-[300px]"
-            ref={containerRef}
-            style={{ fontFamily: 'var(--font-sans)' }}
-        />
+        <div className="relative w-full h-[400px] border border-slate-200 rounded-lg bg-slate-50 overflow-hidden">
+            {/* Controls */}
+            <div className="absolute top-4 right-4 z-10 flex flex-col gap-2 bg-white p-2 rounded-md shadow-sm border border-slate-200">
+                <button onClick={zoomIn} className="p-1 hover:bg-slate-100 rounded text-slate-600" title="Zoom In">
+                    <IconZoomIn size={18} />
+                </button>
+                <button onClick={zoomOut} className="p-1 hover:bg-slate-100 rounded text-slate-600" title="Zoom Out">
+                    <IconZoomOut size={18} />
+                </button>
+                <button onClick={resetZoom} className="p-1 hover:bg-slate-100 rounded text-slate-600" title="Reset View">
+                    <IconReload size={18} />
+                </button>
+            </div>
+
+            {/* Hint */}
+            <div className="absolute top-4 left-4 z-10 px-3 py-1 bg-white/80 backdrop-blur rounded-full border border-slate-200 text-xs text-slate-500 pointer-events-none flex items-center gap-2">
+                <IconArrowsMove size={14} />
+                Usa el mouse para arrastrar y hacer zoom
+            </div>
+
+            <div
+                className="w-full h-full cursor-grab active:cursor-grabbing flex items-center justify-center origin-center"
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
+            // Wheel handled by useEffect
+            >
+                <div
+                    ref={containerRef}
+                    style={{
+                        transform: `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale})`,
+                        transition: dragging ? 'none' : 'transform 0.1s ease-out',
+                        transformOrigin: 'center center'
+                    }}
+                    // Add generic font fix and ensure container fits content
+                    className="font-sans w-max h-max"
+                />
+            </div>
+        </div>
     );
 }
