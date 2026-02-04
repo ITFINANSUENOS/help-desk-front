@@ -122,12 +122,19 @@ export interface UserCandidate {
     cargo?: string;
 }
 
+export interface MissingRole {
+    id: number;
+    name: string;
+    candidates: UserCandidate[];
+    allowSkip: boolean;
+}
+
 export interface LinearTransition {
     targetStepId: number;
     targetStepName: string;
     requiresManualAssignment: boolean;
     candidates: UserCandidate[];
-    missingRoles?: { id: number; name: string }[];
+    missingRoles?: MissingRole[];
 }
 
 export interface DecisionOption {
@@ -136,7 +143,7 @@ export interface DecisionOption {
     targetStepId: number;
     requiresManualAssignment: boolean;
     candidates?: UserCandidate[];
-    missingRoles?: { id: number; name: string }[];
+    missingRoles?: MissingRole[];
     isRoute?: boolean;
 }
 

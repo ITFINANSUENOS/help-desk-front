@@ -63,7 +63,11 @@ export const WorkflowDecisionModal: React.FC<WorkflowDecisionModalProps> = ({
 
         const assignmentsPayload: Record<string, number> = {};
         Object.entries(manualAssignments).forEach(([roleId, uId]) => {
-            if (uId) assignmentsPayload[roleId] = Number(uId);
+            if (uId === 'SKIP') {
+                assignmentsPayload[roleId] = -1;
+            } else if (uId) {
+                assignmentsPayload[roleId] = Number(uId);
+            }
         });
 
         onConfirm(transitionKey, userId, Object.keys(assignmentsPayload).length > 0 ? assignmentsPayload : undefined);
@@ -151,8 +155,9 @@ export const WorkflowDecisionModal: React.FC<WorkflowDecisionModalProps> = ({
                             <div className="space-y-3 pt-2">
                                 {missingRoles.map(role => (
                                     <div key={role.id} className="space-y-1">
-                                        <label htmlFor={`role-${role.id}`} className="text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                                            {role.name}
+                                        <label htmlFor={`role-${role.id}`} className="text-xs font-semibold text-gray-700 uppercase tracking-wider flex justify-between">
+                                            <span>{role.name}</span>
+                                            {role.allowSkip && <span className="text-gray-400 font-normal normal-case">(Opcional)</span>}
                                         </label>
                                         <div className="relative">
                                             <select
@@ -162,7 +167,10 @@ export const WorkflowDecisionModal: React.FC<WorkflowDecisionModalProps> = ({
                                                 onChange={(e) => setManualAssignments(prev => ({ ...prev, [role.id]: e.target.value }))}
                                             >
                                                 <option value="">Seleccione asignado...</option>
-                                                {stepCandidates.map((u) => (
+                                                {role.allowSkip && (
+                                                    <option value="SKIP">⚠️ No asignar (Omitir este cargo)</option>
+                                                )}
+                                                {role.candidates && role.candidates.map((u) => (
                                                     <option key={u.id} value={u.id.toString()}>
                                                         {u.nombre} {u.apellido} {u.cargo ? `(${u.cargo})` : ''}
                                                     </option>
