@@ -49,6 +49,7 @@ export const WorkflowDecisionModal: React.FC<WorkflowDecisionModalProps> = ({
         if (isDecisionMode && selectedDecision) {
             const decision = transitionData?.decisions?.find(d => d.decisionId === selectedDecision);
             setManualAssignments({}); // Reset assignments on decision change
+            setSelectedUser(''); // Reset selected user on decision change
             if (decision?.candidates) {
                 setStepCandidates(decision.candidates);
             } else {
@@ -194,6 +195,7 @@ export const WorkflowDecisionModal: React.FC<WorkflowDecisionModalProps> = ({
                             <div className="relative">
                                 <select
                                     id="user-select"
+                                    key={`user-select-${selectedDecision}`} // Force re-render on decision change
                                     className="block w-full rounded-lg border border-gray-200 bg-slate-50 p-3 text-base text-[#121617] focus:border-brand-teal focus:bg-white focus:outline-none focus:ring-1 focus:ring-brand-teal h-12 appearance-none"
                                     value={selectedUser}
                                     onChange={(e) => setSelectedUser(e.target.value)}
