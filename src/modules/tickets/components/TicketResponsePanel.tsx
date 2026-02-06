@@ -30,7 +30,9 @@ interface TicketResponsePanelProps {
     templateFields?: TemplateField[];
     isParallelStep?: boolean;
     stepRequiresSignature?: boolean;
-    status: TicketStatus; // Added status prop
+    stepRequiresSignature?: boolean;
+    status: TicketStatus;
+    isForcedClose?: boolean;
 }
 
 export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
@@ -44,7 +46,8 @@ export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
     templateFields = [],
     isParallelStep = false,
     stepRequiresSignature = false,
-    status
+    status,
+    isForcedClose = false
 }) => {
     const { user } = useAuth();
     const [comment, setComment] = useState('');
@@ -417,6 +420,23 @@ export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
                 </div>
             )}
 
+            {/* Forced Close Banner */}
+            {isForcedClose && (
+                <div className="border border-red-200 bg-red-50 rounded-lg p-4 mb-4">
+                    <div className="flex items-start gap-3">
+                        <span className="material-symbols-outlined text-red-600 mt-0.5">block</span>
+                        <div>
+                            <p className="text-sm font-medium text-red-800">
+                                Cierre Obligatorio del Ticket
+                            </p>
+                            <p className="text-sm mt-1 text-red-600">
+                                Este paso requiere el cierre definitivo del ticket. No es posible avanzar a otro paso.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* ACTION BUTTONS */}
             <div className="flex justify-end gap-3">
                 {isPaused ? (
@@ -431,7 +451,7 @@ export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
                 ) : (
                     <>
                         {/* Show "Crear Novedad" if not parallel step and active */}
-                        {!isParallelStep && (
+                        {!isParallelStep && !isForcedClose && (
                             <Button
                                 variant="secondary"
                                 onClick={() => setIsCreateNoveltyModalOpen(true)}
@@ -443,7 +463,17 @@ export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
                             </Button>
                         )}
 
-                        {isParallelStep ? (
+                        {isForcedClose ? (
+                            <Button
+                                variant="brand"
+                                onClick={handleCloseTicket}
+                                disabled={isSubmitting}
+                                className="bg-red-600 hover:bg-red-700 text-white border-red-600"
+                            >
+                                <span className="material-symbols-outlined text-sm mr-2">block</span>
+                                {isSubmitting ? 'Cerrando...' : 'Cierre Obligatorio y Finalizar'}
+                            </Button>
+                        ) : isParallelStep ? (
                             <Button
                                 variant="brand"
                                 onClick={() => setIsParallelModalOpen(true)}

@@ -84,6 +84,8 @@ export interface TicketDetail extends Ticket {
     priorityId?: number; // Add ID for editing
     isParallelStep?: boolean; // Indicates if current step is parallel
     stepRequiresSignature?: boolean;
+    allowsClosing?: boolean;
+    isForcedClose?: boolean;
 }
 
 export interface TicketTimelineItem {

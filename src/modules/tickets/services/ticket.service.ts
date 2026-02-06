@@ -35,6 +35,8 @@ interface RawWorkflowStep {
     descripcion: string;
     esParalelo?: boolean;
     requiereFirma?: boolean;
+    permiteCerrar?: number; // 1 or 0
+    cerrarTicketObligatorio?: boolean; // New flag
     // ...
 }
 
@@ -220,6 +222,8 @@ export const ticketService = {
             priorityId: t.prioridad?.id,
             isParallelStep: t.pasoActual?.esParalelo || false,
             stepRequiresSignature: t.pasoActual?.requiereFirma || false,
+            allowsClosing: !!t.pasoActual?.permiteCerrar || !!t.pasoActual?.cerrarTicketObligatorio,
+            isForcedClose: !!t.pasoActual?.cerrarTicketObligatorio,
             tags: (t.etiquetas || []).map(e => ({ id: e.id || 0, name: e.nombre, color: e.color }))
         };
     },
