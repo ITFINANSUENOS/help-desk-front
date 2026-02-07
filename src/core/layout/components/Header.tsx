@@ -1,5 +1,6 @@
 
 import { useAuth } from '../../../modules/auth/context/useAuth';
+import { NotificationsBell } from './NotificationsBell';
 
 interface HeaderProps {
     toggleMobileSidebar: () => void;
@@ -21,12 +22,7 @@ export function Header({ toggleMobileSidebar, title = 'Dashboard' }: HeaderProps
                 <h1 className="text-xl font-bold text-gray-800">{title}</h1>
             </div>
             <div className="flex items-center gap-6">
-                <button
-                    className="relative rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 focus:outline-none">
-                    <span className="material-symbols-outlined text-2xl">notifications</span>
-                    <span
-                        className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full border-2 border-white bg-brand-red"></span>
-                </button>
+                <NotificationsBell />
                 <div className="h-8 w-px bg-gray-200"></div>
                 <div className="flex items-center gap-3">
                     <div className="text-right">
