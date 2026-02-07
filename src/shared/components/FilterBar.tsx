@@ -20,7 +20,7 @@ interface FilterBarProps {
 export function FilterBar({ filters, className = '' }: FilterBarProps) {
     return (
         <div className={`rounded-xl border border-gray-200 bg-white p-4 shadow-sm ${className}`}>
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
                 {filters.map((filter, index) => {
                     if (filter.type === 'search') {
                         return (
@@ -41,9 +41,9 @@ export function FilterBar({ filters, className = '' }: FilterBarProps) {
 
                     if (filter.type === 'select') {
                         return (
-                            <div key={index} className="relative">
+                            <div key={index} className="relative w-full xl:w-auto">
                                 <select
-                                    className="appearance-none rounded-lg border-gray-200 bg-white py-2.5 pl-4 pr-10 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:border-brand-teal focus:ring-brand-teal"
+                                    className="block w-full appearance-none rounded-lg border-gray-200 bg-white py-2.5 pl-4 pr-10 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:border-brand-teal focus:ring-brand-teal"
                                     value={filter.value}
                                     onChange={(e) => {
                                         const value = e.target.value;
