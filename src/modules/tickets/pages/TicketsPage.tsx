@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ticketService } from '../services/ticket.service';
 import type { Ticket, TicketStatus, TicketPriority } from '../interfaces/Ticket';
@@ -29,7 +29,6 @@ export default function TicketsPage() {
     const [totalPages, setTotalPages] = useState(1);
 
     // Filters
-    const [viewFilter, setViewFilter] = useState<'all' | 'created' | 'assigned' | 'observed' | 'history'>('all');
     const [statusFilter, setStatusFilter] = useState<TicketStatus | 'Todos'>('Todos');
     const [priorityFilter, setPriorityFilter] = useState<TicketPriority | 'Todas'>('Todas');
     const [searchQuery, setSearchQuery] = useState('');
@@ -38,6 +37,55 @@ export default function TicketsPage() {
     useEffect(() => {
         setTitle('Gestión de Tickets');
     }, [setTitle]);
+
+    // Construir opciones de vista basadas en permisos
+    const viewOptions = useMemo(() => {
+        const options: Array<{ label: string; value: string }> = [];
+
+        if (can('view:all', 'Ticket')) {
+            options.push({ label: 'Todos los Tickets', value: 'all' });
+        }
+        if (can('view:created', 'Ticket')) {
+            options.push({ label: 'Creados por mí', value: 'created' });
+        }
+        if (can('view:assigned', 'Ticket')) {
+            options.push({ label: 'Asignados a mí', value: 'assigned' });
+        }
+        if (can('view:observed', 'Ticket')) {
+            options.push({ label: 'Observados', value: 'observed' });
+        }
+
+        // Historial: Participated tickets (not currently assigned)
+        if (can('view:assigned', 'Ticket') || can('view:created', 'Ticket')) {
+            options.push({ label: 'Historial', value: 'history' });
+        }
+
+        // Si no tiene ningún permiso específico, al menos mostrar 'creados'
+        if (options.length === 0) {
+            options.push({ label: 'Creados por mí', value: 'created' });
+        }
+
+        return options;
+    }, [can]);
+
+    // Initialize viewFilter with the first available option based on permissions
+    const [viewFilter, setViewFilter] = useState<'all' | 'created' | 'assigned' | 'observed' | 'history'>(() => {
+        // This will be computed after viewOptions is available, but we need a default
+        // We'll use 'created' as the safest default
+        return 'created' as 'all' | 'created' | 'assigned' | 'observed' | 'history';
+    });
+
+    // Track if we've initialized the filter to prevent overriding user selection
+    const filterInitialized = useRef(false);
+
+    // Sync viewFilter with the first available option ONLY on initial load
+    useEffect(() => {
+        if (viewOptions.length > 0 && !filterInitialized.current) {
+            const firstOption = viewOptions[0].value as 'all' | 'created' | 'assigned' | 'observed' | 'history';
+            setViewFilter(firstOption);
+            filterInitialized.current = true;
+        }
+    }, [viewOptions]);
 
     const fetchTickets = useCallback(async () => {
         try {
@@ -117,36 +165,6 @@ export default function TicketsPage() {
         }
         return colors[Math.abs(hash) % colors.length];
     };
-
-    // Construir opciones de vista basadas en permisos
-    const viewOptions = useMemo(() => {
-        const options: Array<{ label: string; value: string }> = [];
-
-        if (can('view:all', 'Ticket')) {
-            options.push({ label: 'Todos los Tickets', value: 'all' });
-        }
-        if (can('view:created', 'Ticket')) {
-            options.push({ label: 'Creados por mí', value: 'created' });
-        }
-        if (can('view:assigned', 'Ticket')) {
-            options.push({ label: 'Asignados a mí', value: 'assigned' });
-        }
-        if (can('view:observed', 'Ticket')) {
-            options.push({ label: 'Observados', value: 'observed' });
-        }
-
-        // Historial: Participated tickets (not currently assigned)
-        if (can('view:assigned', 'Ticket') || can('view:created', 'Ticket')) {
-            options.push({ label: 'Historial', value: 'history' });
-        }
-
-        // Si no tiene ningún permiso específico, al menos mostrar 'creados'
-        if (options.length === 0) {
-            options.push({ label: 'Creados por mí', value: 'created' });
-        }
-
-        return options;
-    }, [can]);
 
     const filterConfig: FilterConfig[] = [
         {
