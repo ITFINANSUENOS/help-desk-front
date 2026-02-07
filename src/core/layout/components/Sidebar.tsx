@@ -102,32 +102,33 @@ export function Sidebar({ isCollapsed, toggleCollapse, isMobileOpen, closeMobile
                 </div>
 
 
-                {/* Create Ticket Action */}
-                {hasPermission('Ticket', 'create') && (
-                    <div className={cn("px-3 pt-6 pb-2", isCollapsed ? "flex justify-center" : "")}>
-                        <Link
-                            to="/tickets/create"
-                            title="Crear Ticket"
-                            className={cn(
-                                "flex items-center justify-center rounded-lg bg-red-600 text-white font-medium shadow-lg hover:bg-red-700 transition-all hover:scale-[1.02] active:scale-[0.98]",
-                                isCollapsed ? "h-10 w-10 p-0" : "h-10 w-full gap-2 px-4"
-                            )}
-                            onClick={() => closeMobile()}
-                        >
-                            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>add</span>
-                            <span className={cn(
-                                "whitespace-nowrap transition-all duration-300",
-                                isCollapsed ? "w-0 opacity-0 hidden" : "w-auto opacity-100"
-                            )}>
-                                Crear Ticket
-                            </span>
-                        </Link>
-                    </div>
-                )}
-
                 {/* Navigation */}
                 <nav className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-6 no-scrollbar">
                     <ul className="space-y-2">
+                        {/* Create Ticket Action */}
+                        {hasPermission('Ticket', 'create') && (
+                            <li>
+                                <Link
+                                    to="/tickets/create"
+                                    title="Crear Ticket"
+                                    className={cn(
+                                        "group flex items-center rounded-lg py-3 transition-colors hover:bg-white/10",
+                                        isCollapsed ? "justify-center px-0" : "px-4 gap-3",
+                                        "text-brand-red hover:text-red-400" // Distinct color
+                                    )}
+                                    onClick={() => closeMobile()}
+                                >
+                                    <span className="material-symbols-outlined flex-shrink-0" style={{ fontSize: '22px' }}>add_circle</span>
+                                    <span className={cn(
+                                        "font-medium text-sm transition-all whitespace-nowrap",
+                                        isCollapsed ? "w-0 opacity-0 hidden" : "w-auto opacity-100"
+                                    )}>
+                                        Crear Ticket
+                                    </span>
+                                </Link>
+                            </li>
+                        )}
+
                         {filteredItems.map((item) => (
                             <li key={item.to}>
                                 <Link

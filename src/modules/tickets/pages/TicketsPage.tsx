@@ -2,7 +2,6 @@ import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ticketService } from '../services/ticket.service';
 import type { Ticket, TicketStatus, TicketPriority } from '../interfaces/Ticket';
-import { Button } from '../../../shared/components/Button';
 import { FilterBar, type FilterConfig } from '../../../shared/components/FilterBar';
 import { DataTable } from '../../../shared/components/DataTable';
 import { usePermissions } from '../../../shared/hooks/usePermissions';
@@ -232,12 +231,6 @@ export default function TicketsPage() {
                     <h2 className="text-2xl font-bold text-gray-900">Tickets</h2>
                     <p className="mt-1 text-sm text-gray-500">Gestiona solicitudes de soporte y sigue su progreso.</p>
                 </div>
-                {can('create', 'Ticket') && (
-                    <Button variant="brand" className="shadow-sm" onClick={() => navigate('/tickets/create')}>
-                        <span className="material-symbols-outlined mr-2">add</span>
-                        Crear Ticket
-                    </Button>
-                )}
             </div>
 
             <AdvancedTicketFilter
