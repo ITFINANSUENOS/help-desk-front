@@ -4,8 +4,9 @@
 export interface Notification {
     id: number;
     mensaje: string;
-    ticketId: number | null;
-    fechaNotificacion: Date;
+    ticketId?: number;
+    ticketTitulo?: string;
+    fechaNotificacion: Date | string;
     estado: number;
 }
 

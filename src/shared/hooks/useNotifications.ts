@@ -5,7 +5,7 @@ import type { Notification } from '../interfaces/notification.interface';
 import type { Toast } from './useToast';
 
 interface UseNotificationsOptions {
-    showToast?: (toast: Omit<Toast, 'id'>) => void;
+    showToast?: (toast: Omit<Toast, 'id'>, onDismiss?: () => void) => void;
 }
 
 /**
@@ -73,6 +73,19 @@ export function useNotifications(options?: UseNotificationsOptions) {
     }, []);
 
     /**
+     * Mark a notification as seen (Toast dismissed)
+     */
+    const markAsSeen = useCallback(async (id: number) => {
+        try {
+            await notificationsApi.markAsSeen(id);
+            // Update local state: 3 -> 2
+            setNotifications(prev => prev.map(n => n.id === id && n.estado === 3 ? { ...n, estado: 2 } : n));
+        } catch (error) {
+            console.error('[useNotifications] Error marking as seen:', error);
+        }
+    }, []);
+
+    /**
      * Handle new notification from WebSocket
      */
     const handleNewNotification = useCallback((data: any) => {
@@ -80,11 +93,11 @@ export function useNotifications(options?: UseNotificationsOptions) {
 
         // Add to notifications list
         const newNotification: Notification = {
-            id: Date.now(), // Temporary ID until we fetch from API
+            id: data.id || Date.now(),
             mensaje: data.mensaje,
             ticketId: data.ticketId,
             fechaNotificacion: new Date(data.fecha),
-            estado: 2,
+            estado: 3, // New / Toast Pending
         };
 
         setNotifications(prev => [newNotification, ...prev]);
@@ -97,9 +110,9 @@ export function useNotifications(options?: UseNotificationsOptions) {
                 type: 'info',
                 ticketId: data.ticketId,
                 duration: 6000,
-            });
+            }, () => markAsSeen(newNotification.id));
         }
-    }, [showToast]);
+    }, [showToast, markAsSeen]);
 
     /**
      * Handle ticket overdue notification
@@ -114,6 +127,9 @@ export function useNotifications(options?: UseNotificationsOptions) {
                 type: 'warning',
                 ticketId: data.ticketId,
                 duration: 8000,
+            }, () => {
+                // If we had a real notification ID here, we would markAsSeen
+                // data.id might be available if backend sends it
             });
         }
     }, [showToast]);
@@ -126,11 +142,11 @@ export function useNotifications(options?: UseNotificationsOptions) {
 
         // Add to notifications list
         const newNotification: Notification = {
-            id: Date.now(), // Temporary ID until we fetch from API
+            id: data.id || Date.now(),
             mensaje: data.mensaje,
             ticketId: data.ticketId,
             fechaNotificacion: new Date(data.fecha),
-            estado: 2,
+            estado: 3,
         };
 
         setNotifications(prev => [newNotification, ...prev]);
@@ -143,9 +159,9 @@ export function useNotifications(options?: UseNotificationsOptions) {
                 type: 'success',
                 ticketId: data.ticketId,
                 duration: 6000,
-            });
+            }, () => markAsSeen(newNotification.id));
         }
-    }, [showToast]);
+    }, [showToast, markAsSeen]);
 
     useEffect(() => {
         // Connect to WebSocket

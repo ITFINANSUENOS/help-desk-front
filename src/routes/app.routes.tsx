@@ -28,6 +28,7 @@ const ErrorTypesPage = lazy(() => import('../modules/error-types/pages/ErrorType
 const WorkflowListPage = lazy(() => import('../modules/workflows/pages/WorkflowListPage'));
 const WorkflowStepsPage = lazy(() => import('../modules/workflows/pages/WorkflowStepsPage').then(module => ({ default: module.WorkflowStepsPage })));
 const MappingRulesPage = lazy(() => import('../modules/mapping-rules/pages/MappingRulesPage'));
+const NotificationsPage = lazy(() => import('../modules/notifications/pages/NotificationsPage'));
 
 
 export const appRoutes: RouteObject[] = [
@@ -218,6 +219,14 @@ export const appRoutes: RouteObject[] = [
                         element: (
                             <Suspense fallback={<PageLoader />}>
                                 <MappingRulesPage />
+                            </Suspense>
+                        )
+                    },
+                    {
+                        path: '/notifications',
+                        element: (
+                            <Suspense fallback={<PageLoader />}>
+                                <NotificationsPage />
                             </Suspense>
                         )
                     },

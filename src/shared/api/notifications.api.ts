@@ -12,11 +12,15 @@ class NotificationsApiService {
      * Get paginated notifications for the current user.
      * @param page - Page number (default: 1)
      * @param limit - Items per page (default: 20)
+     * @param status - Optional status filter (2=Unread/Seen, 1=Read)
      */
-    async getNotifications(page: number = 1, limit: number = 20): Promise<NotificationsResponse> {
-        const response = await api.get<NotificationsResponse>(this.baseUrl, {
-            params: { page, limit }
-        });
+    async getNotifications(page: number = 1, limit: number = 20, status?: number): Promise<NotificationsResponse> {
+        const params: any = { page, limit };
+        if (status !== undefined) {
+            params.status = status;
+        }
+
+        const response = await api.get<NotificationsResponse>(this.baseUrl, { params });
         return response.data;
     }
 
@@ -29,11 +33,19 @@ class NotificationsApiService {
     }
 
     /**
-     * Mark a specific notification as read.
+     * Mark a specific notification as read (State 1).
      * @param id - Notification ID
      */
     async markAsRead(id: number): Promise<void> {
         await api.patch(`${this.baseUrl}/${id}/read`);
+    }
+
+    /**
+     * Mark a specific notification as seen (State 3 -> 2).
+     * @param id - Notification ID
+     */
+    async markAsSeen(id: number): Promise<void> {
+        await api.patch(`${this.baseUrl}/${id}/seen`);
     }
 
     /**

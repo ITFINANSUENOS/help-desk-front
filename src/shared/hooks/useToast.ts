@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 
 export interface Toast {
     id: string;
@@ -16,14 +16,28 @@ let toastCounter = 0;
  */
 export function useToast() {
     const [toasts, setToasts] = useState<Toast[]>([]);
+    const callbacksRef = useRef<Record<string, () => void>>({});
 
-    const showToast = useCallback((toast: Omit<Toast, 'id'>) => {
+    const removeToast = useCallback((id: string) => {
+        setToasts(prev => prev.filter(t => t.id !== id));
+        // Execute callback if exists
+        if (callbacksRef.current[id]) {
+            callbacksRef.current[id]();
+            delete callbacksRef.current[id];
+        }
+    }, []);
+
+    const showToast = useCallback((toast: Omit<Toast, 'id'>, onDismiss?: () => void) => {
         const id = `toast-${Date.now()}-${toastCounter++}`;
         const newToast: Toast = {
             id,
             ...toast,
             duration: toast.duration ?? 5000, // Default 5 seconds
         };
+
+        if (onDismiss) {
+            callbacksRef.current[id] = onDismiss;
+        }
 
         setToasts(prev => [...prev, newToast]);
 
@@ -33,11 +47,7 @@ export function useToast() {
                 removeToast(id);
             }, newToast.duration);
         }
-    }, []);
-
-    const removeToast = useCallback((id: string) => {
-        setToasts(prev => prev.filter(t => t.id !== id));
-    }, []);
+    }, [removeToast]);
 
     return {
         toasts,
