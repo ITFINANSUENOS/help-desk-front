@@ -358,7 +358,26 @@ export default function TicketsPage() {
                     {
                         key: 'lastUpdated',
                         header: 'Última Actualización',
-                        render: (ticket: Ticket) => <span className="text-gray-500">{ticket.lastUpdated}</span>
+                        render: (ticket: Ticket) => {
+                            if (!ticket.lastUpdated) return <span className="text-gray-500">-</span>;
+                            const date = new Date(ticket.lastUpdated);
+                            const formattedDate = date.toLocaleDateString('es-CO', {
+                                year: 'numeric',
+                                month: '2-digit',
+                                day: '2-digit'
+                            });
+                            const formattedTime = date.toLocaleTimeString('es-CO', {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                hour12: false
+                            });
+                            return (
+                                <div className="text-gray-500">
+                                    <div>{formattedDate}</div>
+                                    <div className="text-xs text-gray-400">{formattedTime}</div>
+                                </div>
+                            );
+                        }
                     },
                     {
                         key: 'actions',
