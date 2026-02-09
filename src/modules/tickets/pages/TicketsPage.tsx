@@ -100,7 +100,7 @@ export default function TicketsPage() {
                 limit,
                 ...advancedFilters
             };
-            console.log('[TicketsPage] Fetching with params:', params);
+
             const response = await ticketService.getTickets(params);
             setTickets(response.data);
             setTotal(response.meta.total);

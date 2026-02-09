@@ -59,7 +59,7 @@ export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
     const isClosed = status === 'Cerrado';
 
     // DEBUG: Check isParallelStep value
-    console.log('🔍 TicketResponsePanel - isParallelStep:', isParallelStep, 'ticketId:', ticketId);
+
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Signature State

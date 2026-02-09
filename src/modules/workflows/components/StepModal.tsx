@@ -42,7 +42,7 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
 
             // Only load/reset data if we haven't loaded this step yet
             if (currentId !== lastStepIdRef.current) {
-                console.log('[StepModal] Initializing form for step ID:', currentId);
+
                 lastStepIdRef.current = currentId;
 
                 loadCatalogs();
@@ -51,7 +51,7 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
                 if (step) {
                     // Fetch fresh data for step to get standard DTO structure
                     stepService.getStep(step.id).then(fullStep => {
-                        console.log('[StepModal] Loaded full step data:', fullStep);
+
                         reset({
                             flujoId: fullStep.flujoId,
                             orden: fullStep.orden,
@@ -90,7 +90,7 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
                         });
                     });
                 } else {
-                    console.log('[StepModal] Resetting for new step');
+
                     reset({
                         flujoId,
                         orden: 0,
@@ -121,13 +121,8 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
     const onSubmit = async (data: CreateStepDto) => {
         try {
             // DEBUG: Log form data to verify all fields are present
-            console.log('[StepModal] Form data before processing:', {
-                nombre: data.nombre,
-                orden: data.orden,
-                camposCount: data.campos?.length || 0,
-                firmasCount: data.firmas?.length || 0,
-                fullData: data
-            });
+
+
 
             data.orden = Number(data.orden);
             data.flujoId = Number(flujoId);
@@ -138,7 +133,7 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
             data.permiteCerrar = data.permiteCerrar ? 1 : 0;
             data.requiereCamposPlantilla = data.requiereCamposPlantilla ? 1 : 0;
 
-            console.log('[StepModal] Sending to API:', data);
+
 
             let stepId = step?.id;
 

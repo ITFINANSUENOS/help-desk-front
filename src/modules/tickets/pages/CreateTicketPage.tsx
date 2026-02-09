@@ -376,10 +376,10 @@ export default function CreateTicketPage() {
                                                     className="w-full rounded-lg border-blue-200 px-4 py-3 text-sm focus:border-blue-500 focus:ring-blue-500 shadow-sm font-medium bg-white"
                                                     value={selectedDecision?.decisionId || ''}
                                                     onChange={(e) => {
-                                                        console.log("onChange Value:", e.target.value);
-                                                        console.log("Decisions:", availableDecisions);
+
+
                                                         const dec = availableDecisions.find(d => String(d.decisionId) === e.target.value);
-                                                        console.log("Found Decision:", dec);
+
                                                         setSelectedDecision(dec || null);
                                                         // Update manual assignment requirements based on decision
                                                         if (dec) {

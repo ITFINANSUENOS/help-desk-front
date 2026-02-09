@@ -77,7 +77,7 @@ export function useNotifications(options?: UseNotificationsOptions) {
      * Handle new notification from WebSocket
      */
     const handleNewNotification = useCallback((data: any) => {
-        console.log('[useNotifications] New notification received:', data);
+
 
         // Add to notifications list
         const newNotification: Notification = {
@@ -106,7 +106,7 @@ export function useNotifications(options?: UseNotificationsOptions) {
      * Handle ticket overdue notification
      */
     const handleTicketOverdue = useCallback((data: any) => {
-        console.log('[useNotifications] Ticket overdue:', data);
+
 
         // Show warning toast if available
         if (showToast) {
@@ -126,7 +126,7 @@ export function useNotifications(options?: UseNotificationsOptions) {
      * Handle ticket closed notification
      */
     const handleTicketClosed = useCallback((data: any) => {
-        console.log('[useNotifications] Ticket closed:', data);
+
 
         // Add to notifications list
         const newNotification: Notification = {

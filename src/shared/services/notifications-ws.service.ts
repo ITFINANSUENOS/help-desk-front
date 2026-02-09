@@ -35,11 +35,11 @@ class NotificationsWebSocketService {
         });
 
         this.socket.on('connect', () => {
-            console.log('[WebSocket] Connected:', this.socket?.id);
+
         });
 
-        this.socket.on('disconnect', (reason) => {
-            console.log('[WebSocket] Disconnected:', reason);
+        this.socket.on('disconnect', (_reason) => {
+
         });
 
         this.socket.on('connect_error', (error) => {
@@ -61,7 +61,7 @@ class NotificationsWebSocketService {
         if (this.socket) {
             this.socket.disconnect();
             this.socket = null;
-            console.log('[WebSocket] Disconnected manually');
+
         }
     }
 

@@ -59,7 +59,7 @@ export default function OrganigramaPage() {
             // Root nodes usually don't have OrgID as they aren't subordinates in this view context,
             // or if they are top level.
             // But if we want to delete a relationship, we need to click the child node that represents the link.
-            // console.log('Clicked node without parent relation (Root or unlinked):', node);
+
         }
     };
 

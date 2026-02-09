@@ -183,9 +183,9 @@ export const ticketService = {
         const response = await api.get<RawTicket>(`/tickets/${id}`);
         const t = response.data;
 
-        console.log('🔍 RAW TICKET DATA:', t);
-        console.log('🔍 Paso Actual:', t.pasoActual);
-        console.log('🔍 Es Paralelo Raw:', t.pasoActual?.esParalelo);
+
+
+
 
         const customerName = t.usuario ? `${t.usuario.nombre} ${t.usuario.apellido}` : (t.creadorNombre || 'Unknown');
         const categoryName = t.categoria ? t.categoria.nombre : 'General';
@@ -232,7 +232,7 @@ export const ticketService = {
     },
     async getTicketTimeline(id: number): Promise<TicketTimelineItem[]> {
         const response = await api.get<RawTimelineItem[]>(`/tickets/${id}/history`);
-        console.log('Raw Timeline Data:', response.data);
+
         return response.data.map((item, index) => {
             const authorName = item.actor?.nombre || item.autor || 'Unknown';
             const content = item.descripcion || item.contenido || '';
