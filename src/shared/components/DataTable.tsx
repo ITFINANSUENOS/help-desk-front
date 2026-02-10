@@ -44,7 +44,7 @@ export function DataTable<T>({
         <div className={`overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm ${className}`}>
             <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm text-gray-600">
-                    <thead className="bg-gray-50 text-xs font-semibold uppercase text-gray-500">
+                    <thead className="bg-gray-50 text-xs font-semibold uppercase text-gray-500 sticky top-0 z-10">
                         <tr>
                             {columns.map((col) => (
                                 <th
@@ -73,7 +73,7 @@ export function DataTable<T>({
                             data.map((item) => (
                                 <tr
                                     key={getRowKey(item)}
-                                    className={onRowClick ? 'hover:bg-gray-50 cursor-pointer' : 'hover:bg-gray-50'}
+                                    className={onRowClick ? 'hover:bg-gray-50 cursor-pointer transition-colors' : 'hover:bg-gray-50 transition-colors'}
                                     onClick={() => onRowClick?.(item)}
                                 >
                                     {columns.map((col) => (

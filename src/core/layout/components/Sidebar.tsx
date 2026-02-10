@@ -112,15 +112,15 @@ export function Sidebar({ isCollapsed, toggleCollapse, isMobileOpen, closeMobile
                                     to="/tickets/create"
                                     title="Crear Ticket"
                                     className={cn(
-                                        "group flex items-center rounded-lg py-3 transition-colors hover:bg-white/10",
+                                        "group flex items-center rounded-lg py-3 transition-all",
                                         isCollapsed ? "justify-center px-0" : "px-4 gap-3",
-                                        "text-brand-red hover:text-red-400" // Distinct color
+                                        "bg-brand-blue hover:bg-brand-accent text-white shadow-md hover:shadow-lg"
                                     )}
                                     onClick={() => closeMobile()}
                                 >
-                                    <span className="material-symbols-outlined flex-shrink-0" style={{ fontSize: '22px' }}>add_circle</span>
+                                    <span className="material-symbols-outlined flex-shrink-0" style={{ fontSize: '22px', fontVariationSettings: '"FILL" 1' }}>add_circle</span>
                                     <span className={cn(
-                                        "font-medium text-sm transition-all whitespace-nowrap",
+                                        "font-semibold text-sm transition-all whitespace-nowrap",
                                         isCollapsed ? "w-0 opacity-0 hidden" : "w-auto opacity-100"
                                     )}>
                                         Crear Ticket
@@ -137,11 +137,11 @@ export function Sidebar({ isCollapsed, toggleCollapse, isMobileOpen, closeMobile
                                     className={cn(
                                         "group flex items-center rounded-lg py-3 text-white/80 transition-colors hover:bg-white/10 hover:text-white",
                                         isCollapsed ? "justify-center px-0" : "px-4 gap-3",
-                                        location.pathname === item.to && "bg-brand-accent text-white"
+                                        location.pathname === item.to && "bg-brand-accent text-white border-l-4 border-white"
                                     )}
                                     onClick={() => closeMobile()} // Close on navigation in mobile
                                 >
-                                    <span className="material-symbols-outlined flex-shrink-0" style={{ fontSize: '22px' }}>{item.icon}</span>
+                                    <span className="material-symbols-outlined flex-shrink-0" style={{ fontSize: '22px', fontVariationSettings: '"FILL" 1' }}>{item.icon}</span>
                                     <span className={cn(
                                         "font-medium text-sm transition-all whitespace-nowrap",
                                         isCollapsed ? "w-0 opacity-0 hidden" : "w-auto opacity-100"
@@ -165,7 +165,7 @@ export function Sidebar({ isCollapsed, toggleCollapse, isMobileOpen, closeMobile
                         href="#"
                         title="Support Center"
                     >
-                        <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>help</span>
+                        <span className="material-symbols-outlined" style={{ fontSize: '20px', fontVariationSettings: '"FILL" 1' }}>help</span>
                         {!isCollapsed && <span>Support Center</span>}
                     </a>
 

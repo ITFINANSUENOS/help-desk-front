@@ -35,9 +35,9 @@ export default function DashboardPage() {
 
     return (
         <>
-            <div className="mb-8">
+            <div className="mb-6">
                 <h2 className="text-2xl font-bold text-gray-900">Bienvenido, {user?.nombre} {user?.apellido}! 👋</h2>
-                <p className="mt-1 text-gray-500">Aquí tienes un resumen de tu actividad.</p>
+                <p className="mt-2 text-gray-500">Aquí tienes un resumen de tu actividad.</p>
             </div>
 
             {/* Stats Grid */}
@@ -68,6 +68,7 @@ export default function DashboardPage() {
                     footerLabel="Activos en tu bandeja"
                     footerIcon="priority_high"
                     footerColor="text-brand-red"
+                    isUrgent={true}
                 />
                 <StatsCard
                     title="Total Tickets"

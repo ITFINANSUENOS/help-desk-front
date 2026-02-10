@@ -1,6 +1,8 @@
 
+
 import { useAuth } from '../../../modules/auth/context/useAuth';
 import { NotificationsBell } from './NotificationsBell';
+import { UserDropdown } from './UserDropdown';
 
 interface HeaderProps {
     toggleMobileSidebar: () => void;
@@ -17,31 +19,18 @@ export function Header({ toggleMobileSidebar, title = 'Dashboard' }: HeaderProps
                     onClick={toggleMobileSidebar}
                     className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg lg:hidden"
                 >
-                    <span className="material-symbols-outlined">menu</span>
+                    <span className="material-symbols-outlined" style={{ fontVariationSettings: '"FILL" 1' }}>menu</span>
                 </button>
                 <h1 className="text-xl font-bold text-gray-800">{title}</h1>
             </div>
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-4">
                 <NotificationsBell />
                 <div className="h-8 w-px bg-gray-200"></div>
-                <div className="flex items-center gap-3">
-                    <div className="text-right">
-                        <p className="text-sm font-bold text-gray-800">
-                            {user?.nombre} {user?.apellido}
-                        </p>
-                        <p className="text-xs text-capitalize text-gray-500">
-                            {user?.role?.nombre || 'Sin Rol'}
-                        </p>
-                    </div>
-                    {/* Logout Button (Temporary location or interactive dropdown) */}
-                    <button
-                        onClick={logout}
-                        title="Cerrar Sesión"
-                        className="h-10 w-10 rounded-full border-2 border-white shadow-sm bg-brand-blue flex items-center justify-center text-white hover:bg-brand-red transition-colors"
-                    >
-                        <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>logout</span>
-                    </button>
-                </div>
+                <UserDropdown
+                    userName={`${user?.nombre} ${user?.apellido}`}
+                    userRole={user?.role?.nombre || 'Sin Rol'}
+                    onLogout={logout}
+                />
             </div>
         </header>
     );

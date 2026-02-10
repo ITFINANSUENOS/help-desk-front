@@ -13,6 +13,7 @@ interface StatsCardProps {
     footerIcon?: string;
     footerLabel?: string;
     footerColor?: string;
+    isUrgent?: boolean; // Highlights the card with urgent styling
 }
 
 export function StatsCard({
@@ -26,23 +27,30 @@ export function StatsCard({
     trendColor = "text-green-600",
     footerIcon,
     footerLabel,
-    footerColor = "text-gray-400"
+    footerColor = "text-gray-400",
+    isUrgent = false
 }: StatsCardProps) {
     return (
-        <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
+        <div className={cn(
+            "rounded-xl border bg-white p-6 shadow-sm transition-all",
+            isUrgent ? "border-red-200 bg-red-50/30" : "border-gray-100"
+        )}>
             <div className="flex items-center justify-between">
                 <div>
                     <p className="text-sm font-medium text-gray-500">{title}</p>
-                    <p className="mt-2 text-3xl font-bold text-gray-800">{value}</p>
+                    <p className={cn(
+                        "mt-2 text-3xl font-bold",
+                        isUrgent ? "text-brand-red" : "text-gray-800"
+                    )}>{value}</p>
                 </div>
-                <div className={cn("flex h-12 w-12 items-center justify-center rounded-lg", iconBgColor, iconColor)}>
-                    <span className="material-symbols-outlined">{icon}</span>
+                <div className={cn("flex h-14 w-14 items-center justify-center rounded-lg", iconBgColor, iconColor)}>
+                    <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: '"FILL" 1' }}>{icon}</span>
                 </div>
             </div>
             {(trend || footerLabel) && (
                 <div className={cn("mt-4 flex items-center text-xs font-medium", trend ? trendColor : footerColor)}>
                     {(trend || footerIcon) && (
-                        <span className="material-symbols-outlined mr-1 text-sm">{trend ? (Number(trend.replace(/\D/g, '')) > 0 ? "trending_up" : "trending_down") : footerIcon}</span>
+                        <span className="material-symbols-outlined mr-1 text-sm" style={{ fontVariationSettings: '"FILL" 1' }}>{trend ? (Number(trend.replace(/\D/g, '')) > 0 ? "trending_up" : "trending_down") : footerIcon}</span>
                     )}
                     <span>{trendLabel || footerLabel}</span>
                 </div>
