@@ -56,13 +56,18 @@ export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
     const [comment, setComment] = useState('');
     const [files, setFiles] = useState<File[]>([]);
     const [dynamicValues, setDynamicValues] = useState<{ campoId: number; valor: string }[]>([]);
+    const [originalStepDescription, setOriginalStepDescription] = useState<string>('');
 
     // Pre-load step description into comment editor
     React.useEffect(() => {
-        if (stepDescription && !comment) {
-            setComment(stepDescription);
+        if (stepDescription) {
+            // Only set if comment is empty OR if stepDescription changed (new step)
+            if (!comment || comment === originalStepDescription) {
+                setComment(stepDescription);
+                setOriginalStepDescription(stepDescription);
+            }
         }
-    }, [stepDescription]);
+    }, [stepDescription]); // Removed 'comment' from dependencies to avoid infinite loop
 
 
     const isPaused = status === 'Pausado';
@@ -136,9 +141,31 @@ export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
 
     // Handler: Confirm Close
     const handleConfirmClose = async () => {
-        const cleanComment = comment.replace(/<[^>]*>/g, '').trim();
+        // Helper to decode HTML entities and strip tags
+        const cleanText = (html: string) => {
+            const text = html.replace(/<[^>]*>/g, '').trim();
+            return text
+                .replace(/&nbsp;/g, ' ')
+                .replace(/&amp;/g, '&')
+                .replace(/&lt;/g, '<')
+                .replace(/&gt;/g, '>')
+                .replace(/&quot;/g, '"')
+                .replace(/&#39;/g, "'")
+                .replace(/\s+/g, ' ')
+                .trim();
+        };
+
+        const cleanComment = cleanText(comment);
+        const cleanOriginal = cleanText(originalStepDescription);
+
         if (!cleanComment) {
             toast.warning('Por favor escriba una nota de cierre.');
+            return;
+        }
+
+        // Check if user has modified the pre-loaded template (compare plain text, not HTML)
+        if (originalStepDescription && cleanComment === cleanOriginal) {
+            toast.warning('Por favor modifique o agregue contenido a la plantilla antes de cerrar el ticket.');
             return;
         }
 
@@ -160,9 +187,33 @@ export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
 
     // Handler for "Enviar" / "Avanzar" click
     const handleMainAction = async () => {
-        const cleanComment = comment.replace(/<[^>]*>/g, '').trim();
+        // Helper to decode HTML entities and strip tags
+        const cleanText = (html: string) => {
+            const text = html.replace(/<[^>]*>/g, '').trim();
+            // Decode common HTML entities
+            return text
+                .replace(/&nbsp;/g, ' ')
+                .replace(/&amp;/g, '&')
+                .replace(/&lt;/g, '<')
+                .replace(/&gt;/g, '>')
+                .replace(/&quot;/g, '"')
+                .replace(/&#39;/g, "'")
+                .replace(/\s+/g, ' ') // Normalize whitespace
+                .trim();
+        };
+
+        const cleanComment = cleanText(comment);
+        const cleanOriginal = cleanText(originalStepDescription);
+
         if (!cleanComment) {
             toast.warning('Por favor escriba un comentario o respuesta.');
+            return;
+        }
+
+        // Check if user has modified the pre-loaded template (compare plain text, not HTML)
+        if (originalStepDescription && cleanComment === cleanOriginal) {
+            const message = 'Por favor modifique o agregue contenido a la plantilla antes de avanzar.';
+            toast.warning(message);
             return;
         }
 
