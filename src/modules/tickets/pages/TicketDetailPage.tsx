@@ -264,6 +264,7 @@ export default function TicketDetailPage() {
                     status={ticket.status}
                     isForcedClose={ticket.isForcedClose}
                     allowsClosing={ticket.allowsClosing}
+                    stepDescription={ticket.stepDescription}
                 />
             </div>
 

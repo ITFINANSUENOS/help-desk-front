@@ -88,6 +88,7 @@ export interface TicketDetail extends Ticket {
     stepRequiresSignature?: boolean;
     allowsClosing?: boolean;
     isForcedClose?: boolean;
+    stepDescription?: string; // HTML content from pasoActual.descripcion
 }
 
 export interface TicketTimelineItem {
@@ -140,7 +141,6 @@ export interface LinearTransition {
     requiresManualAssignment: boolean;
     candidates: UserCandidate[];
     candidateIds?: number[]; // Legacy support or simplified check
-    candidates: UserCandidate[];
     missingRoles?: MissingRole[];
     bossCandidates?: UserCandidate[];
     currentBossId?: number;
@@ -153,7 +153,6 @@ export interface DecisionOption {
     targetStepId: number;
     requiresManualAssignment: boolean;
     candidates?: UserCandidate[];
-    missingRoles?: MissingRole[];
     missingRoles?: MissingRole[];
     isRoute?: boolean;
     bossCandidates?: UserCandidate[];
@@ -180,7 +179,6 @@ export interface TransitionTicketDto {
     targetUserId?: number;
     templateValues?: TemplateFieldValue[];
     attachmentIds?: number[]; // IDs of uploaded files
-    signature?: string; // base64
     signature?: string; // base64
     manualAssignments?: Record<string, number>;
     usuarioJefeAprobadorId?: number;

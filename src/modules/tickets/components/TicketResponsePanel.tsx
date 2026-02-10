@@ -33,6 +33,7 @@ interface TicketResponsePanelProps {
     status: TicketStatus;
     isForcedClose?: boolean;
     allowsClosing?: boolean;
+    stepDescription?: string;
 }
 
 export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
@@ -48,12 +49,21 @@ export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
     stepRequiresSignature = false,
     status,
     isForcedClose = false,
-    allowsClosing = false
+    allowsClosing = false,
+    stepDescription
 }) => {
     const { user } = useAuth();
     const [comment, setComment] = useState('');
     const [files, setFiles] = useState<File[]>([]);
     const [dynamicValues, setDynamicValues] = useState<{ campoId: number; valor: string }[]>([]);
+
+    // Pre-load step description into comment editor
+    React.useEffect(() => {
+        if (stepDescription && !comment) {
+            setComment(stepDescription);
+        }
+    }, [stepDescription]);
+
 
     const isPaused = status === 'Pausado';
     const isClosed = status === 'Cerrado';

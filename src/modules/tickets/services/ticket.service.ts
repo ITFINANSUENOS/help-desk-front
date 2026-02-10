@@ -227,6 +227,7 @@ export const ticketService = {
             stepRequiresSignature: t.pasoActual?.requiereFirma || false,
             allowsClosing: !!t.pasoActual?.permiteCerrar || !!t.pasoActual?.cerrarTicketObligatorio,
             isForcedClose: !!t.pasoActual?.cerrarTicketObligatorio,
+            stepDescription: t.pasoActual?.descripcion || '',
             tags: (t.etiquetas || []).map(e => ({ id: e.id || 0, name: e.nombre, color: e.color }))
         };
     },
