@@ -1,5 +1,5 @@
 import { api } from '../../../core/api/api';
-import type { User, UserFilter, UserListResponse, CreateUserDto, UpdateUserDto } from '../interfaces/User';
+import type { User, UserFilter, UserListResponse, CreateUserDto, UpdateUserDto, UserSelectResult } from '../interfaces/User';
 
 export const userService = {
     async getUsers(filter: UserFilter = {}): Promise<UserListResponse> {
@@ -34,14 +34,15 @@ export const userService = {
         // Include relations
         params.included = 'role,regional,cargo,departamento';
 
-        const response = await api.get<{ data?: User[]; total?: number; page?: number; limit?: number; totalPages?: number; meta?: { total: number; page: number; limit: number; totalPages: number } }>('/users', { params });
+        const response = await api.get<{ data?: User[]; total?: number; page?: number; limit?: number; totalPages?: number; meta?: { total: number; page: number; limit: number; totalPages: number; lastPage?: number } }>('/users', { params });
 
         // Handle pagination metadata
         const data: User[] = response.data.data || (Array.isArray(response.data) ? response.data : []);
         const total = response.data.total ?? response.data.meta?.total ?? data.length;
         const page = response.data.page ?? response.data.meta?.page ?? 1;
         const limit = response.data.limit ?? response.data.meta?.limit ?? 10;
-        const totalPages = response.data.totalPages ?? response.data.meta?.totalPages ?? Math.ceil(total / limit);
+        const lastPage = response.data.meta?.lastPage ?? Math.ceil(total / limit);
+        const totalPages = response.data.totalPages ?? response.data.meta?.totalPages ?? lastPage;
 
         return {
             data,
@@ -49,9 +50,17 @@ export const userService = {
                 total,
                 page,
                 limit,
-                totalPages
+                totalPages,
+                lastPage
             }
         };
+    },
+
+    async searchUsers(query: string): Promise<UserSelectResult[]> {
+        const response = await api.get<UserSelectResult[]>('/users/select', {
+            params: { search: query }
+        });
+        return response.data;
     },
 
     async getUser(id: number): Promise<User> {

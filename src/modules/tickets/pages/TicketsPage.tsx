@@ -300,6 +300,20 @@ export default function TicketsPage() {
                         )
                     },
                     {
+                        key: 'assignedTo',
+                        header: 'Asignado a',
+                        render: (ticket: Ticket) => (
+                            <div className="flex items-center gap-3">
+                                <div className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold bg-gray-100 text-gray-600`}>
+                                    {getInitials(ticket.asignadoNombre || 'Sin Asignar')}
+                                </div>
+                                <span className="font-medium text-gray-900 text-sm truncate max-w-[150px]" title={ticket.asignadoNombre}>
+                                    {ticket.asignadoNombre || 'Sin Asignar'}
+                                </span>
+                            </div>
+                        )
+                    },
+                    {
                         key: 'status',
                         header: 'Estado',
                         render: (ticket: Ticket) => (

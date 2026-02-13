@@ -5,6 +5,7 @@ import type { TicketFilter } from '../interfaces/Ticket';
 import { Button } from '../../../shared/components/Button';
 import { companyService } from '../services/company.service';
 import { subcategoryService } from '../services/subcategory.service';
+import { UserSelect } from '../../users/components/UserSelect';
 import { tagService } from '../services/tag.service';
 
 interface AdvancedTicketFilterProps {
@@ -20,13 +21,13 @@ interface FilterFormValues {
     ticketId?: number;
     dateFrom?: string;
     dateTo?: string;
-    creatorId?: number; // Though usually name logic
+    creatorId?: number;
+    assigneeId?: number;
     messageSearch?: string;
-    creatorName?: string; // Metadata not in filter
 }
 
 export const AdvancedTicketFilter: React.FC<AdvancedTicketFilterProps> = ({ filters, onFilterChange, onClear }) => {
-    const { control, register, handleSubmit, reset, watch} = useForm<FilterFormValues>({
+    const { control, register, handleSubmit, reset, watch } = useForm<FilterFormValues>({
         defaultValues: {
             companyId: filters.companyId,
             subcategoryId: filters.subcategoryId,
@@ -47,10 +48,12 @@ export const AdvancedTicketFilter: React.FC<AdvancedTicketFilterProps> = ({ filt
         const loadData = async () => {
             try {
                 // Fetch basic lists
-                const loadedTags = await tagService.getMyTags();
-                setTags(loadedTags);
+                const [loadedTags, loadedCompanies] = await Promise.all([
+                    tagService.getMyTags(),
+                    companyService.getCompanies()
+                ]);
 
-                const loadedCompanies = await companyService.getCompanies();
+                setTags(loadedTags);
                 setCompanies(loadedCompanies);
             } catch (err) {
                 console.error("Error loading filter data", err);
@@ -88,6 +91,8 @@ export const AdvancedTicketFilter: React.FC<AdvancedTicketFilterProps> = ({ filt
             companyId: undefined,
             subcategoryId: undefined,
             tagId: undefined,
+            creatorId: undefined,
+            assigneeId: undefined,
             messageSearch: '',
             dateFrom: '',
             dateTo: ''
@@ -212,14 +217,35 @@ export const AdvancedTicketFilter: React.FC<AdvancedTicketFilterProps> = ({ filt
                             />
                         </div>
 
-                        {/* Usuario (Solo ID por ahora, idealmente un autocomplete) */}
+                        {/* Usuario Creador */}
                         <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1">Usuario (ID Creador)</label>
-                            <input
-                                type="number"
-                                placeholder="ID Usuario"
-                                {...register('creatorId', { valueAsNumber: true })}
-                                className="block w-full rounded-lg border-gray-200 bg-white py-2.5 px-4 text-sm font-medium text-gray-900 placeholder-gray-500 focus:border-brand-teal focus:ring-brand-teal"
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Creador</label>
+                            <Controller
+                                name="creatorId"
+                                control={control}
+                                render={({ field }) => (
+                                    <UserSelect
+                                        value={field.value}
+                                        onChange={(val) => field.onChange(val)}
+                                        placeholder="Buscar creador..."
+                                    />
+                                )}
+                            />
+                        </div>
+
+                        {/* Asignado A */}
+                        <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Asignado A</label>
+                            <Controller
+                                name="assigneeId"
+                                control={control}
+                                render={({ field }) => (
+                                    <UserSelect
+                                        value={field.value}
+                                        onChange={(val) => field.onChange(val)}
+                                        placeholder="Buscar asignado..."
+                                    />
+                                )}
                             />
                         </div>
                     </div>

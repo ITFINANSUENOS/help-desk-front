@@ -63,6 +63,7 @@ interface RawTicket {
 
     // Legacy/List fields fallback (if list endpoint uses different structure)
     creadorNombre?: string;
+    asignadoNombre?: string;
     estado?: string;
     etiquetas?: { id?: number; nombre: string; color: string }[];
     lastUpdated?: string;
@@ -127,6 +128,7 @@ export const ticketService = {
             priority: mapPriority(t.prioridadUsuario || t.prioridad?.nombre || 'Media'),
             prioritySubcategory: mapPriority(t.prioridadSubcategoria || t.prioridadDefecto || 'Media'),
             lastUpdated: t.lastUpdated,
+            asignadoNombre: t.asignadoNombre,
             tags: (t.etiquetas || []).map(e => ({ id: e.id || 0, name: e.nombre, color: e.color }))
         }));
         const total = response.data.total ?? response.data.meta?.total ?? mappedTickets.length;

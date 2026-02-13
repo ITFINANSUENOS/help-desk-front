@@ -87,5 +87,14 @@ export interface UserListResponse {
         page: number;
         limit: number;
         totalPages: number;
+        lastPage: number;
     };
+}
+
+export interface UserSelectResult {
+    id: number;
+    nombre: string;
+    apellido: string;
+    email: string;
+    cargo?: string;
 }

@@ -17,6 +17,13 @@ export interface Ticket {
     prioritySubcategory?: TicketPriority; // Prioridad por defecto/flujo
     lastUpdated: string; // Fecha relativa o absoluta formataeda
     tags: Tag[];
+    asignadoNombre?: string;
+    usuario?: {
+        id: number;
+        nombre: string;
+        apellido: string;
+        email: string;
+    };
 }
 
 export interface TicketFilter {
@@ -30,6 +37,7 @@ export interface TicketFilter {
     // Advanced Filters
     messageSearch?: string;
     creatorId?: number;
+    assigneeId?: number;
     companyId?: number;
     subcategoryId?: number;
     tagId?: number;
@@ -201,6 +209,7 @@ export interface ParallelTask {
         apellido: string;
         email: string;
     };
+    asignadoNombre?: string;
 }
 
 export interface SignParallelTaskDto {
