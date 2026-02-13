@@ -1,3 +1,5 @@
+import { Select } from './Select';
+
 export interface FilterOption {
     label: string;
     value: string | number;
@@ -41,26 +43,19 @@ export function FilterBar({ filters, className = '' }: FilterBarProps) {
 
                     if (filter.type === 'select') {
                         return (
-                            <div key={index} className="relative w-full xl:w-auto">
-                                <select
-                                    className="block w-full appearance-none rounded-lg border-gray-200 bg-white py-2.5 pl-4 pr-10 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:border-brand-teal focus:ring-brand-teal"
-                                    value={filter.value}
-                                    onChange={(e) => {
-                                        const value = e.target.value;
-                                        // Try to parse as number if it's not 'all'
-                                        const parsedValue = value === 'all' ? 'all' : (isNaN(Number(value)) ? value : Number(value));
-                                        filter.onChange(parsedValue);
+                            <div key={index} className="relative w-full xl:w-64">
+                                <Select
+                                    value={filter.value === 'all' ? undefined : filter.value}
+                                    options={filter.options || []}
+                                    onChange={(val) => {
+                                        // If cleared or undefined, assuming 'all' might depend on implementation, 
+                                        // but usually 'all' handling is custom. Select updates state.
+                                        // If val is undefined/null, it might mean cleared.
+                                        filter.onChange(val ?? 'all');
                                     }}
-                                >
-                                    {filter.options?.map((option) => (
-                                        <option key={option.value} value={option.value}>
-                                            {option.label}
-                                        </option>
-                                    ))}
-                                </select>
-                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
-                                    <span className="material-symbols-outlined text-lg">expand_more</span>
-                                </div>
+                                    placeholder={filter.placeholder || "Seleccione..."}
+                                    isClearable={false}
+                                />
                             </div>
                         );
                     }

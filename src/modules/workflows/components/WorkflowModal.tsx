@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import type { Workflow, CreateWorkflowDto } from '../interfaces/Workflow';
 import { workflowService } from '../services/workflow.service';
 import { subcategoryService } from '../../subcategories/services/subcategory.service';
@@ -7,6 +7,7 @@ import type { Subcategory } from '../../subcategories/interfaces/Subcategory';
 import { toast } from 'sonner';
 import { FormModal } from '../../../shared/components/FormModal';
 import { Input } from '../../../shared/components/Input';
+import { Select } from '../../../shared/components/Select';
 
 interface WorkflowModalProps {
     isOpen: boolean;
@@ -16,7 +17,7 @@ interface WorkflowModalProps {
 }
 
 export const WorkflowModal = ({ isOpen, onClose, onSuccess, workflow }: WorkflowModalProps) => {
-    const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<CreateWorkflowDto>();
+    const { register, handleSubmit, reset, control, formState: { errors, isSubmitting } } = useForm<CreateWorkflowDto>();
     const isEdit = !!workflow;
     const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
 
@@ -85,18 +86,23 @@ export const WorkflowModal = ({ isOpen, onClose, onSuccess, workflow }: Workflow
             <div className="space-y-4">
                 <div className="flex flex-col gap-2">
                     <label htmlFor="subcategoriaId" className="text-[#121617] text-sm font-semibold">Subcategoría</label>
-                    <select
-                        id="subcategoriaId"
-                        {...register('subcategoriaId', { required: 'La subcategoría es obligatoria' })}
-                        className="form-select block w-full rounded-lg border border-gray-200 bg-slate-50 p-3 text-base text-[#121617] focus:border-brand-teal focus:bg-white focus:outline-none focus:ring-1 focus:ring-brand-teal h-12"
-                    >
-                        <option value="">Seleccione una subcategoría</option>
-                        {subcategories.map(sub => (
-                            <option key={sub.id} value={sub.id}>
-                                {sub.nombre}s - {sub.categoria?.nombre}
-                            </option>
-                        ))}
-                    </select>
+                    <Controller
+                        name="subcategoriaId"
+                        control={control}
+                        rules={{ required: 'La subcategoría es obligatoria' }}
+                        render={({ field }) => (
+                            <Select
+                                {...field}
+                                options={subcategories.map(sub => ({
+                                    value: sub.id,
+                                    label: `${sub.nombre} - ${sub.categoria?.nombre}`
+                                }))}
+                                onChange={(val) => field.onChange(val)}
+                                placeholder="Seleccione una subcategoría"
+                                error={errors.subcategoriaId?.message}
+                            />
+                        )}
+                    />
                     {errors.subcategoriaId && <p className="text-red-500 text-xs mt-1">{errors.subcategoriaId.message}</p>}
                 </div>
 

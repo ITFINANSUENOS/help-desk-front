@@ -4,6 +4,8 @@ import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 import { FileUploader } from '../../../shared/components/FileUploader';
 import { Button } from '../../../shared/components/Button';
+import { Select } from '../../../shared/components/Select';
+import { UserSelect } from '../../users/components/UserSelect';
 import { InfoModal } from '../../../shared/components/InfoModal';
 import { useAuth } from '../../auth/context/useAuth';
 import { ticketService } from '../services/ticket.service';
@@ -268,54 +270,43 @@ export default function CreateTicketPage() {
                         {/* ROW: DEPARTMENT, SUBCATEGORY (Category Hidden) */}
                         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                             <div className="space-y-2">
-                                <label className="text-sm font-bold text-gray-700">Departamento</label>
-                                <select
-                                    className="w-full rounded-lg border-gray-300 px-4 py-3 text-sm focus:border-brand-teal focus:ring-brand-teal shadow-sm appearance-none"
+                                <Select
+                                    label="Departamento"
+                                    placeholder="Seleccione Departamento"
                                     value={departmentId}
-                                    onChange={(e) => setDepartmentId(Number(e.target.value))}
+                                    onChange={(val) => setDepartmentId(Number(val))}
+                                    options={departments.map(dept => ({ value: dept.id, label: dept.nombre }))}
                                     required
-                                >
-                                    <option value="">Seleccione Departamento</option>
-                                    {departments.map(dept => (
-                                        <option key={dept.id} value={dept.id}>{dept.nombre}</option>
-                                    ))}
-                                </select>
+                                />
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-bold text-gray-700">Subcategoría</label>
-                                <select
-                                    className="w-full rounded-lg border-gray-300 px-4 py-3 text-sm focus:border-brand-teal focus:ring-brand-teal shadow-sm appearance-none disabled:bg-gray-100 disabled:text-gray-400"
+                                <Select
+                                    label="Subcategoría"
+                                    placeholder={departmentId ? 'Seleccione Subcategoría' : 'Primero seleccione Departamento'}
                                     value={subcategoryId}
-                                    onChange={(e) => setSubcategoryId(Number(e.target.value))}
-                                    required
+                                    onChange={(val) => setSubcategoryId(Number(val))}
+                                    options={subcategories.map(sub => ({
+                                        value: sub.id,
+                                        label: sub.categoria ? `${sub.categoria.nombre} - ${sub.nombre}` : sub.nombre
+                                    }))}
                                     disabled={!departmentId}
-                                >
-                                    <option value="">{departmentId ? 'Seleccione Subcategoría' : 'Primero seleccione Departamento'}</option>
-                                    {subcategories.map(sub => (
-                                        <option key={sub.id} value={sub.id}>
-                                            {sub.categoria ? `${sub.categoria.nombre} - ${sub.nombre}` : sub.nombre}
-                                        </option>
-                                    ))}
-                                </select>
+                                    required
+                                />
                             </div>
                         </div>
 
                         {/* ROW: COMPANY & PRIORITY */}
                         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                             <div className="space-y-2">
-                                <label className="text-sm font-bold text-gray-700">Empresa</label>
-                                <select
-                                    className="w-full rounded-lg border-gray-300 px-4 py-3 text-sm focus:border-brand-teal focus:ring-brand-teal shadow-sm appearance-none"
+                                <Select
+                                    label="Empresa"
+                                    placeholder="Seleccione Empresa"
                                     value={companyId}
-                                    onChange={(e) => setCompanyId(Number(e.target.value))}
+                                    onChange={(val) => setCompanyId(Number(val))}
+                                    options={companies.map(comp => ({ value: comp.id, label: comp.nombre }))}
                                     required
-                                >
-                                    <option value="">Seleccione Empresa</option>
-                                    {companies.map(comp => (
-                                        <option key={comp.id} value={comp.id}>{comp.nombre}</option>
-                                    ))}
-                                </select>
+                                />
                             </div>
 
                             <div className="space-y-2">
@@ -371,15 +362,12 @@ export default function CreateTicketPage() {
                                         {/* STEP 0 DECISIONS (If available) */}
                                         {availableDecisions.length > 0 && (
                                             <div className="pt-2">
-                                                <label className="text-sm font-bold text-blue-900 block mb-2">Seleccione Siguiente Acción</label>
-                                                <select
-                                                    className="w-full rounded-lg border-blue-200 px-4 py-3 text-sm focus:border-blue-500 focus:ring-blue-500 shadow-sm font-medium bg-white"
+                                                <Select
+                                                    label="Seleccione Siguiente Acción"
+                                                    placeholder="-- Seleccione una opción --"
                                                     value={selectedDecision?.decisionId || ''}
-                                                    onChange={(e) => {
-
-
-                                                        const dec = availableDecisions.find(d => String(d.decisionId) === e.target.value);
-
+                                                    onChange={(val) => {
+                                                        const dec = availableDecisions.find(d => String(d.decisionId) === String(val));
                                                         setSelectedDecision(dec || null);
                                                         // Update manual assignment requirements based on decision
                                                         if (dec) {
@@ -390,15 +378,9 @@ export default function CreateTicketPage() {
                                                             setAssigneeId(''); // Reset assignment when decision changes
                                                         }
                                                     }}
+                                                    options={availableDecisions.map(d => ({ value: d.decisionId, label: d.label }))}
                                                     required
-                                                >
-                                                    <option value="">-- Seleccione una opción --</option>
-                                                    {availableDecisions.map((d, idx) => (
-                                                        <option key={`${d.decisionId}-${idx}`} value={d.decisionId}>
-                                                            {d.label}
-                                                        </option>
-                                                    ))}
-                                                </select>
+                                                />
                                                 <p className="text-xs text-blue-600 mt-1 ml-1">
                                                     Debe seleccionar una opción para continuar.
                                                 </p>
@@ -407,20 +389,15 @@ export default function CreateTicketPage() {
 
                                         {requiresManualSelection && (
                                             <div className="pt-2">
-                                                <label className="text-sm font-bold text-blue-900 block mb-2">Asignar a</label>
-                                                <select
-                                                    className="w-full rounded-lg border-blue-200 px-4 py-3 text-sm focus:border-blue-500 focus:ring-blue-500 shadow-sm"
-                                                    value={assigneeId}
-                                                    onChange={(e) => setAssigneeId(Number(e.target.value))}
-                                                    required
-                                                >
-                                                    <option value="">Seleccione un usuario...</option>
-                                                    {assigneeCandidates.map(cand => (
-                                                        <option key={cand.id} value={cand.id}>
-                                                            {cand.nombre} {cand.apellido} {cand.cargo ? `(${cand.cargo})` : ''}
-                                                        </option>
-                                                    ))}
-                                                </select>
+                                                <div className="mb-2">
+                                                    <label className="text-sm font-bold text-blue-900">Asignar a</label>
+                                                </div>
+                                                <UserSelect
+                                                    value={typeof assigneeId === 'number' ? assigneeId : undefined}
+                                                    onChange={(val) => setAssigneeId(val || '')}
+                                                    candidates={assigneeCandidates} // Pass candidates for restricted mode
+                                                    placeholder="Seleccione un usuario..."
+                                                />
                                             </div>
                                         )}
                                     </div>

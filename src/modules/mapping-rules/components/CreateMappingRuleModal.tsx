@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { FormModal } from '../../../shared/components/FormModal';
+import { Select } from '../../../shared/components/Select';
 import { subcategoryService } from '../../subcategories/services/subcategory.service';
 import { positionService } from '../../positions/services/position.service';
 import { profileService } from '../../profiles/services/profile.service';
@@ -153,19 +154,16 @@ export function CreateMappingRuleModal({ isOpen, onClose, onSubmit }: CreateMapp
                     {loadingData ? (
                         <div className="text-sm text-gray-500">Cargando...</div>
                     ) : (
-                        <select
-                            value={formData.subcategoriaId}
-                            onChange={(e) => setFormData({ ...formData, subcategoriaId: Number(e.target.value) })}
+                        <Select
+                            value={formData.subcategoriaId === 0 ? undefined : formData.subcategoriaId}
+                            onChange={(val) => setFormData({ ...formData, subcategoriaId: Number(val ?? 0) })}
+                            options={subcategories.map(subcat => ({
+                                value: subcat.id,
+                                label: `${subcat.nombre} ${subcat.categoria ? `(${subcat.categoria.nombre})` : ''}`
+                            }))}
+                            placeholder="Seleccione una subcategoría"
                             disabled={loading}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-blue"
-                        >
-                            <option value={0}>Seleccione una subcategoría</option>
-                            {subcategories.map(subcat => (
-                                <option key={subcat.id} value={subcat.id}>
-                                    {subcat.nombre} {subcat.categoria ? `(${subcat.categoria.nombre})` : ''}
-                                </option>
-                            ))}
-                        </select>
+                        />
                     )}
                 </div>
 

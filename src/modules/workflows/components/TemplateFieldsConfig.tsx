@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { useForm, useWatch, type Control, type UseFormSetValue } from 'react-hook-form';
+import { useForm, useWatch, Controller, type Control, type UseFormSetValue } from 'react-hook-form';
 import { Button } from '../../../shared/components/Button';
 import { Input } from '../../../shared/components/Input';
+import { Select } from '../../../shared/components/Select';
 import type { StepTemplateField } from '../interfaces/TemplateField';
 import { FIELD_TYPES } from '../interfaces/TemplateField';
 import { excelDataService } from '../../imports/services/excel-data.service';
@@ -84,29 +85,27 @@ const ExcelQueryConfig = ({ control, flujoId, setValue }: { control: Control<Ste
     return (
         <div className="space-y-2 p-3 bg-gray-50 rounded border border-gray-200">
             <label className="text-xs font-semibold text-gray-700 block">Configuración Excel</label>
-            <select
-                className="w-full rounded border border-gray-300 px-2 py-1 text-sm"
+            <Select
                 value={currentFileId}
-                onChange={handleFileChange}
+                onChange={(val) => {
+                    const e = { target: { value: val ? String(val) : '' } } as React.ChangeEvent<HTMLSelectElement>;
+                    handleFileChange(e);
+                }}
                 disabled={loadingFiles}
-            >
-                <option value="">-- Seleccionar Archivo --</option>
-                {excelFiles.map(f => (
-                    <option key={f.id} value={f.id}>{f.nombreArchivo}</option>
-                ))}
-            </select>
+                placeholder="-- Seleccionar Archivo --"
+                options={excelFiles.map(f => ({ value: f.id, label: f.nombreArchivo }))}
+            />
 
-            <select
-                className="w-full rounded border border-gray-300 px-2 py-1 text-sm"
+            <Select
                 value={currentCol}
-                onChange={handleColChange}
+                onChange={(val) => {
+                    const e = { target: { value: val ? String(val) : '' } } as React.ChangeEvent<HTMLSelectElement>;
+                    handleColChange(e);
+                }}
                 disabled={!currentFileId || loadingCols}
-            >
-                <option value="">-- Seleccionar Columna --</option>
-                {columns.map(c => (
-                    <option key={c} value={c}>{c}</option>
-                ))}
-            </select>
+                placeholder="-- Seleccionar Columna --"
+                options={columns.map(c => ({ value: c, label: c }))}
+            />
             {isExcel && <p className="text-xs text-gray-400 font-mono mt-1">{campoQuery}</p>}
         </div>
     );
@@ -252,15 +251,19 @@ export const TemplateFieldsConfig = ({ campos, onChange, flujoId }: TemplateFiel
                     <div className="grid grid-cols-2 gap-3">
                         <div className="space-y-1">
                             <label className="text-sm font-semibold text-gray-700">Tipo</label>
-                            <select
-                                {...register('tipo', { required: true })}
-                                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                            >
-                                <option value="">Seleccionar...</option>
-                                {FIELD_TYPES.map(type => (
-                                    <option key={type.value} value={type.value}>{type.label}</option>
-                                ))}
-                            </select>
+                            <Controller
+                                name="tipo"
+                                control={control}
+                                rules={{ required: true }}
+                                render={({ field }) => (
+                                    <Select
+                                        {...field}
+                                        options={FIELD_TYPES.map(type => ({ value: type.value, label: type.label }))}
+                                        onChange={(val) => field.onChange(val)}
+                                        placeholder="Seleccionar..."
+                                    />
+                                )}
+                            />
                         </div>
                         <Input
                             label="Página"
@@ -292,16 +295,19 @@ export const TemplateFieldsConfig = ({ campos, onChange, flujoId }: TemplateFiel
                     {/* Source Config */}
                     <div className="space-y-2 border-t pt-2 mt-2">
                         <label className="text-sm font-semibold text-gray-700">Fuente de Datos</label>
-                        <select
-                            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                            onChange={handleSourceTypeChange}
+                        <Select
                             value={sourceType}
-                        >
-                            <option value="">Ninguna</option>
-                            <option value="CUSTOM">Consulta Manual / SQL</option>
-                            <option value="EXCEL">Datos Excel</option>
-                            <option value="PRESET_FECHA_ACTUAL">Fecha Actual</option>
-                        </select>
+                            onChange={(val) => {
+                                const e = { target: { value: val ? String(val) : '' } } as React.ChangeEvent<HTMLSelectElement>;
+                                handleSourceTypeChange(e);
+                            }}
+                            options={[
+                                { value: '', label: 'Ninguna' },
+                                { value: 'CUSTOM', label: 'Consulta Manual / SQL' },
+                                { value: 'EXCEL', label: 'Datos Excel' },
+                                { value: 'PRESET_FECHA_ACTUAL', label: 'Fecha Actual' }
+                            ]}
+                        />
 
                         {/* Render specific config based on source */}
                         {sourceType === 'CUSTOM' && (

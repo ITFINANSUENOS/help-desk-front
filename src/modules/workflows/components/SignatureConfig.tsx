@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { Button } from '../../../shared/components/Button';
 import { Input } from '../../../shared/components/Input';
+import { Select } from '../../../shared/components/Select';
 
 import type { StepSignature } from '../interfaces/Step';
 import type { Position } from '../../../shared/interfaces/Catalog';
@@ -18,7 +19,7 @@ export const SignatureConfig = ({ firmas, onChange, positions }: SignatureConfig
     const [isAdding, setIsAdding] = useState(false);
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
-    const { register, handleSubmit, reset, setValue } = useForm<StepSignature>();
+    const { register, handleSubmit, reset, setValue, control } = useForm<StepSignature>();
 
     const onSubmit = (data: StepSignature) => {
         const newFirma = {
@@ -163,15 +164,21 @@ export const SignatureConfig = ({ firmas, onChange, positions }: SignatureConfig
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Cargo (Opcional)</label>
-                        <select
-                            {...register('cargoId')}
-                            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                        >
-                            <option value="">-- Cualquiera --</option>
-                            {positions.map(p => (
-                                <option key={p.id} value={p.id}>{p.nombre}</option>
-                            ))}
-                        </select>
+                        <Controller
+                            name="cargoId"
+                            control={control}
+                            render={({ field }) => (
+                                <Select
+                                    {...field}
+                                    options={[
+                                        { value: '', label: '-- Cualquiera --' },
+                                        ...positions.map(p => ({ value: p.id, label: p.nombre }))
+                                    ]}
+                                    onChange={(val) => field.onChange(val)}
+                                    placeholder="-- Seleccionar --"
+                                />
+                            )}
+                        />
                     </div>
                     <div className="flex justify-end gap-2 pt-2">
                         <Button type="button" size="sm" variant="ghost" onClick={handleCancel}>Cancelar</Button>

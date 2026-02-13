@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Modal } from '../../../shared/components/Modal';
 import { Button } from '../../../shared/components/Button';
 import { Input } from '../../../shared/components/Input';
+import { Select } from '../../../shared/components/Select';
 import { positionService } from '../services/position.service';
 import type { Position, UpdatePositionDto } from '../interfaces/Position';
 
@@ -80,14 +81,14 @@ export function EditPositionModal({ isOpen, onClose, onSuccess, position }: Edit
 
                 <div className="space-y-1">
                     <label className="text-sm font-medium text-gray-700">Estado</label>
-                    <select
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand-teal focus:ring-brand-teal"
+                    <Select
                         value={estado}
-                        onChange={(e) => setEstado(Number(e.target.value))}
-                    >
-                        <option value={1}>Activo</option>
-                        <option value={0}>Inactivo</option>
-                    </select>
+                        onChange={(val) => setEstado(Number(val ?? 1))}
+                        options={[
+                            { value: 1, label: 'Activo' },
+                            { value: 0, label: 'Inactivo' }
+                        ]}
+                    />
                 </div>
 
                 <div className="flex justify-end gap-3 pt-2">

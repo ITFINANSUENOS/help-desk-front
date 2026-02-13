@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Modal } from '../../../shared/components/Modal';
 import { Button } from '../../../shared/components/Button';
+import { Select } from '../../../shared/components/Select';
 import { organigramaService } from '../services/organigrama.service';
 import { positionService } from '../../positions/services/position.service';
 import type { Position } from '../../positions/interfaces/Position';
@@ -89,36 +90,33 @@ export function AddRelationModal({ isOpen, onClose, onSuccess }: AddRelationModa
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                             Cargo Jefe (Superior)
                         </label>
-                        <select
-                            className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand-teal focus:ring-brand-teal"
-                            value={jefeCargoId}
-                            onChange={(e) => setJefeCargoId(Number(e.target.value))}
-                        >
-                            <option value={0}>Seleccione el jefe...</option>
-                            {positions.map(p => (
-                                <option key={p.id} value={p.id}>{p.nombre}</option>
-                            ))}
-                        </select>
-                    </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Cargo Jefe (Superior)
+                            </label>
+                            <Select
+                                value={jefeCargoId === 0 ? undefined : jefeCargoId}
+                                onChange={(val) => setJefeCargoId(Number(val ?? 0))}
+                                options={positions.map(p => ({ value: p.id, label: p.nombre }))}
+                                placeholder="Seleccione el jefe..."
+                            />
+                        </div>
 
-                    <div className="flex justify-center text-gray-400">
-                        <span className="material-symbols-outlined">arrow_downward</span>
-                    </div>
+                        <div className="flex justify-center text-gray-400">
+                            <span className="material-symbols-outlined">arrow_downward</span>
+                        </div>
 
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Cargo Subordinado
-                        </label>
-                        <select
-                            className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand-teal focus:ring-brand-teal"
-                            value={cargoId}
-                            onChange={(e) => setCargoId(Number(e.target.value))}
-                        >
-                            <option value={0}>Seleccione el subordinado...</option>
-                            {positions.map(p => (
-                                <option key={p.id} value={p.id}>{p.nombre}</option>
-                            ))}
-                        </select>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Cargo Subordinado
+                            </label>
+                            <Select
+                                value={cargoId === 0 ? undefined : cargoId}
+                                onChange={(val) => setCargoId(Number(val ?? 0))}
+                                options={positions.map(p => ({ value: p.id, label: p.nombre }))}
+                                placeholder="Seleccione el subordinado..."
+                            />
+                        </div>
                     </div>
                 </div>
 

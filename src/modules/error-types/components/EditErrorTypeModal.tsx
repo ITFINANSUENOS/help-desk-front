@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Modal } from '../../../shared/components/Modal';
 import { Button } from '../../../shared/components/Button';
+import { Select } from '../../../shared/components/Select';
 import { errorTypeService } from '../services/error-type.service';
 import type { ErrorType, UpdateErrorTypeDto, ErrorSubtype, CreateErrorSubtypeDto } from '../interfaces/ErrorType';
 
@@ -169,30 +170,28 @@ export const EditErrorTypeModal: React.FC<EditErrorTypeModalProps> = ({ isOpen, 
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Categoría
                             </label>
-                            <select
-                                name="category"
+                            <Select
                                 value={formData.category}
-                                onChange={handleChange}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent transition-all outline-none"
-                            >
-                                <option value={1}>Error de Proceso</option>
-                                <option value={0}>Informativo</option>
-                            </select>
+                                onChange={(val) => setFormData(prev => ({ ...prev, category: Number(val) }))}
+                                options={[
+                                    { value: 1, label: 'Error de Proceso' },
+                                    { value: 0, label: 'Informativo' }
+                                ]}
+                            />
                         </div>
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Estado
                             </label>
-                            <select
-                                name="isActive"
-                                value={String(formData.isActive)}
-                                onChange={handleChange}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent transition-all outline-none"
-                            >
-                                <option value="true">Activo</option>
-                                <option value="false">Inactivo</option>
-                            </select>
+                            <Select
+                                value={formData.isActive ? 'true' : 'false'}
+                                onChange={(val) => setFormData(prev => ({ ...prev, isActive: val === 'true' }))}
+                                options={[
+                                    { value: 'true', label: 'Activo' },
+                                    { value: 'false', label: 'Inactivo' }
+                                ]}
+                            />
                         </div>
                     </div>
                 </div>

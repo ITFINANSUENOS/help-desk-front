@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { User, CreateUserDto, UpdateUserDto } from '../interfaces/User';
 import { Button } from '../../../shared/components/Button';
+import { Select } from '../../../shared/components/Select';
 import { userService } from '../services/user.service';
 import { rbacService } from '../../roles/services/rbac.service';
 import { departmentService, positionService, regionService } from '../../../shared/services/catalog.service';
@@ -106,6 +107,16 @@ export function UserForm({ user, onSubmit, onCancel, isLoading }: UserFormProps)
         }));
 
         // Clear error when user types
+        if (errors[name]) {
+            setErrors(prev => ({ ...prev, [name]: '' }));
+        }
+    };
+
+    const handleSelectChange = (name: string, value: string | number | undefined) => {
+        setFormData(prev => ({
+            ...prev,
+            [name]: value !== undefined ? Number(value) : 0
+        }));
         if (errors[name]) {
             setErrors(prev => ({ ...prev, [name]: '' }));
         }
@@ -248,17 +259,14 @@ export function UserForm({ user, onSubmit, onCancel, isLoading }: UserFormProps)
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                         Rol <span className="text-red-500">*</span>
                     </label>
-                    <select
+                    <Select
                         name="rolId"
                         value={formData.rolId}
-                        onChange={handleChange}
-                        className={`w-full rounded-lg border ${errors.rolId ? 'border-red-500' : 'border-gray-300'} px-3 py-2 focus:border-brand-teal focus:ring-brand-teal`}
-                    >
-                        <option value={0}>Seleccione un rol</option>
-                        {roles.map((role) => (
-                            <option key={role.id} value={role.id}>{role.nombre}</option>
-                        ))}
-                    </select>
+                        onChange={(val) => handleSelectChange('rolId', val)}
+                        options={roles.map(role => ({ value: role.id, label: role.nombre }))}
+                        placeholder="Seleccione un rol"
+                        error={errors.rolId}
+                    />
                     {errors.rolId && <p className="mt-1 text-xs text-red-500">{errors.rolId}</p>}
                 </div>
 
@@ -267,17 +275,13 @@ export function UserForm({ user, onSubmit, onCancel, isLoading }: UserFormProps)
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                         Regional
                     </label>
-                    <select
+                    <Select
                         name="regionalId"
                         value={formData.regionalId}
-                        onChange={handleChange}
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand-teal focus:ring-brand-teal"
-                    >
-                        <option value={0}>Sin regional</option>
-                        {regions.map((region) => (
-                            <option key={region.id} value={region.id}>{region.nombre}</option>
-                        ))}
-                    </select>
+                        onChange={(val) => handleSelectChange('regionalId', val)}
+                        options={regions.map(region => ({ value: region.id, label: region.nombre }))}
+                        placeholder="Sin regional"
+                    />
                 </div>
 
                 {/* Cargo */}
@@ -285,17 +289,13 @@ export function UserForm({ user, onSubmit, onCancel, isLoading }: UserFormProps)
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                         Cargo
                     </label>
-                    <select
+                    <Select
                         name="cargoId"
                         value={formData.cargoId}
-                        onChange={handleChange}
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand-teal focus:ring-brand-teal"
-                    >
-                        <option value={0}>Sin cargo</option>
-                        {positions.map((position) => (
-                            <option key={position.id} value={position.id}>{position.nombre}</option>
-                        ))}
-                    </select>
+                        onChange={(val) => handleSelectChange('cargoId', val)}
+                        options={positions.map(position => ({ value: position.id, label: position.nombre }))}
+                        placeholder="Sin cargo"
+                    />
                 </div>
 
                 {/* Departamento */}
@@ -303,17 +303,13 @@ export function UserForm({ user, onSubmit, onCancel, isLoading }: UserFormProps)
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                         Departamento
                     </label>
-                    <select
+                    <Select
                         name="departamentoId"
                         value={formData.departamentoId}
-                        onChange={handleChange}
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand-teal focus:ring-brand-teal"
-                    >
-                        <option value={0}>Sin departamento</option>
-                        {departments.map((dept) => (
-                            <option key={dept.id} value={dept.id}>{dept.nombre}</option>
-                        ))}
-                    </select>
+                        onChange={(val) => handleSelectChange('departamentoId', val)}
+                        options={departments.map(dept => ({ value: dept.id, label: dept.nombre }))}
+                        placeholder="Sin departamento"
+                    />
                 </div>
 
                 {/* Es Nacional */}
@@ -336,15 +332,15 @@ export function UserForm({ user, onSubmit, onCancel, isLoading }: UserFormProps)
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                             Estado
                         </label>
-                        <select
+                        <Select
                             name="estado"
                             value={formData.estado}
-                            onChange={handleChange}
-                            className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-brand-teal focus:ring-brand-teal"
-                        >
-                            <option value={1}>Activo</option>
-                            <option value={0}>Inactivo</option>
-                        </select>
+                            onChange={(val) => handleSelectChange('estado', val)}
+                            options={[
+                                { value: 1, label: 'Activo' },
+                                { value: 0, label: 'Inactivo' }
+                            ]}
+                        />
                     </div>
                 )}
             </div>

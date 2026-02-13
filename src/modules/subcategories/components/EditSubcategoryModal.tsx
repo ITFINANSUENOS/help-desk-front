@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { FormModal } from '../../../shared/components/FormModal';
 import { Input } from '../../../shared/components/Input';
+import { Select } from '../../../shared/components/Select';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 import { categoryService } from '../../categories/services/category.service';
@@ -141,37 +142,25 @@ export function EditSubcategoryModal({ isOpen, onClose, onSubmit, subcategory }:
 
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
-                    <select
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brand-blue focus:outline-none focus:ring-1 focus:ring-brand-blue disabled:bg-gray-50"
+                    <Select
                         value={formData.categoriaId}
-                        onChange={(e) => setFormData({ ...formData, categoriaId: Number(e.target.value) })}
+                        onChange={(val) => setFormData({ ...formData, categoriaId: Number(val) })}
+                        options={categories.map(cat => ({ value: cat.id, label: cat.nombre }))}
+                        placeholder="Seleccione una categoría"
                         disabled={loading}
-                        required
-                    >
-                        <option value="">Seleccione una categoría</option>
-                        {categories.map((cat) => (
-                            <option key={cat.id} value={cat.id}>
-                                {cat.nombre}
-                            </option>
-                        ))}
-                    </select>
+                    />
                 </div>
 
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Prioridad por Defecto</label>
-                    <select
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brand-blue focus:outline-none focus:ring-1 focus:ring-brand-blue disabled:bg-gray-50"
-                        value={formData.prioridadId || ''}
-                        onChange={(e) => setFormData({ ...formData, prioridadId: e.target.value ? Number(e.target.value) : undefined })}
+                    <Select
+                        value={formData.prioridadId}
+                        onChange={(val) => setFormData({ ...formData, prioridadId: val ? Number(val) : undefined })}
+                        options={priorities.map(p => ({ value: p.id, label: p.nombre }))}
+                        placeholder="Ninguna"
                         disabled={loading}
-                    >
-                        <option value="">Ninguna</option>
-                        {priorities.map((p) => (
-                            <option key={p.id} value={p.id}>
-                                {p.nombre}
-                            </option>
-                        ))}
-                    </select>
+                        isClearable
+                    />
                 </div>
 
                 <div className="flex items-center gap-2">

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Modal } from '../../../shared/components/Modal';
 import { Button } from '../../../shared/components/Button';
 import { Input } from '../../../shared/components/Input';
+import { Select } from '../../../shared/components/Select';
 import { ticketService } from '../services/ticket.service';
 import { categoryService } from '../services/category.service';
 import { priorityService } from '../services/priority.service';
@@ -99,32 +100,25 @@ export function EditTicketModal({ isOpen, onClose, onSuccess, ticket }: EditTick
                     />
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">Category</label>
-                        <select
-                            className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-teal focus:ring-brand-teal sm:text-sm"
+                        <Select
+                            label="Category"
+                            placeholder="Select a Category..."
                             value={categoryId}
-                            onChange={(e) => setCategoryId(Number(e.target.value))}
+                            onChange={(val) => setCategoryId(Number(val))}
+                            options={categories.map(cat => ({ value: cat.id, label: cat.nombre }))}
                             required
-                        >
-                            <option value="">Select a Category...</option>
-                            {categories.map(cat => (
-                                <option key={cat.id} value={cat.id}>{cat.nombre}</option>
-                            ))}
-                        </select>
+                        />
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">Priority</label>
-                        <select
-                            className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-teal focus:ring-brand-teal sm:text-sm"
+                        <Select
+                            label="Priority"
+                            placeholder="Default Priority"
                             value={priorityId}
-                            onChange={(e) => setPriorityId(Number(e.target.value))}
-                        >
-                            <option value="">Default Priority</option>
-                            {priorities.map(prio => (
-                                <option key={prio.id} value={prio.id}>{prio.nombre}</option>
-                            ))}
-                        </select>
+                            onChange={(val) => setPriorityId(Number(val))}
+                            options={priorities.map(prio => ({ value: prio.id, label: prio.nombre }))}
+                            isClearable={true}
+                        />
                     </div>
 
                     <div className="space-y-2">

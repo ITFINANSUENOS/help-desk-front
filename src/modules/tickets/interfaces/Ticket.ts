@@ -132,7 +132,7 @@ export interface UserCandidate {
     id: number;
     nombre: string;
     apellido: string;
-    email: string;
+    email?: string;
     cargo?: string;
 }
 

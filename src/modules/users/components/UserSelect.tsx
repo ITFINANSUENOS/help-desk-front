@@ -2,26 +2,29 @@ import React from 'react';
 import AsyncSelect from 'react-select/async';
 import { userService } from '../services/user.service';
 import type { User, UserSelectResult } from '../interfaces/User';
+import type { UserCandidate } from '../../tickets/interfaces/Ticket';
 
 interface UserSelectProps {
     value?: number;
     onChange: (value: number | undefined) => void;
     placeholder?: string;
     className?: string;
+    candidates?: (User | UserCandidate)[]; // Optional list of users to select from (Restricted mode)
 }
 
 interface UserOption {
     value: number;
     label: string;
     // We keep 'user' implicit or minimal if needed, but primarily we depend on value/label
-    data: User | UserSelectResult;
+    data: User | UserSelectResult | UserCandidate;
 }
 
 export const UserSelect: React.FC<UserSelectProps> = ({
     value,
     onChange,
     placeholder = 'Buscar usuario...',
-    className
+    className,
+    candidates
 }) => {
     // Ref for debounce timer
     const debounceTimer = React.useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -29,19 +32,30 @@ export const UserSelect: React.FC<UserSelectProps> = ({
     // Function to load options asynchronously with debounce
     const loadOptions = (inputValue: string): Promise<UserOption[]> => {
         return new Promise((resolve) => {
+            // If candidates are provided, filter them client-side
+            if (candidates && candidates.length > 0) {
+                const filtered = candidates.filter((u) =>
+                    `${u.nombre} ${u.apellido} ${u.email}`.toLowerCase().includes(inputValue.toLowerCase())
+                );
+                resolve(filtered.map((user) => ({
+                    value: user.id,
+                    label: `${user.nombre} ${user.apellido}${user.email ? ` (${user.email})` : ''}`,
+                    data: user
+                })));
+                return;
+            }
+
             if (debounceTimer.current) {
                 clearTimeout(debounceTimer.current);
             }
 
             debounceTimer.current = setTimeout(async () => {
                 try {
-                    // Only search if input is meaningful or empty (if we want default list)
-                    // But usually for async, we search.
                     const users = await userService.searchUsers(inputValue);
 
                     resolve(users.map(user => ({
                         value: user.id,
-                        label: `${user.nombre} ${user.apellido} (${user.email})`,
+                        label: `${user.nombre} ${user.apellido}${user.email ? ` (${user.email})` : ''}`,
                         data: user
                     })));
                 } catch (error) {
@@ -130,7 +144,7 @@ export const UserSelect: React.FC<UserSelectProps> = ({
                     if (isMounted && user) {
                         setSelectedOption({
                             value: user.id,
-                            label: `${user.nombre} ${user.apellido} (${user.email})`,
+                            label: `${user.nombre} ${user.apellido}${user.email ? ` (${user.email})` : ''}`,
                             data: user
                         });
                     }
@@ -156,7 +170,7 @@ export const UserSelect: React.FC<UserSelectProps> = ({
         <div className={className}>
             <AsyncSelect
                 cacheOptions
-                defaultOptions
+                defaultOptions={true}
                 loadOptions={loadOptions}
                 value={selectedOption}
                 onChange={handleChange as any}

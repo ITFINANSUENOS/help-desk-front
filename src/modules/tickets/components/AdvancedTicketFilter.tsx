@@ -1,11 +1,11 @@
-
 import React, { useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import type { TicketFilter } from '../interfaces/Ticket';
 import { Button } from '../../../shared/components/Button';
+import { Select } from '../../../shared/components/Select';
+import { UserSelect } from '../../users/components/UserSelect';
 import { companyService } from '../services/company.service';
 import { subcategoryService } from '../services/subcategory.service';
-import { UserSelect } from '../../users/components/UserSelect';
 import { tagService } from '../services/tag.service';
 
 interface AdvancedTicketFilterProps {
@@ -122,18 +122,14 @@ export const AdvancedTicketFilter: React.FC<AdvancedTicketFilterProps> = ({ filt
                                 name="companyId"
                                 control={control}
                                 render={({ field }) => (
-                                    <div className="relative">
-                                        <select {...field}
-                                            className="appearance-none block w-full rounded-lg border-gray-200 bg-white py-2.5 pl-4 pr-10 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:border-brand-teal focus:ring-brand-teal"
-                                            value={field.value || ''}
-                                            onChange={e => field.onChange(e.target.value ? Number(e.target.value) : undefined)}>
-                                            <option value="">Seleccionar</option>
-                                            {companies.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
-                                        </select>
-                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
-                                            <span className="material-symbols-outlined text-lg">expand_more</span>
-                                        </div>
-                                    </div>
+                                    <Select
+                                        {...field}
+                                        label="Empresa"
+                                        placeholder="Todas"
+                                        options={companies.map(c => ({ value: c.id, label: c.nombre }))}
+                                        value={field.value || ''}
+                                        onChange={(val) => field.onChange(val)}
+                                    />
                                 )}
                             />
                         </div>
@@ -145,18 +141,14 @@ export const AdvancedTicketFilter: React.FC<AdvancedTicketFilterProps> = ({ filt
                                 name="subcategoryId"
                                 control={control}
                                 render={({ field }) => (
-                                    <div className="relative">
-                                        <select {...field}
-                                            className="appearance-none block w-full rounded-lg border-gray-200 bg-white py-2.5 pl-4 pr-10 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:border-brand-teal focus:ring-brand-teal"
-                                            value={field.value || ''}
-                                            onChange={e => field.onChange(e.target.value ? Number(e.target.value) : undefined)}>
-                                            <option value="">Seleccionar</option>
-                                            {subcategories.map(s => <option key={s.id} value={s.id}>{s.nombre}</option>)}
-                                        </select>
-                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
-                                            <span className="material-symbols-outlined text-lg">expand_more</span>
-                                        </div>
-                                    </div>
+                                    <Select
+                                        {...field}
+                                        label="Subcategoría"
+                                        placeholder="Todas"
+                                        options={subcategories.map(s => ({ value: s.id, label: s.nombre }))}
+                                        value={field.value || ''}
+                                        onChange={(val) => field.onChange(val)}
+                                    />
                                 )}
                             />
                         </div>
@@ -168,18 +160,14 @@ export const AdvancedTicketFilter: React.FC<AdvancedTicketFilterProps> = ({ filt
                                 name="tagId"
                                 control={control}
                                 render={({ field }) => (
-                                    <div className="relative">
-                                        <select {...field}
-                                            className="appearance-none block w-full rounded-lg border-gray-200 bg-white py-2.5 pl-4 pr-10 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:border-brand-teal focus:ring-brand-teal"
-                                            value={field.value || ''}
-                                            onChange={e => field.onChange(e.target.value ? Number(e.target.value) : undefined)}>
-                                            <option value="">Seleccionar</option>
-                                            {tags.map(t => <option key={t.id} value={t.id}>{t.nombre}</option>)}
-                                        </select>
-                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
-                                            <span className="material-symbols-outlined text-lg">expand_more</span>
-                                        </div>
-                                    </div>
+                                    <Select
+                                        {...field}
+                                        label="Etiqueta"
+                                        placeholder="Todas"
+                                        options={tags.map(t => ({ value: t.id, label: t.nombre }))}
+                                        value={field.value || ''}
+                                        onChange={(val) => field.onChange(val)}
+                                    />
                                 )}
                             />
                         </div>

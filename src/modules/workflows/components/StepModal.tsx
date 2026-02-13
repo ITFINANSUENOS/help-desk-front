@@ -4,6 +4,7 @@ import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 import { FormModal } from '../../../shared/components/FormModal';
 import { Input } from '../../../shared/components/Input';
+import { Select } from '../../../shared/components/Select';
 import type { Step, CreateStepDto, StepSignature } from '../interfaces/Step';
 import type { StepTemplateField } from '../interfaces/TemplateField';
 import { stepService } from '../services/step.service';
@@ -209,15 +210,19 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
                 {/* Assignment & SLA */}
                 <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-700">Cargo Asignado (Default)</label>
-                    <select
-                        {...register('cargoAsignadoId')}
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2"
-                    >
-                        <option value="">-- Seleccionar --</option>
-                        {positions.map(p => (
-                            <option key={p.id} value={p.id}>{p.nombre}</option>
-                        ))}
-                    </select>
+                    <label className="text-sm font-medium text-gray-700">Cargo Asignado (Default)</label>
+                    <Controller
+                        name="cargoAsignadoId"
+                        control={control}
+                        render={({ field }) => (
+                            <Select
+                                {...field}
+                                options={positions.map(p => ({ value: p.id, label: p.nombre }))}
+                                onChange={(val) => field.onChange(val)}
+                                placeholder="-- Seleccionar --"
+                            />
+                        )}
+                    />
                 </div>
 
                 <div className="space-y-2">
@@ -231,15 +236,18 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
 
                 <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-700">Campo Ref. Jefe (Opcional)</label>
-                    <select
-                        {...register('campoReferenciaJefeId')}
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                    >
-                        <option value="">-- Seleccionar Campo --</option>
-                        {Array.isArray(templateFields) && templateFields.map(f => (
-                            <option key={f.id} value={f.id}>{f.etiqueta} ({f.codigo})</option>
-                        ))}
-                    </select>
+                    <Controller
+                        name="campoReferenciaJefeId"
+                        control={control}
+                        render={({ field }) => (
+                            <Select
+                                {...field}
+                                options={Array.isArray(templateFields) ? templateFields.map(f => ({ value: f.id, label: `${f.etiqueta} (${f.codigo})` })) : []}
+                                onChange={(val) => field.onChange(val)}
+                                placeholder="-- Seleccionar Campo --"
+                            />
+                        )}
+                    />
                     <p className="text-xs text-gray-500">Usado para determinar jefe inmediato dinámicamente.</p>
                 </div>
 

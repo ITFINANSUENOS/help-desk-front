@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ticketService, type ErrorType } from '../services/ticket.service';
 import { Button } from '../../../shared/components/Button';
+import { Select } from '../../../shared/components/Select';
 import { toast } from 'sonner';
 
 interface ErrorEventsPanelProps {
@@ -67,45 +68,33 @@ export const ErrorEventsPanel = ({ ticketId, onSuccess }: ErrorEventsPanelProps)
             <h3 className="text-lg font-bold text-gray-900 mb-4">Registrar Evento / Error</h3>
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Tipo de Evento
-                    </label>
-                    <select
-                        className="block w-full rounded-md border border-gray-300 py-2 px-3 shadow-sm focus:border-brand-primary focus:outline-none focus:ring-1 focus:ring-brand-primary sm:text-sm"
-                        value={selectedErrorId}
-                        onChange={(e) => {
-                            setSelectedErrorId(Number(e.target.value));
-                            setSelectedSubtypeId('');
-                        }}
-                        required
-                    >
-                        <option value="">Seleccione un tipo...</option>
-                        {errorTypes.map((type) => (
-                            <option key={type.id} value={type.id}>
-                                {type.title}
-                            </option>
-                        ))}
-                    </select>
+                    <div className="mb-4">
+                        <Select
+                            label="Tipo de Evento"
+                            placeholder="Seleccione un tipo..."
+                            value={selectedErrorId}
+                            onChange={(val) => {
+                                setSelectedErrorId(val ? Number(val) : '');
+                                setSelectedSubtypeId('');
+                            }}
+                            options={errorTypes.map(type => ({ value: type.id, label: type.title }))}
+                            required
+                        />
+                    </div>
                 </div>
 
                 {relatedSubtypes.length > 0 && (
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Subtipo (Detalle)
-                        </label>
-                        <select
-                            className="block w-full rounded-md border border-gray-300 py-2 px-3 shadow-sm focus:border-brand-primary focus:outline-none focus:ring-1 focus:ring-brand-primary sm:text-sm"
-                            value={selectedSubtypeId}
-                            onChange={(e) => setSelectedSubtypeId(Number(e.target.value))}
-                            required
-                        >
-                            <option value="">Seleccione una opción...</option>
-                            {relatedSubtypes.map((subtype) => (
-                                <option key={subtype.id} value={subtype.id}>
-                                    {subtype.title}
-                                </option>
-                            ))}
-                        </select>
+                        <div className="mb-4">
+                            <Select
+                                label="Subtipo (Detalle)"
+                                placeholder="Seleccione una opción..."
+                                value={selectedSubtypeId}
+                                onChange={(val) => setSelectedSubtypeId(val ? Number(val) : '')}
+                                options={relatedSubtypes.map(subtype => ({ value: subtype.id, label: subtype.title }))}
+                                required
+                            />
+                        </div>
                     </div>
                 )}
 

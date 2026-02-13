@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from '../../../shared/components/Button';
-import { userService } from '../../users/services/user.service';
-import type { User } from '../../users/interfaces/User';
+import { UserSelect } from '../../users/components/UserSelect';
 import { toast } from 'sonner';
 
 import { Modal } from '../../../shared/components/Modal';
@@ -20,20 +19,12 @@ export const CreateNoveltyModal: React.FC<CreateNoveltyModalProps> = ({
     onConfirm,
     isLoading = false
 }) => {
-    const [users, setUsers] = useState<User[]>([]);
     const [selectedUser, setSelectedUser] = useState<string>('');
     const [description, setDescription] = useState('');
     const [files, setFiles] = useState<File[]>([]);
-    const [loadingUsers, setLoadingUsers] = useState(false);
 
     useEffect(() => {
         if (isOpen) {
-            setLoadingUsers(true);
-            userService.getUsers({ limit: 100 }) // Fetch top 100 users for simple selection
-                .then(res => setUsers(res.data))
-                .catch(() => toast.error('Error al cargar usuarios'))
-                .finally(() => setLoadingUsers(false));
-
             // Reset form
             setSelectedUser('');
             setDescription('');
@@ -80,19 +71,12 @@ export const CreateNoveltyModal: React.FC<CreateNoveltyModalProps> = ({
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                             Asignar Novedad a:
                         </label>
-                        <select
-                            className="w-full border-gray-300 rounded-lg shadow-sm focus:ring-brand-primary focus:border-brand-primary sm:text-sm py-2"
-                            value={selectedUser}
-                            onChange={(e) => setSelectedUser(e.target.value)}
-                            disabled={isLoading || loadingUsers}
-                        >
-                            <option value="">Seleccione un usuario...</option>
-                            {users.map(u => (
-                                <option key={u.id} value={u.id}>
-                                    {u.nombre} {u.apellido}
-                                </option>
-                            ))}
-                        </select>
+                        <UserSelect
+                            value={selectedUser ? Number(selectedUser) : undefined}
+                            onChange={(val) => setSelectedUser(val ? String(val) : '')}
+                            placeholder="Buscar usuario..."
+                        // disabled={isLoading} // UserSelect doesn't have disabled prop yet, but logic handles it via form submission check
+                        />
                     </div>
 
                     <div>

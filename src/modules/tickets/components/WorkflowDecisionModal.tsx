@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import type { CheckNextStepResponse, UserCandidate } from '../interfaces/Ticket';
 import { Modal } from '../../../shared/components/Modal';
 import { Button } from '../../../shared/components/Button';
+import { UserSelect } from '../../users/components/UserSelect';
 
 interface WorkflowDecisionModalProps {
     open: boolean;
@@ -178,23 +179,25 @@ export const WorkflowDecisionModal: React.FC<WorkflowDecisionModalProps> = ({
                                             {role.allowSkip && <span className="text-gray-400 font-normal normal-case">(Opcional)</span>}
                                         </label>
                                         <div className="relative">
-                                            <select
-                                                id={`role-${role.id}`}
-                                                className="block w-full rounded-lg border border-gray-200 bg-slate-50 p-2 text-sm text-[#121617] focus:border-brand-teal focus:bg-white focus:outline-none h-10 appearance-none"
-                                                value={manualAssignments[role.id] || ''}
-                                                onChange={(e) => setManualAssignments(prev => ({ ...prev, [role.id]: e.target.value }))}
-                                            >
-                                                <option value="">Seleccione asignado...</option>
-                                                {role.allowSkip && (
-                                                    <option value="SKIP">⚠️ No asignar (Omitir este cargo)</option>
-                                                )}
-                                                {role.candidates && role.candidates.map((u) => (
-                                                    <option key={u.id} value={u.id.toString()}>
-                                                        {u.nombre} {u.apellido} {u.cargo ? `(${u.cargo})` : ''}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                            <span className="material-symbols-outlined absolute right-2 top-2.5 text-gray-400 pointer-events-none text-lg">expand_more</span>
+                                            <UserSelect
+                                                value={manualAssignments[role.id] && manualAssignments[role.id] !== 'SKIP' ? Number(manualAssignments[role.id]) : undefined}
+                                                onChange={(val) => setManualAssignments(prev => ({ ...prev, [role.id]: val ? String(val) : '' }))}
+                                                candidates={role.candidates}
+                                                placeholder="Seleccione asignado..."
+                                            />
+                                            {role.allowSkip && (
+                                                <div className="mt-1">
+                                                    <label className="inline-flex items-center">
+                                                        <input
+                                                            type="checkbox"
+                                                            className="rounded border-gray-300 text-brand-teal shadow-sm focus:border-brand-teal focus:ring focus:ring-brand-teal focus:ring-opacity-50"
+                                                            checked={manualAssignments[role.id] === 'SKIP'}
+                                                            onChange={(e) => setManualAssignments(prev => ({ ...prev, [role.id]: e.target.checked ? 'SKIP' : '' }))}
+                                                        />
+                                                        <span className="ml-2 text-xs text-gray-600">No asignar (Omitir)</span>
+                                                    </label>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 ))}
@@ -209,21 +212,12 @@ export const WorkflowDecisionModal: React.FC<WorkflowDecisionModalProps> = ({
                                 Asignar a Usuario
                             </label>
                             <div className="relative">
-                                <select
-                                    id="user-select"
-                                    key={`user-select-${selectedDecision}`}
-                                    className="block w-full rounded-lg border border-gray-200 bg-slate-50 p-3 text-base text-[#121617] focus:border-brand-teal focus:bg-white focus:outline-none focus:ring-1 focus:ring-brand-teal h-12 appearance-none"
-                                    value={selectedUser}
-                                    onChange={(e) => setSelectedUser(e.target.value)}
-                                >
-                                    <option value="">Seleccione un usuario...</option>
-                                    {stepCandidates.map((u) => (
-                                        <option key={u.id} value={u.id.toString()}>
-                                            {u.nombre} {u.apellido} {u.cargo ? `(${u.cargo})` : ''}
-                                        </option>
-                                    ))}
-                                </select>
-                                <span className="material-symbols-outlined absolute right-3 top-3 text-gray-400 pointer-events-none">expand_more</span>
+                                <UserSelect
+                                    value={selectedUser ? Number(selectedUser) : undefined}
+                                    onChange={(val) => setSelectedUser(val ? String(val) : '')}
+                                    candidates={stepCandidates}
+                                    placeholder="Seleccione un usuario..."
+                                />
                             </div>
                         </div>
                     )}
@@ -241,20 +235,12 @@ export const WorkflowDecisionModal: React.FC<WorkflowDecisionModalProps> = ({
                                 Es necesario confirmar quién aprobará este ticket.
                             </p>
                             <div className="relative">
-                                <select
-                                    id="boss-select"
-                                    className="block w-full rounded-lg border border-purple-200 bg-white p-2 text-sm text-[#121617] focus:border-purple-500 focus:outline-none h-10 appearance-none"
-                                    value={selectedBossId}
-                                    onChange={(e) => setSelectedBossId(e.target.value)}
-                                >
-                                    <option value="">Seleccione al Jefe Inmediato...</option>
-                                    {bossCandidates.map((u) => (
-                                        <option key={u.id} value={u.id.toString()}>
-                                            {u.nombre} {u.apellido} {u.cargo ? `(${u.cargo})` : ''}
-                                        </option>
-                                    ))}
-                                </select>
-                                <span className="material-symbols-outlined absolute right-2 top-2.5 text-gray-400 pointer-events-none text-lg">expand_more</span>
+                                <UserSelect
+                                    value={selectedBossId ? Number(selectedBossId) : undefined}
+                                    onChange={(val) => setSelectedBossId(val ? String(val) : '')}
+                                    candidates={bossCandidates}
+                                    placeholder="Seleccione al Jefe Inmediato..."
+                                />
                             </div>
                         </div>
                     )}

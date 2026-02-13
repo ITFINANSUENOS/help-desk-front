@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { FormModal } from '../../../shared/components/FormModal';
 import { Input } from '../../../shared/components/Input';
+import { Select } from '../../../shared/components/Select';
 import { Button } from '../../../shared/components/Button';
 import { IconTrash, IconArrowRight, IconRoute, IconArrowsSplit, IconPlus, IconSettings } from '@tabler/icons-react';
 import type { Transition, CreateTransitionDto } from '../interfaces/Transition';
@@ -33,7 +34,7 @@ export const TransitionModal = ({ isOpen, onClose, stepOrigenId, stepOrigenNombr
     const [isRouteStepsModalOpen, setIsRouteStepsModalOpen] = useState(false);
     const [selectedRoute, setSelectedRoute] = useState<Route | null>(null);
 
-    const { register, handleSubmit, watch, reset, setValue } = useForm<CreateTransitionDto>({
+    const { register, handleSubmit, watch, reset, setValue, control } = useForm<CreateTransitionDto>({
         defaultValues: {
             tipoDestino: 'paso',
             pasoOrigenId: stepOrigenId
@@ -220,21 +221,22 @@ export const TransitionModal = ({ isOpen, onClose, stepOrigenId, stepOrigenNombr
                                         {tipoDestino === 'paso' ? 'Paso Destino' : 'Ruta Destino'}
                                     </label>
                                     <div className="flex gap-2">
-                                        <select
-                                            {...register(tipoDestino === 'paso' ? 'pasoDestinoId' : 'rutaDestinoId', { required: true })}
-                                            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                                        >
-                                            <option value="">-- Seleccionar --</option>
-                                            {tipoDestino === 'paso' ? (
-                                                steps.map(s => (
-                                                    <option key={s.id} value={s.id}>{s.orden} - {s.nombre}</option>
-                                                ))
-                                            ) : (
-                                                routes.map(r => (
-                                                    <option key={r.id} value={r.id}>{r.nombre}</option>
-                                                ))
+                                        <Controller
+                                            name={tipoDestino === 'paso' ? 'pasoDestinoId' : 'rutaDestinoId'}
+                                            control={control}
+                                            rules={{ required: true }}
+                                            render={({ field }) => (
+                                                <Select
+                                                    {...field}
+                                                    options={tipoDestino === 'paso'
+                                                        ? steps.map(s => ({ value: s.id, label: `${s.orden} - ${s.nombre}` }))
+                                                        : routes.map(r => ({ value: r.id, label: r.nombre }))
+                                                    }
+                                                    onChange={(val) => field.onChange(val)}
+                                                    placeholder="-- Seleccionar --"
+                                                />
                                             )}
-                                        </select>
+                                        />
 
                                         {tipoDestino === 'ruta' && (
                                             <>

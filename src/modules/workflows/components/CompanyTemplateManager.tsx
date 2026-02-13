@@ -4,7 +4,8 @@ import { DataTable } from '../../../shared/components/DataTable';
 import { IconUpload, IconTrash, IconFileAnalytics } from '@tabler/icons-react';
 import { templateService } from '../../templates/services/template.service';
 import { toast } from 'sonner';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
+import { Select } from '../../../shared/components/Select';
 import { companyService } from '../../companies/services/company.service';
 
 interface CompanyTemplateManagerProps {
@@ -28,7 +29,7 @@ export const CompanyTemplateManager = ({ flujoId }: CompanyTemplateManagerProps)
     const [isUploading, setIsUploading] = useState(false);
 
     // Form state for upload
-    const { register, handleSubmit, reset, formState: { errors } } = useForm<{ empresaId: number, file: FileList }>();
+    const { register, handleSubmit, reset, control, formState: { errors } } = useForm<{ empresaId: number, file: FileList }>();
 
     useEffect(() => {
         loadData();
@@ -105,16 +106,20 @@ export const CompanyTemplateManager = ({ flujoId }: CompanyTemplateManagerProps)
                 <form onSubmit={handleSubmit(onSubmit)} className="flex gap-4 items-end flex-wrap">
                     <div className="w-64">
                         <label className="block text-sm font-medium text-gray-700 mb-1">Empresa</label>
-                        <select
-                            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary sm:text-sm"
-                            {...register('empresaId', { required: true })}
-                        >
-                            <option value="">Seleccione...</option>
-                            {companies.map(c => (
-                                <option key={c.id} value={c.id}>{c.nombre}</option>
-                            ))}
-                        </select>
-                        {errors.empresaId && <span className="text-xs text-red-500">Requerido</span>}
+                        <Controller
+                            name="empresaId"
+                            control={control}
+                            rules={{ required: true }}
+                            render={({ field }) => (
+                                <Select
+                                    {...field}
+                                    options={companies.map(c => ({ value: c.id, label: c.nombre }))}
+                                    onChange={(val) => field.onChange(val)}
+                                    placeholder="Seleccione..."
+                                    error={errors.empresaId ? 'Requerido' : undefined}
+                                />
+                            )}
+                        />
                     </div>
                     <div className="flex-1 min-w-[200px]">
                         <label className="block text-sm font-medium text-gray-700 mb-1">Archivo PDF</label>

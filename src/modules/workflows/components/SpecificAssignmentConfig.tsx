@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { IconX, IconUserPlus, IconBriefcase } from '@tabler/icons-react';
 import { Button } from '../../../shared/components/Button';
+import { Select } from '../../../shared/components/Select';
 import { userService } from '../../users/services/user.service';
 import { positionService } from '../../positions/services/position.service';
 import type { User } from '../../users/interfaces/User';
@@ -101,20 +102,19 @@ export const SpecificAssignmentConfig = ({ assignments, onChange }: SpecificAssi
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                         Agregar Usuario
                     </label>
-                    <select
+                    <Select
                         value={selectedUserId}
-                        onChange={(e) => setSelectedUserId(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent"
-                    >
-                        <option value="">-- Seleccionar Usuario --</option>
-                        {users
+                        onChange={(val) => setSelectedUserId(val ? String(val) : '')}
+                        options={users
                             .filter(u => !assignments.some(a => a.usuarioId === u.id))
-                            .map(user => (
-                                <option key={user.id} value={user.id}>
-                                    {user.nombre} {user.apellido} - {user.email}
-                                </option>
-                            ))}
-                    </select>
+                            .map(user => ({
+                                value: user.id,
+                                label: `${user.nombre} ${user.apellido} - ${user.email}`
+                            }))
+                        }
+                        placeholder="-- Seleccionar Usuario --"
+                        isClearable
+                    />
                 </div>
                 <div className="flex items-end">
                     <Button
@@ -134,20 +134,19 @@ export const SpecificAssignmentConfig = ({ assignments, onChange }: SpecificAssi
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                         Agregar Cargo (Para Asignación por Regional)
                     </label>
-                    <select
+                    <Select
                         value={selectedPositionId}
-                        onChange={(e) => setSelectedPositionId(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent"
-                    >
-                        <option value="">-- Seleccionar Cargo --</option>
-                        {positions
+                        onChange={(val) => setSelectedPositionId(val ? String(val) : '')}
+                        options={positions
                             .filter(p => !assignments.some(a => a.cargoId === p.id))
-                            .map(position => (
-                                <option key={position.id} value={position.id}>
-                                    {position.nombre}
-                                </option>
-                            ))}
-                    </select>
+                            .map(position => ({
+                                value: position.id,
+                                label: position.nombre
+                            }))
+                        }
+                        placeholder="-- Seleccionar Cargo --"
+                        isClearable
+                    />
                 </div>
                 <div className="flex items-end">
                     <Button

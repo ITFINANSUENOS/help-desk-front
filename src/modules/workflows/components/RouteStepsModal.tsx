@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { FormModal } from '../../../shared/components/FormModal';
+import { Select } from '../../../shared/components/Select';
 import { Button } from '../../../shared/components/Button';
 import { IconTrash, IconPlus } from '@tabler/icons-react';
 import type { Route, RouteStep } from '../interfaces/Route';
@@ -102,18 +103,15 @@ export const RouteStepsModal = ({ isOpen, onClose, route, flujoId }: RouteStepsM
                         </div>
                         <div className="flex-1">
                             <label className="block text-xs font-semibold text-blue-700 mb-1">Paso del Flujo</label>
-                            <select
-                                value={selectedStepId}
-                                onChange={(e) => setSelectedStepId(e.target.value)}
-                                className="w-full rounded border border-blue-300 px-2 py-1.5 text-sm"
-                            >
-                                <option value="">-- Seleccionar Paso --</option>
-                                {availableSteps.map(step => (
-                                    <option key={step.id} value={step.id}>
-                                        {step.nombre} (ID: {step.id})
-                                    </option>
-                                ))}
-                            </select>
+                            <Select
+                                value={selectedStepId ? Number(selectedStepId) : ''}
+                                onChange={(val) => setSelectedStepId(val ? String(val) : '')}
+                                options={availableSteps.map(step => ({
+                                    value: step.id,
+                                    label: `${step.nombre} (ID: ${step.id})`
+                                }))}
+                                placeholder="-- Seleccionar Paso --"
+                            />
                         </div>
                         <Button type="button" variant="brand" disabled={!selectedStepId} onClick={handleAdd}>
                             <IconPlus size={18} />
