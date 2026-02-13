@@ -69,6 +69,12 @@ export default function TicketsPage() {
             options.push({ label: 'Reabiertos', value: 'reopened' });
         }
 
+        // Vistas de Errores (Disponibles para todos los que puedan ver tickets)
+        if (can('view:assigned', 'Ticket') || can('view:created', 'Ticket')) {
+            options.push({ label: 'Errores que reporté', value: 'errors_reported' });
+            options.push({ label: 'Errores asignados a mí', value: 'errors_received' });
+        }
+
         // Si no tiene ningún permiso específico, al menos mostrar 'creados'
         if (options.length === 0) {
             options.push({ label: 'Creados por mí', value: 'created' });
@@ -78,10 +84,10 @@ export default function TicketsPage() {
     }, [can]);
 
     // Initialize viewFilter with the first available option based on permissions
-    const [viewFilter, setViewFilter] = useState<'all' | 'created' | 'assigned' | 'observed' | 'history'>(() => {
+    const [viewFilter, setViewFilter] = useState<'all' | 'created' | 'assigned' | 'observed' | 'history' | 'reopened' | 'errors_reported' | 'errors_received'>(() => {
         // This will be computed after viewOptions is available, but we need a default
         // We'll use 'created' as the safest default
-        return 'created' as 'all' | 'created' | 'assigned' | 'observed' | 'history';
+        return 'created';
     });
 
     // Track if we've initialized the filter to prevent overriding user selection
@@ -90,7 +96,7 @@ export default function TicketsPage() {
     // Sync viewFilter with the first available option ONLY on initial load
     useEffect(() => {
         if (viewOptions.length > 0 && !filterInitialized.current) {
-            const firstOption = viewOptions[0].value as 'all' | 'created' | 'assigned' | 'observed' | 'history';
+            const firstOption = viewOptions[0].value as 'all' | 'created' | 'assigned' | 'observed' | 'history' | 'reopened' | 'errors_reported' | 'errors_received';
             setViewFilter(firstOption);
             filterInitialized.current = true;
         }

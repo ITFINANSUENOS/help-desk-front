@@ -1,7 +1,7 @@
 /**
  * Lista de acciones permitidas para los permisos.
  */
-export const PERMISSION_ACTIONS = ['manage', 'create', 'read', 'update', 'delete'] as const;
+export const PERMISSION_ACTIONS = ['manage', 'create', 'read', 'update', 'delete', 'view:assigned', 'view:created', 'view:all', 'view:observed', 'reopen', 'view:errors_reported', 'view:errors_received'] as const;
 export type PermissionAction = typeof PERMISSION_ACTIONS[number];
 
 /**
