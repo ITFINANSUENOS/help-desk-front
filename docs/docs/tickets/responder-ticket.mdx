@@ -5,49 +5,406 @@ sidebar_position: 3
 # Responder y Gestionar Tickets
 
 ## Objetivo
-Interactuar con tickets asignados: responder, adjuntar evidencias, reportar novedades y avanzar el flujo de trabajo.
+Interactuar efectivamente con tickets asignados: responder, adjuntar evidencias, reportar novedades, gestionar flujos de trabajo y completar tareas.
+
+## Acceder a un Ticket
+
+1. Ve a la página de **Tickets**
+2. Selecciona la vista **"Asignados a mí"**
+3. Haz clic en el ticket que deseas gestionar
+4. Se abrirá la **vista de detalle** con toda la información
+
+## Anatomía de la Vista de Detalle
+
+La vista de detalle se divide en varias secciones:
+
+### Panel Superior
+- **ID y Asunto** del ticket
+- **Estado actual** (badge con color)
+- **Prioridad** (pastilla con color)
+- **Botones de acción** (Reabrir, Reportar Error, etc.)
+
+### Panel Lateral Derecho
+- **Información del ticket**:
+  - Empresa y departamento
+  - Categoría y subcategoría
+  - Fechas de creación y actualización
+  - Usuario creador
+  - Usuarios asignados
+- **Workflow actual**:
+  - Paso en el que se encuentra
+  - Pasos completados
+  - Pasos pendientes
+
+### Panel Central
+- **Descripción original** del ticket
+- **Historial de eventos** (cronológico)
+- **Mensajes y respuestas**
+- **Archivos adjuntos**
+- **Panel de respuesta** (si tienes permisos)
 
 ## Panel de Respuesta
 
-Al ingresar a un ticket asignado a ti, verás el **Panel de Respuesta** en la parte inferior.
+El panel de respuesta aparece en la parte inferior cuando el ticket está asignado a ti y requiere tu acción.
+
+### Componentes del Panel
+
+#### 1. Editor de Texto
+- Editor rico con formato
+- Soporta:
+  - **Negrita**, *cursiva*, subrayado
+  - Listas numeradas y con viñetas
+  - Enlaces
+  - Código (si aplica)
+
+**Buenas prácticas:**
+- Sé claro y conciso
+- Usa formato para destacar información importante
+- Incluye pasos realizados si es una resolución
+- Menciona próximos pasos si aplica
+
+#### 2. Formulario Dinámico
+Algunos pasos requieren información adicional mediante campos personalizados.
+
+**Tipos de campos comunes:**
+- **Texto corto**: Respuestas breves (ej: número de orden)
+- **Texto largo**: Descripciones detalladas
+- **Selección**: Opciones predefinidas
+- **Fecha**: Fechas específicas (ej: fecha de entrega)
+- **Número**: Valores numéricos (ej: cantidad, costo)
+- **Archivo**: Documentos específicos requeridos
+
+:::warning Campos Obligatorios
+Los campos marcados con asterisco (*) son **obligatorios**. No podrás avanzar el ticket sin completarlos.
+:::
+
+#### 3. Adjuntos
+Puedes adjuntar archivos de soporte para documentar tu trabajo.
+
+**Límites técnicos:**
+- **Máximo 5 archivos** por respuesta
+- **2MB por archivo** individual
+- **8MB total** por respuesta
+
+**Formatos aceptados:**
+- Imágenes: JPG, PNG, GIF, WebP
+- Documentos: PDF, DOC, DOCX, XLS, XLSX
+- Comprimidos: ZIP, RAR
+- Otros: TXT, CSV
+
+**Recomendaciones:**
+- Usa nombres descriptivos para los archivos
+- Comprime imágenes grandes antes de subir
+- Agrupa archivos relacionados en un ZIP si son muchos
+
+#### 4. Firma Digital (Si aplica)
+Algunos pasos requieren firma digital para validar tu aprobación o conformidad.
+
+**Opciones de firma:**
+- **Dibujar**: Usa el mouse o pantalla táctil para firmar
+- **Cargar imagen**: Sube una imagen de tu firma escaneada
+- **Texto**: Usa tu nombre como firma (si está habilitado)
+
+**Consideraciones:**
+- La firma queda registrada permanentemente
+- No se puede modificar después de enviar
+- Tiene validez legal según configuración del sistema
+
+## Acciones Principales
 
 ### 1. Responder y Avanzar
-Para completar tu tarea y pasar el ticket al siguiente paso:
-1. **Comentario**: Escribe una nota de cierre, respuesta o análisis en el editor de texto.
-2. **Formulario Dinámico**: Si el paso lo requiere, completa los campos adicionales solicitados.
-3. **Adjuntos (Opcional)**:
-   - Puedes adjuntar archivos de soporte (imágenes, documentos, hojas de cálculo).
-   - *Límites*: Máximo 5 archivos, 2MB por archivo, 8MB total.
-4. **Firmar (Si aplica)**: Si el paso requiere firma, usa el botón "Agregar Firma" para dibujar o cargar tu rúbrica.
-5. Haz clic en **"Enviar y Avanzar"**.
+
+Esta es la acción más común: completar tu tarea y pasar el ticket al siguiente paso del flujo.
+
+**Pasos:**
+1. **Escribe tu respuesta** en el editor de texto
+   - Explica qué hiciste
+   - Documenta hallazgos importantes
+   - Menciona cualquier consideración especial
+
+2. **Completa el formulario dinámico** (si existe)
+   - Llena todos los campos obligatorios
+   - Verifica que la información sea correcta
+
+3. **Adjunta archivos** (si es necesario)
+   - Evidencias fotográficas
+   - Documentos de soporte
+   - Reportes generados
+
+4. **Firma** (si el paso lo requiere)
+   - Agrega tu firma digital
+   - Verifica que se vea correctamente
+
+5. **Haz clic en "Enviar y Avanzar"**
+
+**¿Qué sucede después?**
+- Tu respuesta se registra en el historial
+- Los archivos se almacenan permanentemente
+- El ticket avanza al siguiente paso del flujo
+- El siguiente responsable recibe una notificación
+- Tú recibes confirmación de la acción
+
+:::tip
+Si no estás seguro de tu respuesta, puedes guardarla como borrador (si está habilitado) y revisarla después.
+:::
 
 ### 2. Reportar Novedad (Pausar Ticket)
-Si no puedes continuar con el ticket por una causa externa (ej. falta de repuestos, esperando proveedor):
-1. Haz clic en el botón **"Crear Novedad"**.
-2. **Descripción**: Explica la razón de la pausa.
-3. **Asignado (Opcional)**: Puedes indicar quién es el responsable de resolver la novedad.
-4. **Adjuntos**: Sube evidencias que justifiquen la novedad (ej. correo del proveedor).
-5. Confirmar.
-   - El ticket pasará a estado **Pausado**.
-   - El tiempo de SLA (Acuerdo de Nivel de Servicio) se detendrá.
+
+Usa esta acción cuando **no puedes continuar** con el ticket por causas externas.
+
+**Casos de uso:**
+- Esperando repuestos o materiales
+- Pendiente de información del cliente
+- Dependencia de terceros (proveedores, otras áreas)
+- Aprobaciones externas pendientes
+- Problemas técnicos que requieren escalamiento
+
+**Pasos:**
+1. Haz clic en **"Crear Novedad"** o **"Pausar Ticket"**
+
+2. **Selecciona el tipo de novedad**:
+   - Falta de materiales
+   - Información pendiente
+   - Aprobación requerida
+   - Problema técnico
+   - Otro (especificar)
+
+3. **Escribe la descripción**:
+   - Explica **por qué** no puedes continuar
+   - Indica **qué se necesita** para reanudar
+   - Menciona **quién** es responsable de resolver la novedad
+   - Estima **cuándo** podría resolverse (si es posible)
+
+4. **Asigna responsable** (opcional):
+   - Puedes indicar quién debe resolver la novedad
+   - Esa persona recibirá una notificación
+
+5. **Adjunta evidencias**:
+   - Correos del proveedor
+   - Cotizaciones
+   - Fotos del problema
+   - Cualquier documento relevante
+
+6. **Confirma la novedad**
+
+**¿Qué sucede después?**
+- El ticket pasa a estado **"Pausado"**
+- El **SLA se detiene** (el tiempo no corre)
+- Se notifica al responsable asignado (si lo indicaste)
+- Se notifica al creador del ticket
+- La novedad aparece en el historial
+
+:::info SLA (Service Level Agreement)
+El SLA es el tiempo máximo comprometido para resolver un ticket. Al pausar, este tiempo se congela hasta que se resuelva la novedad.
+:::
 
 ### 3. Resolver Novedad (Reanudar Ticket)
-Cuando la causa de la pausa se ha solucionado:
-1. Ingresa al ticket pausado.
-2. Haz clic en **"Resolver Novedad (Reanudar)"**.
-3. **Adjuntos**: Sube evidencias de la solución (ej. foto del repuesto recibido).
-4. El ticket volverá a estado **Abierto** y recuperará su SLA.
 
-## Firmas Paralelas
-En pasos que requieren la aprobación de múltiples personas:
-- Verás un indicador de progreso de firmas.
-- Debes hacer clic en **"Firmar mi parte"**.
-- El ticket solo avanzará cuando **todos** los responsables hayan firmado.
+Cuando la causa de la pausa se ha solucionado, debes reanudar el ticket.
 
-## Cierre del Ticket
-Si estás en el último paso del flujo:
-1. Haz clic en **"Finalizar Ticket & Cerrar"**.
-2. **Confirma la acción**:
-   - Escribe la nota final y conclusiones en el editor.
-   - **Adjuntos (Opcional)**: Puedes subir evidencias finales (ej. acta de entrega).
-3. Haz clic en **"Confirmar Cierre"**. El ticket pasará a estado Histórico/Cerrado.
+**Pasos:**
+1. Ingresa al ticket pausado
+
+2. Localiza la novedad activa en el historial
+
+3. Haz clic en **"Resolver Novedad"** o **"Reanudar Ticket"**
+
+4. **Describe la solución**:
+   - Qué se hizo para resolver la novedad
+   - Cuándo se resolvió
+   - Quién lo resolvió (si fue otra persona)
+
+5. **Adjunta evidencias de la solución**:
+   - Foto del repuesto recibido
+   - Confirmación del proveedor
+   - Documento de aprobación
+   - Cualquier prueba de que se resolvió
+
+6. **Confirma la resolución**
+
+**¿Qué sucede después?**
+- El ticket vuelve a estado **"Abierto"**
+- El **SLA se reanuda** desde donde se pausó
+- Se notifica al asignado actual
+- Puedes continuar con tu trabajo normal
+
+### 4. Reportar Error de Proceso
+
+Si detectas un problema en el flujo de trabajo o una asignación incorrecta.
+
+**Casos de uso:**
+- El ticket fue asignado a la persona incorrecta
+- Falta información crítica para continuar
+- El paso actual no corresponde al tipo de ticket
+- Hay un error en los datos del ticket
+- El flujo está mal configurado
+
+**Pasos:**
+1. Haz clic en **"Reportar Error"**
+
+2. **Selecciona el tipo de error**:
+   - Error de asignación
+   - Información faltante
+   - Flujo incorrecto
+   - Datos erróneos
+   - Otro
+
+3. **Selecciona el subtipo** (si aplica)
+
+4. **Describe el error**:
+   - Qué está mal
+   - Por qué es un error
+   - Qué debería ser lo correcto
+
+5. **Adjunta evidencias** (si es necesario)
+
+6. **Confirma el reporte**
+
+**¿Qué sucede después?**
+- El error se registra en el sistema
+- Se notifica al supervisor o administrador
+- El ticket puede ser reasignado o corregido
+- Tú recibes seguimiento del error
+
+## Escenarios Especiales
+
+### Pasos Paralelos
+
+Algunos pasos requieren la participación simultánea de múltiples personas.
+
+**Características:**
+- Verás un **indicador de progreso** mostrando quién ha completado su parte
+- Debes hacer clic en **"Completar mi parte"** o **"Firmar mi parte"**
+- El ticket **solo avanza** cuando **todos** los responsables hayan completado
+- Recibes notificaciones cuando otros completan sus partes
+
+**Ejemplo:**
+```
+Aprobación de Compra (3 firmas requeridas)
+✅ Jefe de Área (completado)
+⏳ Gerente Financiero (pendiente - tú)
+⏳ Director General (pendiente)
+```
+
+**Pasos:**
+1. Revisa la información del ticket
+2. Verifica el trabajo de los que ya completaron
+3. Haz clic en "Completar mi parte"
+4. Agrega tu comentario (si es necesario)
+5. Firma (si se requiere)
+6. Confirma
+
+:::tip
+Una vez completes tu parte en un paso paralelo, el ticket **desaparece de tu vista "Asignados a mí"** para evitar desorden.
+:::
+
+### Firmas Múltiples
+
+Similar a pasos paralelos, pero específicamente para aprobaciones con firma.
+
+**Tipos de firma:**
+- **Firma simple**: Solo tu firma
+- **Firma con cargo**: Tu firma representa tu cargo/rol
+- **Firma con sello**: Incluye sello digital de la empresa
+
+**Validación:**
+- El sistema valida que seas el usuario correcto
+- La firma queda vinculada a tu usuario permanentemente
+- Se registra fecha, hora y ubicación (si está habilitado)
+
+### Cierre del Ticket
+
+Si estás en el **último paso del flujo**, tienes la responsabilidad de cerrar el ticket.
+
+**Pasos:**
+1. Verifica que todo esté completo:
+   - Todos los pasos anteriores finalizados
+   - Toda la información documentada
+   - Todos los archivos adjuntos necesarios
+
+2. Haz clic en **"Finalizar Ticket & Cerrar"**
+
+3. **Escribe la nota final**:
+   - Resumen de la solución
+   - Conclusiones
+   - Recomendaciones (si aplica)
+   - Lecciones aprendidas
+
+4. **Adjunta evidencias finales** (opcional):
+   - Acta de entrega
+   - Conformidad del cliente
+   - Fotos finales
+   - Documentos de cierre
+
+5. **Firma de cierre** (si se requiere)
+
+6. **Confirma el cierre**
+
+**¿Qué sucede después?**
+- El ticket pasa a estado **"Cerrado"**
+- Se notifica al creador del ticket
+- Se notifica a todos los participantes
+- El ticket pasa al historial
+- Se generan documentos finales (si están configurados)
+- El SLA se marca como cumplido o incumplido
+
+:::warning No se puede deshacer
+El cierre de un ticket es **permanente**. Solo se puede reabrir mediante el proceso formal de reapertura.
+:::
+
+## Buenas Prácticas
+
+### Para Respuestas
+✅ **Sé específico**: "Reemplacé el disco duro del servidor" en lugar de "Arreglé el problema"
+✅ **Documenta pasos**: Lista lo que hiciste para que otros puedan replicarlo
+✅ **Adjunta evidencias**: Fotos antes/después, capturas de pantalla, logs
+✅ **Usa formato**: Resalta información importante con negrita o listas
+
+❌ **Evita**: Respuestas genéricas como "Listo" o "Hecho"
+❌ **Evita**: Dejar campos obligatorios vacíos
+❌ **Evita**: Adjuntar archivos sin nombre descriptivo
+
+### Para Novedades
+✅ **Sé claro**: Explica exactamente qué se necesita para continuar
+✅ **Asigna responsable**: Si sabes quién debe resolverlo, indícalo
+✅ **Estima tiempos**: Si es posible, indica cuándo podría resolverse
+✅ **Adjunta evidencias**: Documenta por qué no puedes continuar
+
+❌ **Evita**: Pausar sin explicación clara
+❌ **Evita**: Dejar novedades abiertas indefinidamente
+❌ **Evita**: Usar novedades para retrasar trabajo que sí puedes hacer
+
+### Para Errores
+✅ **Describe el problema**: Qué está mal y por qué
+✅ **Sugiere solución**: Si sabes cómo corregirlo, menciónalo
+✅ **Sé constructivo**: El objetivo es mejorar el proceso
+
+❌ **Evita**: Reportar errores sin descripción
+❌ **Evita**: Usar el reporte de errores para quejas personales
+
+## Atajos de Teclado
+
+Cuando estés en el editor de texto:
+
+- **Ctrl + B**: Negrita
+- **Ctrl + I**: Cursiva
+- **Ctrl + U**: Subrayado
+- **Ctrl + K**: Insertar enlace
+- **Ctrl + Enter**: Enviar respuesta (si está habilitado)
+
+## Notificaciones
+
+Recibirás notificaciones cuando:
+- Te asignan un nuevo ticket
+- Alguien responde a un ticket donde participas
+- Se resuelve una novedad que reportaste
+- Completan su parte en un paso paralelo
+- Se cierra un ticket que creaste
+
+## Próximos Pasos
+
+- [Ver tickets](./ver-tickets.mdx)
+- [Crear un ticket](./crear-ticket.mdx)
+- [Reabrir tickets](./reabrir-tickets.mdx)
+- [Gestionar notificaciones](./gestionar-notificaciones.mdx)
+- [FAQ y solución de problemas](../faq.mdx)

@@ -59,9 +59,9 @@ const config: Config = {
       respectPrefersColorScheme: true,
     },
     navbar: {
-      title: 'My Site',
+      title: 'Mesa de Ayuda',
       logo: {
-        alt: 'My Site Logo',
+        alt: 'Mesa de Ayuda Logo',
         src: 'img/logo.svg',
       },
       items: [

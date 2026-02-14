@@ -2,98 +2,322 @@
 sidebar_position: 2
 ---
 
-# Ver Tickets
+# Ver y Consultar Tickets
 
 ## Objetivo
-Consultar y filtrar la lista de tickets según tus permisos.
+Consultar, filtrar y gestionar la lista de tickets según tus permisos y necesidades de trabajo.
 
-## Acceder a la lista
+## Acceder a la Lista de Tickets
 
-Navega a **Tickets** desde el menú principal.
+1. Haz clic en **Tickets** en el menú lateral izquierdo
+2. Por defecto, verás la vista más relevante según tu rol
+3. La interfaz muestra:
+   - **Tarjetas de resumen (KPIs)** en la parte superior
+   - **Filtros rápidos** (búsqueda, estado, prioridad)
+   - **Filtros avanzados** (panel desplegable)
+   - **Tabla de tickets** con paginación
 
 ## Vistas Disponibles
 
-El sistema muestra diferentes vistas según tu rol:
+El sistema ofrece diferentes vistas para organizar tu trabajo. Selecciona la vista usando el selector en la parte superior de la tabla.
 
 ### Todos los Tickets
 **Disponible para**: Administradores
 
-Muestra todos los tickets del sistema sin restricciones.
+Muestra **todos** los tickets del sistema sin restricciones de visibilidad. Útil para:
+- Supervisión general del sistema
+- Auditorías
+- Reportes globales
+
+:::warning Rendimiento
+Esta vista puede contener miles de tickets. Usa filtros para mejorar el rendimiento.
+:::
 
 ### Creados por mí
 **Disponible para**: Todos los usuarios
 
-Muestra únicamente los tickets que tú has creado.
+Muestra **únicamente** los tickets que tú has creado, sin importar su estado actual o asignación.
+
+**Casos de uso:**
+- Dar seguimiento a tus solicitudes
+- Verificar el progreso de tus reportes
+- Reabrir tickets si el problema persiste
 
 ### Asignados a mí
 **Disponible para**: Agentes y Administradores
 
-Muestra los tickets que están asignados a ti para su resolución.
+Muestra tickets que **están actualmente asignados a ti** para su resolución.
+
+**Comportamiento especial:**
+- Los tickets **paralelos** desaparecen automáticamente una vez completes tu tarea
+- Solo muestra tickets en estado **Abierto** o **Pausado**
+- Se actualiza en tiempo real cuando recibes nuevas asignaciones
+
+### Reabiertos
+**Disponible para**: Usuarios con permisos de visualización
+
+Muestra tickets que fueron **cerrados y luego reabiertos** debido a:
+- El problema volvió a ocurrir
+- La solución no fue efectiva
+- Se descubrió información adicional
+
+**Útil para:**
+- Identificar problemas recurrentes
+- Mejorar procesos
+- Priorizar casos que requieren atención especial
+
+### Errores que reporté
+**Disponible para**: Todos los usuarios
+
+Muestra tickets donde **tú reportaste un error de proceso**. Esto incluye:
+- Errores durante la gestión del ticket
+- Eventos de reapertura que iniciaste
+- Problemas en el flujo de trabajo
+
+**Cuándo usar esta vista:**
+- Dar seguimiento a errores que reportaste
+- Verificar si fueron resueltos
+- Comunicarte con los responsables de la resolución
+
+### Errores asignados a mí
+**Disponible para**: Agentes y Administradores
+
+Muestra tickets con **errores de proceso asignados a ti** para resolver.
+
+**Responsabilidades:**
+- Investigar la causa del error
+- Corregir el problema
+- Documentar la solución
+- Notificar al reportante
 
 ### Observados
 **Disponible para**: Usuarios configurados como observadores
 
-Muestra tickets de flujos donde estás configurado como observador.
+Muestra tickets de flujos donde estás configurado como **observador**.
 
-## Filtros
+**Características:**
+- Recibes notificaciones de cambios importantes
+- Puedes ver el ticket pero no modificarlo
+- Útil para supervisión sin intervención directa
 
-### Búsqueda por texto
+## Filtros Rápidos
+
+Ubicados en la parte superior de la tabla, permiten filtrado instantáneo:
+
+### Búsqueda por Texto
 Escribe en el campo de búsqueda para filtrar por:
-- ID del ticket
-- Asunto
-- Nombre del cliente
+- **ID del ticket** (ej: "123", "TK-456")
+- **Asunto** (palabras clave del título)
+- **Nombre del cliente** (quien creó el ticket)
 
-### Filtro por estado
-Selecciona el estado para ver solo tickets:
+:::tip
+La búsqueda es **instantánea** y no distingue mayúsculas/minúsculas.
+:::
+
+### Filtro por Estado
+Selecciona uno o varios estados:
 - **Abierto**: Tickets activos en proceso
-- **Pausado**: Tickets temporalmente detenidos
-- **Cerrado**: Tickets resueltos
+- **Pausado**: Tickets temporalmente detenidos (esperando información, aprobación, etc.)
+- **Cerrado**: Tickets resueltos y finalizados
 
-### Filtro por prioridad
+### Filtro por Prioridad
 Filtra por nivel de urgencia:
-- Alta
-- Media
-- Baja
+- **Alta**: Requiere atención inmediata
+- **Media**: Atención en tiempo normal
+- **Baja**: Puede esperar
 
-### Filtros Avanzados
-Haz clic en el panel superior **"Filtros Avanzados"** para desplegar opciones detalladas:
+## Filtros Avanzados
 
-- **Empresa**: Filtra tickets por cliente/empresa.
-- **Subcategoría**: Se habilita al seleccionar una empresa. Permite filtrar por tipo específico de solicitud intra-empresa.
-- **Etiqueta**: Filtra por tus etiquetas personales asignadas.
-- **N° Ticket**: Búsqueda exacta por ID numérico.
-- **Rango de Fechas**: "Fecha Inicio" y "Fecha Fin" para acotar la búsqueda temporal.
-- **Usuario (ID Creador)**: Filtra tickets creados por un usuario específico (usando su ID).
-- **Búsqueda en Mensajes**: Busca texto libre tanto en la **descripción principal** del ticket como en todo el **historial de mensajes/comentarios**.
+Haz clic en **"Filtros Avanzados"** para desplegar el panel completo de opciones:
 
-## Información Mostrada
+### Empresa
+Filtra tickets por cliente o empresa específica.
 
-Para cada ticket verás:
+**Comportamiento:**
+- Al seleccionar una empresa, se habilita el filtro de **Subcategoría**
+- Las subcategorías mostradas pertenecen solo a esa empresa
 
-| Columna | Descripción |
-|---------|-------------|
-| **ID** | Número único del ticket (ej: #TK-123) |
-| **Asunto** | Título del problema |
-| **Cliente** | Usuario que creó el ticket |
-| **Estado** | Estado actual (Abierto/Pausado/Cerrado) |
-| **Prioridad** | Nivel de urgencia |
-| **Etiquetas** | Distintivos personales para organizar tus tickets |
-| **Última Actualización** | Fecha del último cambio |
+### Subcategoría
+Filtra por tipo específico de solicitud dentro de una empresa.
 
-## Ver Detalles
+**Requiere:** Seleccionar primero una empresa (o activar "Solo mis procesos")
 
-Haz clic en cualquier fila para ver los detalles completos del ticket:
+#### Solo mis procesos
+Checkbox especial que cambia el comportamiento del filtro de subcategoría:
+
+**Cuando está ACTIVO:**
+- Muestra **solo** las subcategorías donde has participado
+- Incluye subcategorías donde fuiste:
+  - Creador de tickets
+  - Asignado actual
+  - Asignado en el pasado
+- El filtro de **Empresa se deshabilita** (son mutuamente excluyentes)
+
+**Cuándo usarlo:**
+- Para encontrar rápidamente tus tipos de trabajo habituales
+- Cuando trabajas en múltiples empresas
+- Para filtrar ruido de subcategorías irrelevantes
+
+:::info Rendimiento
+La primera carga puede tardar unos segundos si tienes mucho historial. Las siguientes cargas son instantáneas.
+:::
+
+### Etiqueta
+Filtra por tus **etiquetas personales** asignadas.
+
+**Características:**
+- Solo tú ves tus etiquetas
+- Puedes seleccionar múltiples etiquetas
+- Útil para organización personal
+
+### N° Ticket
+Búsqueda **exacta** por ID numérico del ticket.
+
+**Ejemplo:** Ingresa "1234" para encontrar el ticket #TK-1234
+
+### Rango de Fechas
+Filtra tickets creados entre dos fechas específicas.
+
+**Campos:**
+- **Fecha Inicio**: Desde cuándo buscar
+- **Fecha Fin**: Hasta cuándo buscar
+
+**Tip:** Deja uno vacío para búsquedas abiertas ("desde X" o "hasta Y")
+
+### Usuario Creador
+Filtra tickets creados por un usuario específico.
+
+**Características:**
+- Búsqueda asíncrona: escribe al menos 2 caracteres
+- Busca por nombre o email
+- Debounce de 300ms para optimizar rendimiento
+
+### Asignado A
+Filtra tickets asignados a un usuario específico.
+
+**Útil para:**
+- Supervisores que revisan trabajo de su equipo
+- Coordinación entre áreas
+- Seguimiento de cargas de trabajo
+
+### Búsqueda en Mensajes
+Busca texto libre en:
+- **Descripción principal** del ticket
+- **Todo el historial** de mensajes y comentarios
+
+:::warning Rendimiento
+Esta búsqueda es más lenta porque revisa todo el contenido. Úsala cuando otros filtros no sean suficientes.
+:::
+
+### Limpiar Filtros
+Botón que **resetea todos los filtros** a sus valores por defecto.
+
+## Información Mostrada en la Tabla
+
+Cada fila de la tabla muestra:
+
+| Columna | Descripción | Detalles |
+|---------|-------------|----------|
+| **ID** | Número único del ticket | Formato: #TK-123. Haz clic para copiar |
+| **Asunto** | Título del problema | Truncado si es muy largo. Ver detalle para texto completo |
+| **Cliente** | Usuario que creó el ticket | Nombre completo del creador |
+| **Estado** | Estado actual | Badge con color: Verde (Abierto), Amarillo (Pausado), Gris (Cerrado) |
+| **Prioridad** | Nivel de urgencia | Pastilla con color: Rojo (Alta), Naranja (Media), Azul (Baja) |
+| **Asignado A** | Usuario(s) asignado(s) | Muestra el asignado principal. Ver detalle para todos |
+| **Etiquetas** | Tus etiquetas personales | Solo visibles para ti. Haz clic para gestionar |
+| **Última Actualización** | Fecha del último cambio | Formato: DD/MM/YYYY HH:mm |
+
+### Interacciones en la Tabla
+
+- **Hover**: Las filas cambian de color al pasar el mouse
+- **Click en fila**: Abre el detalle completo del ticket
+- **Click en etiquetas**: Abre el gestor de etiquetas
+- **Ordenamiento**: Haz clic en los encabezados para ordenar (donde aplique)
+
+## Ver Detalles del Ticket
+
+Haz clic en cualquier fila para abrir la **vista de detalle** que incluye:
+
+### Información General
 - Descripción completa
-- Historial de cambios
-- Comentarios
-- Archivos adjuntos
-- Información del flujo de trabajo
+- Empresa y departamento
+- Categoría y subcategoría
+- Prioridad y estado
+- Fechas de creación y última actualización
+
+### Historial de Cambios
+- Todos los eventos del ticket
+- Asignaciones y reasignaciones
+- Cambios de estado
+- Errores reportados
+
+### Mensajes y Comentarios
+- Conversación completa
+- Respuestas de agentes
+- Notas internas (si tienes permisos)
+
+### Archivos Adjuntos
+- Documentos subidos por el creador
+- Archivos agregados por agentes
+- Documentos generados por el sistema (PDFs firmados, etc.)
+
+### Información del Workflow
+- Paso actual en el flujo
+- Pasos completados
+- Pasos pendientes
+- Usuarios asignados en cada etapa
+
+### Acciones Disponibles
+Según tus permisos y el estado del ticket:
+- **Responder**: Agregar comentarios
+- **Asignar**: Cambiar asignación
+- **Cambiar Estado**: Pausar, cerrar, etc.
+- **Reabrir**: Si está cerrado y hay problemas
+- **Reportar Error**: Si hay problemas en el proceso
 
 ## Paginación
 
-La lista muestra 10 tickets por página. Usa los controles de paginación en la parte inferior para navegar entre páginas.
+- La tabla muestra **10 tickets por página** por defecto
+- Controles en la parte inferior:
+  - **Anterior/Siguiente**: Navega entre páginas
+  - **Números de página**: Salto directo
+  - **Total de resultados**: Muestra cuántos tickets coinciden con tus filtros
+
+## Tarjetas de Resumen (KPIs)
+
+En la parte superior verás tarjetas con estadísticas clave:
+
+- **Total**: Todos los tickets en la vista actual
+- **Abiertos**: Tickets activos
+- **Pendientes**: Tickets que requieren tu atención (destacado en rojo)
+- **Cerrados**: Tickets resueltos
+
+:::tip
+Las KPIs se actualizan automáticamente al cambiar filtros o vistas.
+:::
+
+## Consejos de Uso
+
+### Para Usuarios Finales
+1. Usa **"Creados por mí"** para seguimiento de tus solicitudes
+2. Asigna **etiquetas** para organizar tickets importantes
+3. Usa **búsqueda por texto** para encontrar tickets rápidamente
+
+### Para Agentes
+1. Comienza tu día en **"Asignados a mí"**
+2. Revisa **"Errores asignados a mí"** diariamente
+3. Usa **filtros de prioridad** para organizar tu trabajo
+4. Aprovecha **"Solo mis procesos"** para enfocarte en tu área
+
+### Para Supervisores
+1. Usa **filtro de "Asignado A"** para revisar trabajo del equipo
+2. Monitorea **"Reabiertos"** para identificar problemas recurrentes
+3. Combina **filtros de fecha + empresa** para reportes
 
 ## Próximos Pasos
 
 - [Crear un nuevo ticket](./crear-ticket.mdx)
+- [Responder a un ticket](./responder-ticket.mdx)
+- [Gestionar etiquetas](./gestionar-etiquetas.mdx)
 - [Entender los estados](./estados-tickets.mdx)
+- [FAQ y solución de problemas](../faq.mdx)

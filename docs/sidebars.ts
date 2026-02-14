@@ -22,7 +22,9 @@ const sidebars: SidebarsConfig = {
         'tickets/crear-ticket',
         'tickets/ver-tickets',
         'tickets/responder-ticket',
+        'tickets/reabrir-tickets',
         'tickets/gestionar-etiquetas',
+        'tickets/gestionar-notificaciones',
         'tickets/estados-tickets',
       ],
     },
@@ -62,6 +64,7 @@ const sidebars: SidebarsConfig = {
         'workflows/gestion-pasos',
       ],
     },
+    'faq',
   ],
 };
 

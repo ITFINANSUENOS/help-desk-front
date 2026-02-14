@@ -6,25 +6,80 @@
 
 /* You can override the default Infima variables here. */
 :root {
-  --ifm-color-primary: #2e8555;
-  --ifm-color-primary-dark: #29784c;
-  --ifm-color-primary-darker: #277148;
-  --ifm-color-primary-darkest: #205d3b;
-  --ifm-color-primary-light: #33925d;
-  --ifm-color-primary-lighter: #359962;
-  --ifm-color-primary-lightest: #3cad6e;
+  /* Brand Colors - Mesa de Ayuda (Softened) */
+  --ifm-color-primary: #43BBCA;
+  /* brand-teal - más suave para los ojos */
+  --ifm-color-primary-dark: #3ca9b7;
+  --ifm-color-primary-darker: #399fac;
+  --ifm-color-primary-darkest: #2f838e;
+  --ifm-color-primary-light: #4dcddd;
+  --ifm-color-primary-lighter: #57d1e0;
+  --ifm-color-primary-lightest: #6fdae7;
+
+  /* Accent colors */
+  --ifm-color-secondary: #5a6bc4;
+  /* brand-blue suavizado */
+  --ifm-color-info: #43BBCA;
+  --ifm-color-success: #00c9a7;
+  --ifm-color-warning: #ffb020;
+  --ifm-color-danger: #e74c3c;
+  /* brand-red suavizado */
+
+  /* Background colors */
+  --ifm-background-color: #ffffff;
+  --ifm-background-surface-color: #f8f9fa;
+
   --ifm-code-font-size: 95%;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+  --docusaurus-highlighted-code-line-bg: rgba(67, 187, 202, 0.15);
+
+  /* Font */
+  --ifm-font-family-base: 'Manrope', system-ui, -apple-system, sans-serif;
+  --ifm-heading-font-weight: 600;
+
+  /* Navbar */
+  --ifm-navbar-background-color: #ffffff;
+  --ifm-navbar-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
 [data-theme='dark'] {
-  --ifm-color-primary: #25c2a0;
-  --ifm-color-primary-dark: #21af90;
-  --ifm-color-primary-darker: #1fa588;
-  --ifm-color-primary-darkest: #1a8870;
-  --ifm-color-primary-light: #29d5b0;
-  --ifm-color-primary-lighter: #32d8b4;
-  --ifm-color-primary-lightest: #4fddbf;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+  --ifm-color-primary: #5dd4e3;
+  /* brand-teal más claro para dark mode */
+  --ifm-color-primary-dark: #4acfdf;
+  --ifm-color-primary-darker: #3ecbdc;
+  --ifm-color-primary-darkest: #2ab8c9;
+  --ifm-color-primary-light: #70d9e7;
+  --ifm-color-primary-lighter: #7cddea;
+  --ifm-color-primary-lightest: #9be5f0;
+
+  --ifm-color-secondary: #7b8dd6;
+  /* brand-blue suavizado para dark */
+  --ifm-color-info: #5dd4e3;
+  --ifm-color-success: #00e6c3;
+  --ifm-color-warning: #ffc44d;
+  --ifm-color-danger: #ff6b6b;
+  /* Rojo suave para dark mode */
+
+  /* Background colors for dark mode */
+  --ifm-background-color: #1b1b1d;
+  --ifm-background-surface-color: #242526;
+
+  --docusaurus-highlighted-code-line-bg: rgba(93, 212, 227, 0.15);
+
+  /* Navbar dark */
+  --ifm-navbar-background-color: #242526;
+}
+
+/* Custom improvements */
+.hero {
+  background: linear-gradient(135deg, #43BBCA 0%, #5a6bc4 100%);
+}
+
+[data-theme='dark'] .hero {
+  background: linear-gradient(135deg, #2a3f4a 0%, #1e2a3a 100%);
+}
+
+/* Smooth transitions */
+* {
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
