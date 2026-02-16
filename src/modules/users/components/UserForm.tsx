@@ -5,8 +5,10 @@ import { Select } from '../../../shared/components/Select';
 import { userService } from '../services/user.service';
 import { rbacService } from '../../roles/services/rbac.service';
 import { departmentService, positionService, regionService } from '../../../shared/services/catalog.service';
+import { profileService } from '../../profiles/services/profile.service';
 import type { Role } from '../../roles/interfaces/Role';
 import type { Department, Position, Region } from '../../../shared/interfaces/Catalog';
+import type { Profile } from '../../profiles/interfaces/Profile';
 
 interface UserFormProps {
     user?: User;
@@ -17,7 +19,6 @@ interface UserFormProps {
 
 export function UserForm({ user, onSubmit, onCancel, isLoading }: UserFormProps) {
     const [formData, setFormData] = useState({
-        cedula: user?.cedula || '',
         nombre: user?.nombre || '',
         apellido: user?.apellido || '',
         email: user?.email || '',
@@ -27,29 +28,33 @@ export function UserForm({ user, onSubmit, onCancel, isLoading }: UserFormProps)
         cargoId: user?.cargoId || 0,
         departamentoId: user?.departamentoId || 0,
         esNacional: user?.esNacional || false,
-        estado: user?.estado ?? 1
+        estado: user?.estado ?? 1,
+        perfilIds: [] as number[]
     });
 
     const [roles, setRoles] = useState<Role[]>([]);
     const [departments, setDepartments] = useState<Department[]>([]);
     const [positions, setPositions] = useState<Position[]>([]);
     const [regions, setRegions] = useState<Region[]>([]);
+    const [profiles, setProfiles] = useState<Profile[]>([]);
 
     const [errors, setErrors] = useState<Record<string, string>>({});
 
     useEffect(() => {
         const loadCatalogs = async () => {
             try {
-                const [rolesData, deptsData, posData, regsData] = await Promise.all([
+                const [rolesData, deptsData, posData, regsData, profilesData] = await Promise.all([
                     rbacService.getRoles(),
                     departmentService.getAllActive(),
                     positionService.getAllActive(),
-                    regionService.getAllActive()
+                    regionService.getAllActive(),
+                    profileService.getProfiles({ limit: 1000, estado: 1 })
                 ]);
                 setRoles(rolesData);
                 setDepartments(deptsData);
                 setPositions(posData);
                 setRegions(regsData);
+                setProfiles(profilesData.data);
             } catch (error) {
                 console.error("Error loading catalogs:", error);
             }
@@ -64,7 +69,6 @@ export function UserForm({ user, onSubmit, onCancel, isLoading }: UserFormProps)
             userService.getUser(user.id)
                 .then(freshUser => {
                     setFormData({
-                        cedula: freshUser.cedula || '',
                         nombre: freshUser.nombre || '',
                         apellido: freshUser.apellido || '',
                         email: freshUser.email || '',
@@ -74,14 +78,14 @@ export function UserForm({ user, onSubmit, onCancel, isLoading }: UserFormProps)
                         cargoId: freshUser.cargoId || freshUser.cargo?.id || 0,
                         departamentoId: freshUser.departamentoId || freshUser.departamento?.id || 0,
                         esNacional: freshUser.esNacional || false,
-                        estado: freshUser.estado ?? 1
+                        estado: freshUser.estado ?? 1,
+                        perfilIds: freshUser.usuarioPerfiles?.map(up => up.perfilId) || []
                     });
                 })
                 .catch(err => {
                     console.error("Error loading user details", err);
                     // Fallback to prop data if fetch fails
                     setFormData({
-                        cedula: user.cedula || '',
                         nombre: user.nombre || '',
                         apellido: user.apellido || '',
                         email: user.email || '',
@@ -91,7 +95,8 @@ export function UserForm({ user, onSubmit, onCancel, isLoading }: UserFormProps)
                         cargoId: user.cargoId || user.cargo?.id || 0,
                         departamentoId: user.departamentoId || user.departamento?.id || 0,
                         esNacional: user.esNacional || false,
-                        estado: user.estado ?? 1
+                        estado: user.estado ?? 1,
+                        perfilIds: user.usuarioPerfiles?.map(up => up.perfilId) || []
                     });
                 });
         }
@@ -122,10 +127,18 @@ export function UserForm({ user, onSubmit, onCancel, isLoading }: UserFormProps)
         }
     };
 
+    const toggleProfile = (profileId: number) => {
+        setFormData(prev => ({
+            ...prev,
+            perfilIds: prev.perfilIds.includes(profileId)
+                ? prev.perfilIds.filter(id => id !== profileId)
+                : [...prev.perfilIds, profileId]
+        }));
+    };
+
     const validate = (): boolean => {
         const newErrors: Record<string, string> = {};
 
-        if (!formData.cedula.trim()) newErrors.cedula = 'Cédula es requerida';
         if (!formData.nombre.trim()) newErrors.nombre = 'Nombre es requerido';
         if (!formData.apellido.trim()) newErrors.apellido = 'Apellido es requerido';
         if (!formData.email.trim()) newErrors.email = 'Email es requerido';
@@ -153,7 +166,6 @@ export function UserForm({ user, onSubmit, onCancel, isLoading }: UserFormProps)
         if (!validate()) return;
 
         const submitData: CreateUserDto | UpdateUserDto = {
-            cedula: formData.cedula,
             nombre: formData.nombre,
             apellido: formData.apellido,
             email: formData.email,
@@ -161,7 +173,8 @@ export function UserForm({ user, onSubmit, onCancel, isLoading }: UserFormProps)
             regionalId: formData.regionalId || undefined,
             cargoId: formData.cargoId || undefined,
             departamentoId: formData.departamentoId || undefined,
-            esNacional: formData.esNacional
+            esNacional: formData.esNacional,
+            perfilIds: formData.perfilIds.length > 0 ? formData.perfilIds : undefined
         };
 
         if (formData.password) {
@@ -178,21 +191,6 @@ export function UserForm({ user, onSubmit, onCancel, isLoading }: UserFormProps)
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                {/* Cédula */}
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Cédula <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                        type="text"
-                        name="cedula"
-                        value={formData.cedula}
-                        onChange={handleChange}
-                        className={`w-full rounded-lg border ${errors.cedula ? 'border-red-500' : 'border-gray-300'} px-3 py-2 focus:border-brand-teal focus:ring-brand-teal`}
-                    />
-                    {errors.cedula && <p className="mt-1 text-xs text-red-500">{errors.cedula}</p>}
-                </div>
-
                 {/* Email */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -310,6 +308,34 @@ export function UserForm({ user, onSubmit, onCancel, isLoading }: UserFormProps)
                         options={departments.map(dept => ({ value: dept.id, label: dept.nombre }))}
                         placeholder="Sin departamento"
                     />
+                </div>
+
+                {/* Perfiles */}
+                <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Perfiles
+                    </label>
+                    <div className="max-h-48 overflow-y-auto border border-gray-300 rounded-md p-2 space-y-2">
+                        {profiles.length === 0 ? (
+                            <p className="text-sm text-gray-500 italic">No hay perfiles disponibles</p>
+                        ) : (
+                            profiles.map(profile => (
+                                <div key={profile.id} className="flex items-center gap-2 hover:bg-gray-50 p-1 rounded">
+                                    <input
+                                        type="checkbox"
+                                        id={`profile-${profile.id}`}
+                                        checked={formData.perfilIds.includes(profile.id)}
+                                        onChange={() => toggleProfile(profile.id)}
+                                        disabled={isLoading}
+                                        className="w-4 h-4 text-brand-blue border-gray-300 rounded focus:ring-brand-blue"
+                                    />
+                                    <label htmlFor={`profile-${profile.id}`} className="text-sm text-gray-700 w-full cursor-pointer">
+                                        {profile.nombre}
+                                    </label>
+                                </div>
+                            ))
+                        )}
+                    </div>
                 </div>
 
                 {/* Es Nacional */}

@@ -1,7 +1,7 @@
 // User entity interface
 export interface User {
     id: number;
-    cedula: string;
+    cedula?: string; // Optional, legacy field
     nombre: string;
     apellido: string;
     email: string;
@@ -29,6 +29,14 @@ export interface User {
         id: number;
         nombre: string;
     };
+    usuarioPerfiles?: Array<{
+        id: number;
+        perfilId: number;
+        perfil?: {
+            id: number;
+            nombre: string;
+        };
+    }>;
 
     // Permissions from backend
     permissions?: Array<{
@@ -39,7 +47,6 @@ export interface User {
 
 // Create user DTO
 export interface CreateUserDto {
-    cedula: string;
     nombre: string;
     apellido: string;
     email: string;
@@ -50,11 +57,11 @@ export interface CreateUserDto {
     departamentoId?: number;
     esNacional?: boolean;
     empresasIds?: number[];
+    perfilIds?: number[];
 }
 
 // Update user DTO
 export interface UpdateUserDto {
-    cedula?: string;
     nombre?: string;
     apellido?: string;
     email?: string;
@@ -66,6 +73,7 @@ export interface UpdateUserDto {
     esNacional?: boolean;
     estado?: number;
     empresasIds?: number[];
+    perfilIds?: number[];
 }
 
 // User filter interface

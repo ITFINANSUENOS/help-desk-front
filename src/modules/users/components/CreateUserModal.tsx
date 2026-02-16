@@ -34,7 +34,7 @@ export function CreateUserModal({ isOpen, onClose, onSuccess }: CreateUserModalP
             isOpen={isOpen}
             onClose={onClose}
             title="Crear Usuario"
-            className="max-w-2xl"
+            className="max-w-4xl"
         >
             {error && (
                 <div className="mb-4 rounded-lg bg-red-50 p-4 text-sm text-red-800">

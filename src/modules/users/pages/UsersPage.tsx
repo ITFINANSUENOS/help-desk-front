@@ -151,10 +151,7 @@ export default function UsersPage() {
                         key: 'nombre',
                         header: 'Nombre',
                         render: (user: User) => (
-                            <div>
-                                <div className="font-medium text-gray-900">{user.nombre} {user.apellido}</div>
-                                <div className="text-xs text-gray-500">CC: {user.cedula}</div>
-                            </div>
+                            <div className="font-medium text-gray-900">{user.nombre} {user.apellido}</div>
                         )
                     },
                     {
@@ -169,6 +166,15 @@ export default function UsersPage() {
                             <div>
                                 <div className="font-medium">{user.role?.nombre || '-'}</div>
                                 <div className="text-xs text-gray-500">{user.cargo?.nombre || '-'}</div>
+                                {user.usuarioPerfiles && user.usuarioPerfiles.length > 0 && (
+                                    <div className="flex flex-wrap gap-1 mt-1">
+                                        {user.usuarioPerfiles.map(up => (
+                                            <span key={up.id} className="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-purple-100 text-purple-800">
+                                                {up.perfil?.nombre || `Perfil #${up.perfilId}`}
+                                            </span>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         )
                     },

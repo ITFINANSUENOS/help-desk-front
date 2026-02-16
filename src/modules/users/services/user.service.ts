@@ -32,7 +32,7 @@ export const userService = {
         }
 
         // Include relations
-        params.included = 'role,regional,cargo,departamento';
+        params.included = 'role,regional,cargo,departamento,usuarioPerfiles.perfil';
 
         const response = await api.get<{ data?: User[]; total?: number; page?: number; limit?: number; totalPages?: number; meta?: { total: number; page: number; limit: number; totalPages: number; lastPage?: number } }>('/users', { params });
 
@@ -66,7 +66,7 @@ export const userService = {
     async getUser(id: number): Promise<User> {
         const response = await api.get<User>(`/users/${id}`, {
             params: {
-                included: 'role,regional,cargo,departamento'
+                included: 'role,regional,cargo,departamento,usuarioPerfiles.perfil'
             }
         });
         return response.data;

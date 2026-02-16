@@ -38,11 +38,11 @@ export function Modal({ isOpen, onClose, title, children, className }: ModalProp
             />
             <div
                 className={cn(
-                    "relative w-full max-w-lg transform rounded-xl bg-white p-6 shadow-2xl transition-all animate-in fade-in zoom-in-95 duration-200",
+                    "relative w-full max-w-lg transform rounded-xl bg-white shadow-2xl transition-all animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] flex flex-col",
                     className
                 )}
             >
-                <div className="mb-6 flex items-center justify-between">
+                <div className="flex-shrink-0 px-6 pt-6 pb-4 flex items-center justify-between border-b border-gray-200">
                     <h3 className="text-xl font-bold text-gray-900">{title}</h3>
                     <button
                         onClick={onClose}
@@ -51,7 +51,9 @@ export function Modal({ isOpen, onClose, title, children, className }: ModalProp
                         <span className="material-symbols-outlined">close</span>
                     </button>
                 </div>
-                {children}
+                <div className="flex-1 overflow-y-auto px-6 py-4">
+                    {children}
+                </div>
             </div>
         </div>,
         document.body

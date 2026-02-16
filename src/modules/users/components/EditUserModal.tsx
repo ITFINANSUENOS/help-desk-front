@@ -40,7 +40,7 @@ export function EditUserModal({ isOpen, user, onClose, onSuccess }: EditUserModa
             isOpen={isOpen}
             onClose={onClose}
             title="Editar Usuario"
-            className="max-w-2xl"
+            className="max-w-4xl"
         >
             {error && (
                 <div className="mb-4 rounded-lg bg-red-50 p-4 text-sm text-red-800">

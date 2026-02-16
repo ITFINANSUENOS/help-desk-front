@@ -44,12 +44,13 @@ export function EditMappingRuleModal({ isOpen, onClose, onSubmit, rule }: EditMa
             setFormData({
                 subcategoriaId: rule.subcategoriaId,
                 estado: rule.estado,
-                creadorCargoIds: rule.creadores?.map(c => c.cargoId) || [],
-                creadorPerfilIds: rule.creadoresPerfil?.map(cp => cp.perfilId) || [],
-                asignadoCargoIds: rule.asignados?.map(a => a.cargoId) || []
+                creadorCargoIds: rule.creadores?.map(c => c.creadorCargoId) || [],
+                creadorPerfilIds: rule.creadoresPerfil?.map(cp => cp.creadorPerfilId) || [],
+                asignadoCargoIds: rule.asignados?.map(a => a.asignadoCargoId) || []
             });
         }
     }, [rule]);
+
 
     const loadData = async () => {
         setLoadingData(true);

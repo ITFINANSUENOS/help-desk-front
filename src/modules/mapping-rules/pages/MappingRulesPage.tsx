@@ -163,12 +163,12 @@ export default function MappingRulesPage() {
                 <div className="flex flex-wrap gap-1">
                     {rule.creadores?.map(c => (
                         <span key={c.id} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
-                            {c.cargo?.nombre || `Cargo #${c.cargoId}`}
+                            {c.cargo?.nombre || `Cargo #${c.creadorCargoId}`}
                         </span>
                     ))}
                     {rule.creadoresPerfil?.map(cp => (
                         <span key={cp.id} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">
-                            {cp.perfil?.nombre || `Perfil #${cp.perfilId}`}
+                            {cp.perfil?.nombre || `Perfil #${cp.creadorPerfilId}`}
                         </span>
                     ))}
                     {(!rule.creadores || rule.creadores.length === 0) && (!rule.creadoresPerfil || rule.creadoresPerfil.length === 0) && (
@@ -184,7 +184,7 @@ export default function MappingRulesPage() {
                 <div className="flex flex-wrap gap-1">
                     {rule.asignados?.map(a => (
                         <span key={a.id} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                            {a.cargo?.nombre || `Cargo #${a.cargoId}`}
+                            {a.cargo?.nombre || `Cargo #${a.asignadoCargoId}`}
                         </span>
                     )) || <span className="text-gray-400 text-xs">-</span>}
                 </div>

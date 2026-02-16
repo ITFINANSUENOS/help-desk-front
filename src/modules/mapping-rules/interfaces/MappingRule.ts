@@ -11,12 +11,13 @@ export interface ReglaCreadores {
     /** ID de la regla de mapeo */
     reglaId: number;
     /** ID del cargo creador */
-    cargoId: number;
+    creadorCargoId: number;
     /** Relación con el cargo */
     cargo?: Position;
     /** Index signature para compatibilidad */
     [key: string]: unknown;
 }
+
 
 /**
  * Entidad ReglaCreadoresPerfil (Perfil creador)
@@ -27,12 +28,13 @@ export interface ReglaCreadoresPerfil {
     /** ID de la regla de mapeo */
     reglaId: number;
     /** ID del perfil creador */
-    perfilId: number;
+    creadorPerfilId: number;
     /** Relación con el perfil */
     perfil?: Profile;
     /** Index signature para compatibilidad */
     [key: string]: unknown;
 }
+
 
 /**
  * Entidad ReglaAsignados (Cargo asignado)
@@ -43,12 +45,13 @@ export interface ReglaAsignados {
     /** ID de la regla de mapeo */
     reglaId: number;
     /** ID del cargo asignado */
-    cargoId: number;
+    asignadoCargoId: number;
     /** Relación con el cargo */
     cargo?: Position;
     /** Index signature para compatibilidad */
     [key: string]: unknown;
 }
+
 
 /**
  * Entidad MappingRule (Regla de Mapeo)
