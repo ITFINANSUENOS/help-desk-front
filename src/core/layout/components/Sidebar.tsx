@@ -70,114 +70,130 @@ export function Sidebar({ isCollapsed, toggleCollapse, isMobileOpen, closeMobile
             {/* Sidebar */}
             <aside
                 className={cn(
-                    "fixed inset-y-0 left-0 z-50 flex flex-col bg-brand-blue text-white transition-all duration-300 lg:static lg:z-auto",
+                    "fixed inset-y-0 left-0 z-50 flex flex-col text-white transition-all duration-300 lg:static lg:z-auto overflow-hidden",
                     isCollapsed ? "w-20" : "w-64",
                     // Mobile slide behavior
                     !isMobileOpen && "-translate-x-full lg:translate-x-0"
                 )}
             >
-                {/* Header / Logo */}
-                <div className={cn(
-                    "flex h-20 items-center border-b border-white/10 transition-all",
-                    isCollapsed ? "justify-center px-0" : "justify-between px-6"
-                )}>
-                    <div className="flex items-center gap-3 overflow-hidden">
-                        <div className="flex h-20 w-20 flex-shrink-0 items-center justify-center">
-                            <img src="../../public/img/FN-EC.png" alt="" />
+                {/* Background con degradado y textura */}
+                <div className="absolute inset-0 z-0 bg-gradient-to-br from-[#1a3a6e] via-brand-blue to-[#0B1120]"></div>
+
+                {/* Grid Pattern sutil */}
+                <div className="absolute inset-0 z-0 opacity-[0.08]" style={{
+                    backgroundImage: `
+                        radial-gradient(circle at 2px 2px, rgba(255, 255, 255, 0.8) 1px, transparent 0),
+                        linear-gradient(to right, rgba(255, 255, 255, 0.4) 1px, transparent 1px),
+                        linear-gradient(to bottom, rgba(255, 255, 255, 0.4) 1px, transparent 1px)
+                    `,
+                    backgroundSize: '32px 32px, 64px 64px, 64px 64px'
+                }} />
+
+                {/* Contenido del sidebar */}
+                <div className="relative z-10 flex flex-col h-full">
+                    {/* Header / Logo */}
+                    <div className={cn(
+                        "flex h-20 items-center border-b border-white/20 transition-all",
+                        isCollapsed ? "justify-center px-0" : "justify-between px-6"
+                    )}>
+                        <div className="flex items-center gap-3 overflow-hidden">
+                            <div className="flex h-20 w-20 flex-shrink-0 items-center justify-center">
+                                <img src="../../public/img/FN-EC.png" alt="" />
+                            </div>
+                            <span className={cn(
+                                "text-xl font-extrabold tracking-wide transition-opacity whitespace-nowrap drop-shadow-md",
+                                isCollapsed ? "w-0 opacity-0 hidden" : "w-auto opacity-100"
+                            )}>
+                                Axios
+                            </span>
                         </div>
-                        <span className={cn(
-                            "text-xl font-bold tracking-wide transition-opacity whitespace-nowrap",
-                            isCollapsed ? "w-0 opacity-0 hidden" : "w-auto opacity-100"
-                        )}>
-                            Axios
-                        </span>
+                        {/* Mobile Close Button */}
+                        <button
+                            onClick={closeMobile}
+                            className="lg:hidden text-white/90 hover:text-white transition-colors"
+                        >
+                            <span className="material-symbols-outlined">close</span>
+                        </button>
                     </div>
-                    {/* Mobile Close Button */}
-                    <button
-                        onClick={closeMobile}
-                        className="lg:hidden text-white/80 hover:text-white"
-                    >
-                        <span className="material-symbols-outlined">close</span>
-                    </button>
-                </div>
 
 
-                {/* Navigation */}
-                <nav className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-6 no-scrollbar">
-                    <ul className="space-y-2">
-                        {/* Create Ticket Action */}
-                        {hasPermission('Ticket', 'create') && (
-                            <li>
-                                <Link
-                                    to="/tickets/create"
-                                    title="Crear Ticket"
-                                    className={cn(
-                                        "group flex items-center rounded-lg py-3 transition-all",
-                                        isCollapsed ? "justify-center px-0" : "px-4 gap-3",
-                                        "bg-brand-blue hover:bg-brand-accent text-white shadow-md hover:shadow-lg"
-                                    )}
-                                    onClick={() => closeMobile()}
-                                >
-                                    <span className="material-symbols-outlined flex-shrink-0" style={{ fontSize: '22px', fontVariationSettings: '"FILL" 1' }}>add_circle</span>
-                                    <span className={cn(
-                                        "font-semibold text-sm transition-all whitespace-nowrap",
-                                        isCollapsed ? "w-0 opacity-0 hidden" : "w-auto opacity-100"
-                                    )}>
-                                        Crear Ticket
-                                    </span>
-                                </Link>
-                            </li>
-                        )}
+                    {/* Navigation */}
+                    <nav className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-6 no-scrollbar">
+                        <ul className="space-y-2">
+                            {/* Create Ticket Action */}
+                            {hasPermission('Ticket', 'create') && (
+                                <li>
+                                    <Link
+                                        to="/tickets/create"
+                                        title="Crear Ticket"
+                                        className={cn(
+                                            "group flex items-center rounded-lg py-3 transition-all",
+                                            isCollapsed ? "justify-center px-0" : "px-4 gap-3",
+                                            "bg-gradient-to-r from-brand-teal via-[#3aa9b8] to-[#2563a8] hover:from-[#3aa9b8] hover:via-brand-teal hover:to-brand-blue text-white shadow-lg hover:shadow-xl font-semibold"
+                                        )}
+                                        onClick={() => closeMobile()}
+                                    >
+                                        <span className="material-symbols-outlined flex-shrink-0" style={{ fontSize: '22px', fontVariationSettings: '"FILL" 1' }}>add_circle</span>
+                                        <span className={cn(
+                                            "font-semibold text-sm transition-all whitespace-nowrap",
+                                            isCollapsed ? "w-0 opacity-0 hidden" : "w-auto opacity-100"
+                                        )}>
+                                            Crear Ticket
+                                        </span>
+                                    </Link>
+                                </li>
+                            )}
 
-                        {filteredItems.map((item) => (
-                            <li key={item.to}>
-                                <Link
-                                    to={item.to}
-                                    title={isCollapsed ? item.label : undefined}
-                                    className={cn(
-                                        "group flex items-center rounded-lg py-3 text-white/80 transition-colors hover:bg-white/10 hover:text-white",
-                                        isCollapsed ? "justify-center px-0" : "px-4 gap-3",
-                                        location.pathname === item.to && "bg-brand-accent text-white border-l-4 border-white"
-                                    )}
-                                    onClick={() => closeMobile()} // Close on navigation in mobile
-                                >
-                                    <span className="material-symbols-outlined flex-shrink-0" style={{ fontSize: '22px', fontVariationSettings: '"FILL" 1' }}>{item.icon}</span>
-                                    <span className={cn(
-                                        "font-medium text-sm transition-all whitespace-nowrap",
-                                        isCollapsed ? "w-0 opacity-0 hidden" : "w-auto opacity-100"
-                                    )}>
-                                        {item.label}
-                                    </span>
-                                </Link>
-                            </li>
-                        ))}
-                    </ul>
-                </nav>
+                            {filteredItems.map((item) => (
+                                <li key={item.to}>
+                                    <Link
+                                        to={item.to}
+                                        title={isCollapsed ? item.label : undefined}
+                                        className={cn(
+                                            "group flex items-center rounded-lg py-3 text-white/90 transition-all hover:bg-white/15 hover:text-white hover:shadow-md",
+                                            isCollapsed ? "justify-center px-0" : "px-4 gap-3",
+                                            location.pathname === item.to && "bg-gradient-to-r from-brand-teal/30 to-transparent text-white border-l-4 border-brand-teal shadow-md"
+                                        )}
+                                        onClick={() => closeMobile()} // Close on navigation in mobile
+                                    >
+                                        <span className="material-symbols-outlined flex-shrink-0" style={{ fontSize: '22px', fontVariationSettings: '"FILL" 1' }}>{item.icon}</span>
+                                        <span className={cn(
+                                            "font-medium text-sm transition-all whitespace-nowrap",
+                                            isCollapsed ? "w-0 opacity-0 hidden" : "w-auto opacity-100"
+                                        )}>
+                                            {item.label}
+                                        </span>
+                                    </Link>
+                                </li>
+                            ))}
+                        </ul>
+                    </nav>
 
-                {/* Footer / Toggle */}
-                <div className="border-t border-white/10 p-4">
-                    {/* Support Link */}
-                    <a
-                        className={cn(
-                            "flex items-center gap-3 text-sm text-white/60 hover:text-white mb-4",
-                            isCollapsed ? "justify-center" : ""
-                        )}
-                        href="#"
-                        title="Support Center"
-                    >
-                        <span className="material-symbols-outlined" style={{ fontSize: '20px', fontVariationSettings: '"FILL" 1' }}>help</span>
-                        {!isCollapsed && <span>Support Center</span>}
-                    </a>
+                    {/* Footer / Toggle */}
+                    <div className="border-t border-white/20 p-4">
+                        {/* Support Link */}
+                        <a
+                            className={cn(
+                                "flex items-center gap-3 text-sm text-white/80 hover:text-white mb-4 transition-colors font-medium",
+                                isCollapsed ? "justify-center" : ""
+                            )}
+                            href="#"
+                            title="Support Center"
+                        >
+                            <span className="material-symbols-outlined" style={{ fontSize: '20px', fontVariationSettings: '"FILL" 1' }}>help</span>
+                            {!isCollapsed && <span>Support Center</span>}
+                        </a>
 
-                    {/* Desktop Collapse Toggle */}
-                    <button
-                        onClick={toggleCollapse}
-                        className="hidden lg:flex w-full items-center justify-center rounded-lg bg-white/5 p-2 text-white/60 hover:bg-white/10 hover:text-white transition-colors"
-                    >
-                        <span className="material-symbols-outlined">
-                            {isCollapsed ? 'keyboard_double_arrow_right' : 'keyboard_double_arrow_left'}
-                        </span>
-                    </button>
+                        {/* Desktop Collapse Toggle */}
+                        <button
+                            onClick={toggleCollapse}
+                            className="hidden lg:flex w-full items-center justify-center rounded-lg bg-white/10 p-2 text-white/80 hover:bg-white/20 hover:text-white transition-all"
+                        >
+                            <span className="material-symbols-outlined">
+                                {isCollapsed ? 'keyboard_double_arrow_right' : 'keyboard_double_arrow_left'}
+                            </span>
+                        </button>
+                    </div>
                 </div>
             </aside>
         </>
