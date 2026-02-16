@@ -98,7 +98,7 @@ export function Sidebar({ isCollapsed, toggleCollapse, isMobileOpen, closeMobile
                     )}>
                         <div className="flex items-center gap-3 overflow-hidden">
                             <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center">
-                                <img src="../../public/img/AXIS-BG.png" alt="" />
+                                <img src="img/AXIS-BG.png" alt="" />
                             </div>
                             <span className={cn(
                                 "text-xl font-extrabold tracking-wide transition-opacity whitespace-nowrap drop-shadow-md",
