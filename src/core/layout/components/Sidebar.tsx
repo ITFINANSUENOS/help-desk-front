@@ -89,7 +89,7 @@ export function Sidebar({ isCollapsed, toggleCollapse, isMobileOpen, closeMobile
                             "text-xl font-bold tracking-wide transition-opacity whitespace-nowrap",
                             isCollapsed ? "w-0 opacity-0 hidden" : "w-auto opacity-100"
                         )}>
-                            Deskflow
+                            Axios
                         </span>
                     </div>
                     {/* Mobile Close Button */}

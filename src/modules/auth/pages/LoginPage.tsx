@@ -56,17 +56,17 @@ export default function LoginPage() {
                         support_agent
                     </span>
                 </div>
-                <span className="text-lg font-bold text-brand-blue">DeskFlow</span>
+                <span className="text-lg font-bold text-brand-blue">AXIOS</span>
             </div>
 
             {/* Form */}
             <div className="mx-auto w-full max-w-[440px]">
                 {/* Header */}
                 <div className="mb-10">
-                    <h1 className="mb-2 text-[32px] font-bold leading-tight text-brand-blue">
+                    <h1 className="mb-3 text-[36px] font-extrabold leading-tight text-brand-blue">
                         Inicia sesión en tu cuenta
                     </h1>
-                    <p className="text-base font-normal text-slate-500">
+                    <p className="text-lg font-medium text-slate-600">
                         ¡Bienvenido de nuevo! Por favor, introduce tus datos.
                     </p>
                 </div>
@@ -109,23 +109,23 @@ export default function LoginPage() {
                                 type="checkbox"
                                 className="h-4 w-4 rounded border-gray-300 text-brand-teal transition-all focus:ring-brand-teal/20"
                             />
-                            <span className="text-sm font-medium text-slate-600 transition-colors group-hover:text-slate-800">
+                            <span className="text-sm font-semibold text-slate-700 transition-colors group-hover:text-slate-900">
                                 Recordar por 30 días
                             </span>
                         </label>
                         <a
                             href="#"
-                            className="text-sm font-semibold text-brand-teal transition-colors hover:text-[#3aa9b8]"
+                            className="text-sm font-bold text-brand-teal transition-colors hover:text-[#3aa9b8]"
                         >
                             ¿Olvidaste tu contraseña?
                         </a>
                     </div>
 
-                    {/* Sign In Button */}
+                    {/* Sign In Button - Degradado azul/turquesa de marca */}
                     <Button
                         variant="brand"
                         size="xl"
-                        className="w-full mt-2"
+                        className="w-full mt-2 bg-gradient-to-r from-brand-blue via-[#2563a8] to-brand-teal hover:from-[#1a3a6e] hover:via-brand-blue hover:to-[#3aa9b8] shadow-lg hover:shadow-xl transition-all duration-300 font-bold text-lg"
                         type="submit"
                         disabled={loading}
                     >
@@ -136,14 +136,14 @@ export default function LoginPage() {
             </div>
 
             {/* Simple footer for support links inside right panel */}
-            <div className="mt-12 flex justify-center gap-6 text-xs text-slate-400">
-                <a href="#" className="hover:text-slate-600">
+            <div className="mt-12 flex justify-center gap-6 text-sm text-slate-600 font-medium">
+                <a href="#" className="hover:text-brand-blue transition-colors">
                     Política de Privacidad
                 </a>
-                <a href="#" className="hover:text-slate-600">
+                <a href="#" className="hover:text-brand-blue transition-colors">
                     Términos de Servicio
                 </a>
-                <a href="#" className="hover:text-slate-600">
+                <a href="#" className="hover:text-brand-blue transition-colors">
                     Centro de Ayuda
                 </a>
             </div>

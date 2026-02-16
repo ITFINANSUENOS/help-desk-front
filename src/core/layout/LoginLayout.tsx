@@ -16,15 +16,15 @@ export function LoginLayout({ children }: LoginLayoutProps) {
             {/* Left Panel: Brand Anchor */}
             {/* Hidden on mobile/tablet, visible on desktop (lg) */}
             <div className="relative hidden w-1/2 flex-col items-center justify-center overflow-hidden bg-brand-blue p-12 text-white lg:flex">
-                {/* Background Pattern & Gradient */}
-                <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-brand-blue/80 via-brand-blue to-[#0B1120]"></div>
+                {/* Background Pattern & Gradient - Más pronunciado */}
+                <div className="absolute inset-0 z-0 bg-gradient-to-br from-[#1a3a6e] via-brand-blue to-[#0B1120]"></div>
 
-                {/* Grid Pattern with reduced opacity (5-10%) */}
-                <div className="absolute inset-0 z-0 opacity-[0.07]" style={{
+                {/* Grid Pattern with subtle texture - Más visible */}
+                <div className="absolute inset-0 z-0 opacity-[0.12]" style={{
                     backgroundImage: `
-                radial-gradient(circle at 2px 2px, rgba(255, 255, 255, 0.8) 1px, transparent 0),
-                linear-gradient(to right, rgba(255, 255, 255, 0.4) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(255, 255, 255, 0.4) 1px, transparent 1px)
+                radial-gradient(circle at 2px 2px, rgba(255, 255, 255, 0.9) 1px, transparent 0),
+                linear-gradient(to right, rgba(255, 255, 255, 0.5) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.5) 1px, transparent 1px)
             `,
                     backgroundSize: '32px 32px, 64px 64px, 64px 64px'
                 }} />
@@ -35,34 +35,33 @@ export function LoginLayout({ children }: LoginLayoutProps) {
 
                 {/* Hero Content */}
                 <div className="relative z-10 flex max-w-lg flex-col items-center text-center">
-                    {/* Logo Container - Lighter Glassmorphism */}
-                    <div className="mb-10 rounded-3xl bg-white/10 p-8 backdrop-blur-sm ring-1 ring-white/10 shadow-xl transition-transform hover:scale-105 duration-500">
+                    {/* Logo Container - Mejor contraste con fondo más claro */}
+                    <div className="mb-12 rounded-3xl bg-white/20 p-10 backdrop-blur-md ring-2 ring-white/20 shadow-2xl transition-all hover:scale-105 hover:bg-white/25 duration-500">
                         <img
                             src="/img/electro-logo.png"
                             alt="Logo de la Empresa"
-                            className="max-h-[14rem] max-w-[18rem] object-contain drop-shadow-sm"
+                            className="max-h-[14rem] max-w-[18rem] object-contain drop-shadow-lg brightness-110"
                         />
                     </div>
 
-                    {/* Typography: Medium + Bold */}
-                    <h2 className="mb-6 text-5xl tracking-tight text-white drop-shadow-lg leading-tight">
-                        <span className="font-medium block sm:inline">Plataforma de</span>{' '}
-                        <span className="font-bold block sm:inline">Soporte</span>
+                    {/* Typography: Mokoto para el título (Tech/Futurista) + Montserrat para el texto */}
+                    <h2 className="mb-8 text-7xl tracking-tight text-white drop-shadow-2xl leading-tight font-mokoto">
+                        <span className="font-extrabold block sm:inline tracking-wider">Axios</span>{' '}
                     </h2>
 
-                    <p className="text-xl font-medium text-blue-100/90 max-w-md leading-relaxed">
-                        Gestión eficiente para todas tus solicitudes.
+                    <p className="text-2xl font-semibold text-white max-w-md leading-relaxed font-montserrat drop-shadow-md">
+                        El eje de tus procesos, el camino a tus soluciones.
                     </p>
                 </div>
 
                 {/* Bottom Metadata */}
-                <div className="absolute bottom-8 left-0 z-10 flex w-full items-end justify-between px-12 text-xs font-medium uppercase tracking-wider text-white/50">
+                <div className="absolute bottom-8 left-0 z-10 flex w-full items-end justify-between px-12 text-xs font-medium uppercase tracking-wider text-white/70">
                     <div className="flex flex-col gap-1 text-left">
                         <span>© 2026 sistemas arpesod sas</span>
-                        <div className="flex gap-3 normal-case tracking-normal opacity-80">
-                            <a href="#" className="hover:text-white transition-colors underline-offset-2 hover:underline">Privacidad</a>
+                        <div className="flex gap-3 normal-case tracking-normal">
+                            <a href="#" className="hover:text-white transition-colors underline-offset-2 hover:underline text-white/80">Privacidad</a>
                             <span>•</span>
-                            <a href="#" className="hover:text-white transition-colors underline-offset-2 hover:underline">Términos</a>
+                            <a href="#" className="hover:text-white transition-colors underline-offset-2 hover:underline text-white/80">Términos</a>
                         </div>
                     </div>
 
