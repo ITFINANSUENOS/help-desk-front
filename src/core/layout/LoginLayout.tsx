@@ -46,7 +46,7 @@ export function LoginLayout({ children }: LoginLayoutProps) {
 
                     {/* Typography: Mokoto para el título (Tech/Futurista) + Montserrat para el texto */}
                     <h2 className="mb-8 text-7xl tracking-tight text-white drop-shadow-2xl leading-tight font-mokoto">
-                        <span className="font-extrabold block sm:inline tracking-wider">Axios</span>{' '}
+                        <span className="font-extrabold block sm:inline tracking-wider">Axis</span>{' '}
                     </h2>
 
                     <p className="text-2xl font-semibold text-white max-w-md leading-relaxed font-montserrat drop-shadow-md">
