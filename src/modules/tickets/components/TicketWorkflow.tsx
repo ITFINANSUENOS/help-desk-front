@@ -28,14 +28,22 @@ export function TicketWorkflow({ ticket }: TicketWorkflowProps) {
                 <div className="text-sm text-gray-600">
                     <span className="font-bold">Descripción de la Tarea:</span>
                     {ticket.description ? (
-                        <div className="react-quill-readonly mt-1 p-0 border-0 bg-transparent">
-                            <RichTextEditor
-                                value={ticket.description}
-                                onChange={() => { }} // Read-only
-                                disabled={true}
-                                height={150}
+                        <>
+                            {/* Screen View: Editor */}
+                            <div className="react-quill-readonly mt-1 p-0 border-0 bg-transparent print:hidden">
+                                <RichTextEditor
+                                    value={ticket.description}
+                                    onChange={() => { }} // Read-only
+                                    disabled={true}
+                                    height={150}
+                                />
+                            </div>
+                            {/* Print View: Raw HTML to avoid iframe cutoff */}
+                            <div
+                                className="hidden print:block mt-2 text-sm [&>table]:w-full [&>table]:border-collapse [&>table]:border [&>table]:border-gray-300 [&_th]:border [&_th]:border-gray-300 [&_th]:p-2 [&_td]:border [&_td]:border-gray-300 [&_td]:p-2"
+                                dangerouslySetInnerHTML={{ __html: ticket.description }}
                             />
-                        </div>
+                        </>
                     ) : (
                         ' No hay descripción disponible para este paso.'
                     )}
