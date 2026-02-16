@@ -16,7 +16,7 @@ function MainLayoutContent() {
     return (
         <LayoutContext.Provider value={{ setTitle }}>
             <GlobalErrorListener />
-            <div className="flex h-screen w-full flex-row overflow-hidden bg-[#f6f8f8]">
+            <div id="app-layout" className="flex h-screen w-full flex-row overflow-hidden bg-[#f6f8f8]">
                 <Sidebar
                     isCollapsed={isSidebarCollapsed}
                     toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}

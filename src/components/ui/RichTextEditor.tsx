@@ -36,7 +36,13 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
                     'bold italic forecolor | alignleft aligncenter ' +
                     'alignright alignjustify | bullist numlist outdent indent | ' +
                     'removeformat | table | help',
-                content_style: 'body { font-family:Inter,sans-serif; font-size:14px }',
+                content_style: `
+                    body { font-family:Inter,sans-serif; font-size:14px }
+                    @media print {
+                        body { height: auto !important; overflow: visible !important; }
+                        .mce-content-body { height: auto !important; overflow: visible !important; }
+                    }
+                `,
                 placeholder: placeholder,
                 forced_root_block: 'p', // Keeps paragraphs clean
                 paste_data_images: true, // Allows pasting images

@@ -29,7 +29,7 @@ export function TicketTimeline({ items }: TicketTimelineProps) {
                 const isError = item.type === 'error_report' || !!item.metadata?.error;
 
                 return (
-                    <div key={item.id || index} className="relative flex gap-6">
+                    <div key={item.id || index} className="relative flex gap-6 print:break-inside-avoid">
                         {/* Avatar / Icon */}
                         <div className="absolute left-0 flex h-14 w-14 items-center justify-center rounded-full border-4 border-[#f6f8f8] bg-white">
                             {isError ? (

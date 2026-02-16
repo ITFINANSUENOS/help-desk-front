@@ -15,9 +15,10 @@ interface EditTicketModalProps {
     onClose: () => void;
     onSuccess: () => void;
     ticket: TicketDetail | null;
+    className?: string;
 }
 
-export function EditTicketModal({ isOpen, onClose, onSuccess, ticket }: EditTicketModalProps) {
+export function EditTicketModal({ isOpen, onClose, onSuccess, ticket, className }: EditTicketModalProps) {
     const [loading, setLoading] = useState(false);
     const [categories, setCategories] = useState<Category[]>([]);
     const [priorities, setPriorities] = useState<Priority[]>([]);
@@ -87,7 +88,7 @@ export function EditTicketModal({ isOpen, onClose, onSuccess, ticket }: EditTick
             isOpen={isOpen}
             onClose={onClose}
             title={`Edit Ticket #${ticket.id}`}
-            className="max-w-2xl"
+            className={`max-w-2xl ${className || ''}`}
         >
             <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-4">

@@ -8,8 +8,10 @@
   }
 
   .no-scrollbar {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
   }
 
   /* Toast animations */
@@ -18,6 +20,7 @@
       transform: translateX(100%);
       opacity: 0;
     }
+
     to {
       transform: translateX(0);
       opacity: 1;
@@ -26,5 +29,61 @@
 
   .animate-slide-in-right {
     animation: slide-in-right 0.3s ease-out;
+  }
+}
+
+@media print {
+
+  /* Hide typical specific elements */
+  .no-print,
+  aside,
+  header,
+  button,
+  .print-hidden {
+    display: none !important;
+  }
+
+  /* Reset layout for printing */
+  body,
+  #root,
+  #app-layout,
+  main,
+  #main-content {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Force all parents to be visible to avoid clipping pages */
+  body * {
+    visibility: visible;
+  }
+
+  /* Hide everything we don't want */
+  .no-print,
+  .no-print * {
+    display: none !important;
+  }
+
+  /* Ensure background colors are printed where needed (mostly for status badges) */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Improve typography for print */
+  body {
+    font-size: 12pt;
+    line-height: 1.5;
+    color: #000;
+    background: white;
+  }
+
+  /* Avoid breaking pages in the middle of elements */
+  .break-inside-avoid {
+    break-inside: avoid;
   }
 }

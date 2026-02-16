@@ -130,15 +130,19 @@ export default function TicketDetailPage() {
 
     // handleCloseTicket moved to TicketResponsePanel
 
+    const handlePrint = () => {
+        window.print();
+    };
+
     return (
         <>
-            <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
+            <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-start print:mb-2 text-black">
                 <div className="space-y-2">
                     <div className="flex items-center gap-3">
-                        <Button variant="ghost" className="!p-0 text-gray-400 hover:text-gray-600" onClick={() => navigate('/tickets')}>
+                        <Button variant="ghost" className="!p-0 text-gray-400 hover:text-gray-600 no-print" onClick={() => navigate('/tickets')}>
                             <span className="material-symbols-outlined text-xl">arrow_back</span>
                         </Button>
-                        <h2 className="text-2xl font-bold text-gray-900">
+                        <h2 className="text-2xl font-bold text-gray-900 print:text-black">
                             Ticket #{ticket.id} - {ticket.subject}
                         </h2>
                         <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-bold ring-1 ring-inset ${getStatusColor(ticket.status)}`}>
@@ -163,8 +167,8 @@ export default function TicketDetailPage() {
                         </span>
                     </div>
                 </div>
-                <div className="flex gap-3">
-                    <Button variant="secondary">
+                <div className="flex gap-3 no-print">
+                    <Button variant="secondary" onClick={handlePrint}>
                         <span className="material-symbols-outlined mr-2">print</span>
                         Imprimir
                     </Button>
@@ -176,11 +180,15 @@ export default function TicketDetailPage() {
                 </div>
             </div>
 
-            <TicketWorkflow ticket={ticket} />
+            {/* Workflow Section - now allowed in print, but graph hidden inside */}
+            <div>
+                <TicketWorkflow ticket={ticket} />
+            </div>
 
-            <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-                <div className="lg:col-span-3 space-y-6">
-                    <div className="flex items-center justify-between">
+            {/* Main Content Grid - Remove grid for print to allow natural flow */}
+            <div className="grid grid-cols-1 gap-8 lg:grid-cols-3 print:block print:gap-0">
+                <div className="lg:col-span-3 space-y-6 print:space-y-4">
+                    <div className="flex items-center justify-between no-print">
                         <h3 className="text-lg font-bold text-gray-900">Actividad Reciente</h3>
                         <div className="flex gap-2">
                             <button
@@ -231,7 +239,7 @@ export default function TicketDetailPage() {
                     </div>
 
                     {activeFilter === 'document' ? (
-                        <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden min-h-[600px]">
+                        <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden min-h-[600px] no-print">
                             {pdfUrl ? (
                                 <iframe
                                     src={pdfUrl}
@@ -245,12 +253,22 @@ export default function TicketDetailPage() {
                             )}
                         </div>
                     ) : (
-                        <TicketTimeline items={filteredItems} />
+                        <div className="no-print">
+                            <TicketTimeline items={filteredItems} />
+                        </div>
                     )}
+
+                    {/* Print Only: Always show full timeline */}
+                    <div className="hidden print:block pt-4">
+                        <h3 className="text-xl font-bold mb-4 text-black border-b border-gray-300 pb-2">Historial Completo</h3>
+                        <div className="print:block print:overflow-visible">
+                            <TicketTimeline items={timeline} />
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div className="mt-8">
+            <div className="mt-8 no-print">
                 <TicketResponsePanel
                     ticketId={ticket.id}
                     assignedToId={ticket.assignedToId}
@@ -273,6 +291,7 @@ export default function TicketDetailPage() {
                 onClose={() => setIsEditModalOpen(false)}
                 onSuccess={fetchData}
                 ticket={ticket}
+                className="no-print"
             />
         </>
     );
