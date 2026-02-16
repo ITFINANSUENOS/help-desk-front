@@ -231,6 +231,7 @@ export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
     const handleSignatureConfirm = (data: SignatureData) => {
         setSignature(data.signature);
         toast.success('Firma capturada correctamente');
+        setIsSignatureModalOpen(false);
     };
 
     // Handler when Modal confirms decision/user
