@@ -104,7 +104,7 @@ export function Sidebar({ isCollapsed, toggleCollapse, isMobileOpen, closeMobile
                                 "text-xl font-extrabold tracking-wide transition-opacity whitespace-nowrap drop-shadow-md",
                                 isCollapsed ? "w-0 opacity-0 hidden" : "w-auto opacity-100"
                             )}>
-                                Axis
+                                Soporte
                             </span>
                         </div>
                         {/* Mobile Close Button */}

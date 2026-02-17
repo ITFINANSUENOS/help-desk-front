@@ -56,7 +56,7 @@ export default function LoginPage() {
                         support_agent
                     </span>
                 </div>
-                <span className="text-lg font-bold text-brand-blue">Axis</span>
+                <span className="text-lg font-bold text-brand-blue">Mesa de Ayuda</span>
             </div>
 
             {/* Form */}
