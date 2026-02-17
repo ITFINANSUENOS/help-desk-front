@@ -177,11 +177,13 @@ export function Sidebar({ isCollapsed, toggleCollapse, isMobileOpen, closeMobile
                                 "flex items-center gap-3 text-sm text-white/80 hover:text-white mb-4 transition-colors font-medium",
                                 isCollapsed ? "justify-center" : ""
                             )}
-                            href="#"
-                            title="Support Center"
+                            href="/manual/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title="Manual de Usuario"
                         >
-                            <span className="material-symbols-outlined" style={{ fontSize: '20px', fontVariationSettings: '"FILL" 1' }}>help</span>
-                            {!isCollapsed && <span>Support Center</span>}
+                            <span className="material-symbols-outlined" style={{ fontSize: '20px', fontVariationSettings: '"FILL" 1' }}>menu_book</span>
+                            {!isCollapsed && <span>Manual de Usuario</span>}
                         </a>
 
                         {/* Desktop Collapse Toggle */}

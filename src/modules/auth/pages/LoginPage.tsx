@@ -143,8 +143,8 @@ export default function LoginPage() {
                 <a href="#" className="hover:text-brand-blue transition-colors">
                     Términos de Servicio
                 </a>
-                <a href="#" className="hover:text-brand-blue transition-colors">
-                    Centro de Ayuda
+                <a href="/manual/" target="_blank" rel="noopener noreferrer" className="hover:text-brand-blue transition-colors">
+                    Manual de Usuario
                 </a>
             </div>
         </LoginLayout>

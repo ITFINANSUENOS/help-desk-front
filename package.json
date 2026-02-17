@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "vitest"
+    "test": "vitest",
+    "build:docs": "cd docs && pnpm install && pnpm build && mkdir -p ../public/manual && cp -r build/* ../public/manual/"
   },
   "dependencies": {
     "@tabler/icons-react": "^3.36.1",
