@@ -44,6 +44,8 @@ export interface TicketFilter {
     ticketId?: number;
     dateFrom?: string;
     dateTo?: string;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
 }
 
 export interface TicketListResponse {

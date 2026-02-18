@@ -5,6 +5,7 @@ export interface ColumnDef<T> {
     header: string;
     className?: string;
     render?: (item: T) => ReactNode;
+    sortable?: boolean;
 }
 
 export interface PaginationInfo {
@@ -25,6 +26,8 @@ interface DataTableProps<T> {
     onRowClick?: (item: T) => void;
     getRowKey: (item: T) => string | number;
     className?: string; // Add className prop
+    sort?: { key: string; order: 'asc' | 'desc' } | null;
+    onSort?: (key: string) => void;
 }
 
 export function DataTable<T>({
@@ -36,7 +39,9 @@ export function DataTable<T>({
     pagination,
     onRowClick,
     getRowKey,
-    className = ''
+    className = '',
+    sort,
+    onSort
 }: DataTableProps<T>) {
     const colSpan = columns.length;
 
@@ -132,9 +137,22 @@ export function DataTable<T>({
                             {columns.map((col) => (
                                 <th
                                     key={col.key}
-                                    className={col.className || 'px-6 py-4'}
+                                    className={`${col.className || 'px-6 py-4'} ${col.sortable ? 'cursor-pointer hover:bg-gray-100 transition-colors select-none' : ''}`}
+                                    onClick={() => col.sortable && onSort?.(col.key)}
                                 >
-                                    {col.header}
+                                    <div className="flex items-center gap-1">
+                                        {col.header}
+                                        {col.sortable && sort && sort.key === col.key && (
+                                            <span className="material-symbols-outlined text-sm font-bold text-brand-blue">
+                                                {sort.order === 'asc' ? 'arrow_upward' : 'arrow_downward'}
+                                            </span>
+                                        )}
+                                        {col.sortable && (!sort || sort.key !== col.key) && (
+                                            <span className="material-symbols-outlined text-sm font-bold text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                unfold_more
+                                            </span>
+                                        )}
+                                    </div>
                                 </th>
                             ))}
                         </tr>

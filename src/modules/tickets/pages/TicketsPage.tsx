@@ -37,6 +37,8 @@ export default function TicketsPage() {
     const userPriorityFilter = (searchParams.get('userPriority') as TicketPriority | 'Todas') || 'Todas';
     const subcategoryPriorityFilter = (searchParams.get('subcategoryPriority') as TicketPriority | 'Todas') || 'Todas';
     const searchQuery = searchParams.get('search') || '';
+    const sortBy = searchParams.get('sortBy') || 'lastUpdated';
+    const sortOrder = (searchParams.get('sortOrder') as 'asc' | 'desc') || 'desc';
 
     // Advanced Filters Derived
     const advancedFilters = useMemo(() => {
@@ -110,7 +112,7 @@ export default function TicketsPage() {
             // Only force default if URL param is completely missing
             if (!urlView) {
                 const defaultView = viewOptions[0].value;
-                setSearchParams(_ => {
+                setSearchParams(() => {
                     // Start fresh from current search params
                     const newParams = new URLSearchParams(window.location.search);
                     newParams.set('view', defaultView);
@@ -124,6 +126,8 @@ export default function TicketsPage() {
     useEffect(() => {
         setTitle('Gestión de Tickets');
     }, [setTitle]);
+
+    // ... (existing derivations)
 
     // Helper functions to update URL params (replace setters)
     const updateParams = useCallback((updates: Record<string, string | null>) => {
@@ -143,6 +147,18 @@ export default function TicketsPage() {
             return newParams;
         });
     }, [setSearchParams]);
+
+    const handleSort = (key: string) => {
+        if (sortBy === key) {
+            // Toggle order
+            updateParams({ sortOrder: sortOrder === 'asc' ? 'desc' : 'asc' });
+        } else {
+            // New key, default to desc (or asc based on type? usually asc for text, desc for date/id. Let's default asc)
+            // Actually, for consistency let's default to asc except for date/id.
+            // But simplify: Toggle.
+            updateParams({ sortBy: key, sortOrder: 'asc' });
+        }
+    };
 
     // Specific Setters for UI Components (Clean defaults from URL)
     const setPage = (p: number) => {
@@ -177,8 +193,7 @@ export default function TicketsPage() {
         });
     };
 
-
-
+    // ...
 
     const fetchTickets = useCallback(async () => {
         try {
@@ -191,6 +206,8 @@ export default function TicketsPage() {
                 search: searchQuery,
                 page,
                 limit,
+                sortBy,
+                sortOrder,
                 ...advancedFilters
             };
 
@@ -203,7 +220,7 @@ export default function TicketsPage() {
         } finally {
             setLoading(false);
         }
-    }, [viewFilter, statusFilter, userPriorityFilter, subcategoryPriorityFilter, searchQuery, page, limit, advancedFilters]);
+    }, [viewFilter, statusFilter, userPriorityFilter, subcategoryPriorityFilter, searchQuery, page, limit, advancedFilters, sortBy, sortOrder]);
 
     // Effect to fetch tickets when URL params change
     useEffect(() => {
@@ -314,6 +331,8 @@ export default function TicketsPage() {
         }
     ];
 
+    // ...
+
     return (
         <>
             <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
@@ -326,10 +345,6 @@ export default function TicketsPage() {
             <AdvancedTicketFilter
                 filters={advancedFilters}
                 onFilterChange={(newFilters) => {
-                    // setAdvancedFilters already resets page to 1 internally.
-                    // Do NOT call setPage(1) here — it would trigger a second
-                    // setSearchParams that overwrites the advanced filter params
-                    // due to a race condition with stale closure state.
                     setAdvancedFilters(newFilters);
                 }}
                 onClear={() => {
@@ -353,12 +368,15 @@ export default function TicketsPage() {
                     totalPages,
                     onPageChange: setPage
                 }}
+                sort={{ key: sortBy, order: sortOrder }}
+                onSort={handleSort}
                 columns={[
                     {
                         key: 'id',
                         header: 'ID',
                         className: 'px-6 py-4 font-mono font-medium text-gray-900',
-                        render: (ticket: Ticket) => `#TK-${ticket.id}`
+                        render: (ticket: Ticket) => `#TK-${ticket.id}`,
+                        sortable: true
                     },
                     {
                         key: 'subject',
@@ -368,7 +386,8 @@ export default function TicketsPage() {
                                 <p className="font-medium text-gray-900">{ticket.subject}</p>
                                 <p className="text-xs text-gray-500">Ticket #{ticket.id}</p>
                             </div>
-                        )
+                        ),
+                        sortable: true
                     },
                     {
                         key: 'customer',
@@ -380,7 +399,8 @@ export default function TicketsPage() {
                                 </div>
                                 <span className="font-medium text-gray-900">{ticket.customer}</span>
                             </div>
-                        )
+                        ),
+                        sortable: true
                     },
                     {
                         key: 'assignedTo',
@@ -395,6 +415,7 @@ export default function TicketsPage() {
                                 </span>
                             </div>
                         )
+                        // Assignee sorting is complex (list), skipping for now as per plan
                     },
                     {
                         key: 'status',
@@ -403,7 +424,8 @@ export default function TicketsPage() {
                             <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusColor(ticket.status)}`}>
                                 {ticket.status}
                             </span>
-                        )
+                        ),
+                        sortable: true
                     },
                     {
                         key: 'priority',
@@ -413,7 +435,8 @@ export default function TicketsPage() {
                                 <div className={`h-2.5 w-2.5 rounded-full ${getPriorityColor(ticket.priority).split(' ')[0]}`}></div>
                                 <span className="font-medium text-gray-700">{ticket.priority}</span>
                             </div>
-                        )
+                        ),
+                        sortable: true
                     },
                     {
                         key: 'prioritySubcategory',
@@ -423,7 +446,8 @@ export default function TicketsPage() {
                                 <div className={`h-2.5 w-2.5 rounded-full ${getPriorityColor(ticket.prioritySubcategory || 'Media').split(' ')[0]}`}></div>
                                 <span className="font-medium text-gray-700">{ticket.prioritySubcategory || 'Media'}</span>
                             </div>
-                        )
+                        ),
+                        sortable: true
                     },
                     {
                         key: 'tags',
@@ -483,7 +507,8 @@ export default function TicketsPage() {
                                     <div className="text-xs text-gray-400">{formattedTime}</div>
                                 </div>
                             );
-                        }
+                        },
+                        sortable: true
                     },
                     {
                         key: 'actions',
