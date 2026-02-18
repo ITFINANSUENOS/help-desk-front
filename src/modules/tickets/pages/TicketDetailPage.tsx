@@ -193,11 +193,6 @@ export default function TicketDetailPage() {
                         <span className="material-symbols-outlined mr-2">label</span>
                         Etiquetas
                     </Button>
-                    {/* Cerrar Ticket button moved to TicketResponsePanel */}
-                    <Button variant="brand" onClick={() => setIsEditModalOpen(true)}>
-                        <span className="material-symbols-outlined mr-2">edit</span>
-                        Editar Ticket
-                    </Button>
                 </div>
             </div>
 
