@@ -47,6 +47,7 @@ export const UnifiedSignatureModal: React.FC<UnifiedSignatureModalProps> = ({
 }) => {
     const sigCanvas = useRef<SignatureCanvas>(null);
     const [isEmpty, setIsEmpty] = useState(true);
+    const [hasImage, setHasImage] = useState(false);
     const [comment, setComment] = useState('');
     const [isLoadingSignature, setIsLoadingSignature] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -56,6 +57,7 @@ export const UnifiedSignatureModal: React.FC<UnifiedSignatureModalProps> = ({
 
     const handleClear = () => {
         sigCanvas.current?.clear();
+        setHasImage(false);
         setIsEmpty(true);
     };
 
@@ -79,8 +81,52 @@ export const UnifiedSignatureModal: React.FC<UnifiedSignatureModalProps> = ({
 
     const handleEnd = () => {
         if (sigCanvas.current) {
-            setIsEmpty(sigCanvas.current.isEmpty());
+            // Check if empty (no strokes) AND no custom image
+            setIsEmpty(sigCanvas.current.isEmpty() && !hasImage);
         }
+    };
+
+    const drawImageOnCanvas = (img: HTMLImageElement) => {
+        if (!sigCanvas.current) return;
+
+        const canvas = sigCanvas.current.getCanvas();
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        // Synchronize canvas internal resolution with its display size
+        // Multiply by 3 to ensure high resolution for the output image (PDF stamping)
+        const SCALE_FACTOR = 3;
+        const rect = canvas.getBoundingClientRect();
+
+        if (rect.width > 0 && rect.height > 0) {
+            canvas.width = rect.width * SCALE_FACTOR;
+            canvas.height = rect.height * SCALE_FACTOR;
+        }
+
+        // Clear canvas (resizing usually clears, but good to ensure)
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Calculate scale to fit image within canvas with padding
+        const padding = 20 * SCALE_FACTOR; // Scale padding too
+        const availWidth = canvas.width - padding;
+        const availHeight = canvas.height - padding;
+
+        // Prevent division by zero
+        const safeW = availWidth > 0 ? availWidth : canvas.width;
+        const safeH = availHeight > 0 ? availHeight : canvas.height;
+
+        const scale = Math.min(safeW / img.width, safeH / img.height);
+
+        const w = img.width * scale;
+        const h = img.height * scale;
+
+        // Center the image
+        const x = (canvas.width - w) / 2;
+        const y = (canvas.height - h) / 2;
+
+        ctx.drawImage(img, x, y, w, h);
+        setHasImage(true);
+        setIsEmpty(false);
     };
 
     const handleLoadProfileSignature = async () => {
@@ -109,17 +155,7 @@ export const UnifiedSignatureModal: React.FC<UnifiedSignatureModalProps> = ({
             const objectUrl = URL.createObjectURL(blob);
 
             img.onload = () => {
-                if (sigCanvas.current) {
-                    const canvas = sigCanvas.current.getCanvas();
-                    const ctx = canvas.getContext('2d');
-                    if (ctx) {
-                        // Clear canvas first
-                        ctx.clearRect(0, 0, canvas.width, canvas.height);
-                        // Draw the image scaled to fit
-                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                        setIsEmpty(false);
-                    }
-                }
+                drawImageOnCanvas(img);
                 URL.revokeObjectURL(objectUrl);
                 toast.success('Firma de perfil cargada');
             };
@@ -156,46 +192,8 @@ export const UnifiedSignatureModal: React.FC<UnifiedSignatureModalProps> = ({
         reader.onload = (e) => {
             const img = new Image();
             img.onload = () => {
-                if (sigCanvas.current) {
-                    const canvas = sigCanvas.current.getCanvas();
-                    const ctx = canvas.getContext('2d');
-                    if (ctx) {
-                        // Synchronize canvas internal resolution with its display size
-                        // Multiply by 3 to ensure high resolution for the output image (PDF stamping)
-                        const SCALE_FACTOR = 3;
-                        const rect = canvas.getBoundingClientRect();
-
-                        if (rect.width > 0 && rect.height > 0) {
-                            canvas.width = rect.width * SCALE_FACTOR;
-                            canvas.height = rect.height * SCALE_FACTOR;
-                        }
-
-                        // Clear canvas (resizing usually clears, but good to ensure)
-                        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-                        // Calculate scale to fit image within canvas with padding
-                        const padding = 20 * SCALE_FACTOR; // Scale padding too
-                        const availWidth = canvas.width - padding;
-                        const availHeight = canvas.height - padding;
-
-                        // Prevent division by zero
-                        const safeW = availWidth > 0 ? availWidth : canvas.width;
-                        const safeH = availHeight > 0 ? availHeight : canvas.height;
-
-                        const scale = Math.min(safeW / img.width, safeH / img.height);
-
-                        const w = img.width * scale;
-                        const h = img.height * scale;
-
-                        // Center the image
-                        const x = (canvas.width - w) / 2;
-                        const y = (canvas.height - h) / 2;
-
-                        ctx.drawImage(img, x, y, w, h);
-                        setIsEmpty(false);
-                        toast.success('Imagen cargada como firma');
-                    }
-                }
+                drawImageOnCanvas(img);
+                toast.success('Imagen cargada como firma');
             };
             img.onerror = () => {
                 toast.error('Error al procesar la imagen');
