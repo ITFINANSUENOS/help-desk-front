@@ -7,6 +7,7 @@ import type { RecentTicket } from '../services/dashboard.service';
 
 interface TicketTableProps {
     tickets: RecentTicket[];
+    title?: string;
 }
 
 const getStatusColor = (status: string) => {
@@ -41,7 +42,7 @@ const getPriorityColor = (priority: string) => {
     }
 };
 
-export function TicketTable({ tickets }: TicketTableProps) {
+export function TicketTable({ tickets, title = 'Próximos Tickets Asignados' }: TicketTableProps) {
     if (!tickets || tickets.length === 0) {
         return (
             <div className="mt-8">
@@ -57,7 +58,7 @@ export function TicketTable({ tickets }: TicketTableProps) {
     return (
         <div className="mt-8">
             <div className="flex items-center justify-between mb-4 px-1">
-                <h3 className="text-lg font-bold text-gray-800">Próximos Tickets Asignados</h3>
+                <h3 className="text-lg font-bold text-gray-800">{title}</h3>
                 {/* <a className="text-sm font-bold text-brand-teal hover:text-brand-accent" href="/tickets">Ver todos</a> */}
             </div>
             <div className="max-h-[600px] overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-sm">

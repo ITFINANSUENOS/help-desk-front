@@ -15,6 +15,8 @@ interface StatsCardProps {
     footerLabel?: string;
     footerColor?: string;
     isUrgent?: boolean; // Highlights the card with urgent styling
+    onClick?: () => void;
+    active?: boolean;
 }
 
 export function StatsCard({
@@ -29,13 +31,23 @@ export function StatsCard({
     footerIcon,
     footerLabel,
     footerColor = "text-gray-400",
-    isUrgent = false
+    isUrgent = false,
+    onClick,
+    active = false
 }: StatsCardProps) {
     return (
-        <div className={cn(
-            "rounded-xl border bg-white p-6 shadow-sm transition-all",
-            isUrgent ? "border-red-200 bg-red-50/30" : "border-gray-100"
-        )}>
+        <div
+            className={cn(
+                "rounded-xl border bg-white p-6 shadow-sm transition-all",
+                isUrgent ? "border-red-200 bg-red-50/30" : "border-gray-100",
+                onClick && "cursor-pointer hover:shadow-md hover:border-brand-blue/30",
+                active && "ring-2 ring-brand-blue border-brand-blue shadow-md"
+            )}
+            onClick={onClick}
+            role={onClick ? "button" : undefined}
+            tabIndex={onClick ? 0 : undefined}
+            onKeyDown={onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') onClick(); } : undefined}
+        >
             <div className="flex items-center justify-between">
                 <div>
                     <p className="text-sm font-medium text-gray-500">{title}</p>
@@ -59,3 +71,4 @@ export function StatsCard({
         </div>
     );
 }
+

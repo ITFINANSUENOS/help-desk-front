@@ -23,5 +23,10 @@ export const dashboardService = {
     async getStats(): Promise<DashboardStats> {
         const response = await api.get<DashboardStats>('/dashboard/stats');
         return response.data;
+    },
+
+    async getPendingTickets(): Promise<RecentTicket[]> {
+        const response = await api.get<RecentTicket[]>('/dashboard/pending');
+        return response.data;
     }
 };

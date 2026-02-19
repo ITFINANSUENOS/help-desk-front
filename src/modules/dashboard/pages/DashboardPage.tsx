@@ -5,13 +5,18 @@ import { TicketTable } from '../components/TicketTable';
 import { useAuth } from '../../auth/context/useAuth';
 import { useLayout } from '../../../core/layout/context/LayoutContext';
 import { dashboardService } from '../services/dashboard.service';
-import type { DashboardStats } from '../services/dashboard.service';
+import type { DashboardStats, RecentTicket } from '../services/dashboard.service';
 
 export default function DashboardPage() {
     const { user } = useAuth();
     const { setTitle } = useLayout();
     const [stats, setStats] = useState<DashboardStats | null>(null);
     const [loading, setLoading] = useState(true);
+
+    /** Controla si se muestran tickets pendientes o recientes */
+    const [showPending, setShowPending] = useState(false);
+    const [pendingTickets, setPendingTickets] = useState<RecentTicket[]>([]);
+    const [loadingPending, setLoadingPending] = useState(false);
 
     useEffect(() => {
         setTitle('Dashboard');
@@ -29,9 +34,34 @@ export default function DashboardPage() {
         }
     };
 
+    /**
+     * Alterna entre la vista de tickets recientes y los tickets pendientes.
+     * Al activar, carga los pendientes desde el endpoint dedicado.
+     */
+    const handlePendingClick = async () => {
+        const nextState = !showPending;
+        setShowPending(nextState);
+
+        if (nextState && pendingTickets.length === 0) {
+            setLoadingPending(true);
+            try {
+                const data = await dashboardService.getPendingTickets();
+                setPendingTickets(data);
+            } catch (error) {
+                console.error('Failed to load pending tickets:', error);
+            } finally {
+                setLoadingPending(false);
+            }
+        }
+    };
+
     if (loading) {
         return <div className="p-8 text-center text-gray-500">Cargando estadísticas...</div>;
     }
+
+    /** Tickets a mostrar según el modo activo */
+    const displayTickets = showPending ? pendingTickets : (stats?.recent || []);
+    const tableTitle = showPending ? 'Mis Tickets Pendientes' : 'Próximos Tickets Asignados';
 
     return (
         <>
@@ -65,10 +95,12 @@ export default function DashboardPage() {
                     icon="hourglass_top"
                     iconColor="text-orange-500"
                     iconBgColor="bg-orange-50"
-                    footerLabel="Activos en tu bandeja"
+                    footerLabel={showPending ? 'Clic para ver recientes' : 'Clic para ver pendientes'}
                     footerIcon="priority_high"
                     footerColor="text-brand-red"
-                    isUrgent={true}
+                    isUrgent={!showPending}
+                    onClick={handlePendingClick}
+                    active={showPending}
                 />
                 <StatsCard
                     title="Total Tickets"
@@ -80,8 +112,12 @@ export default function DashboardPage() {
                 />
             </div>
 
-            {/* Recent Tickets Table */}
-            <TicketTable tickets={stats?.recent || []} />
+            {/* Tickets Table */}
+            {loadingPending ? (
+                <div className="mt-8 p-8 text-center text-gray-500">Cargando tickets pendientes...</div>
+            ) : (
+                <TicketTable tickets={displayTickets} title={tableTitle} />
+            )}
         </>
     );
 }
