@@ -24,6 +24,11 @@ export const tagService = {
         return response.data;
     },
 
+    async updateTag(id: number, data: Partial<CreateTagDto>): Promise<Tag> {
+        const response = await api.patch(`/tags/${id}`, data);
+        return response.data;
+    },
+
     async deleteTag(id: number): Promise<void> {
         await api.delete(`/tags/${id}`);
     },

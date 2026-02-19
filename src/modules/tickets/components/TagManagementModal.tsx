@@ -15,21 +15,35 @@ interface TagManagementModalProps {
     onTagAssigned?: () => void;
 }
 
+const COLORS = ['#EF4444', '#F59E0B', '#10B981', '#3B82F6', '#6366F1', '#8B5CF6', '#EC4899', '#6B7280'];
+
 export default function TagManagementModal({ isOpen, onClose, ticketId, currentTags, onTagAssigned }: TagManagementModalProps) {
     const [tags, setTags] = useState<Tag[]>([]);
     const [loading, setLoading] = useState(false);
-    const [view, setView] = useState<'list' | 'create'>('list');
+    const [view, setView] = useState<'list' | 'create' | 'edit'>('list');
 
-    // Create Form
-    const [newTagName, setNewTagName] = useState('');
-    const [newTagColor, setNewTagColor] = useState('#3B82F6');
+    // Form fields (shared for create & edit)
+    const [formName, setFormName] = useState('');
+    const [formColor, setFormColor] = useState('#3B82F6');
+    const [editingTag, setEditingTag] = useState<Tag | null>(null);
+
+    // Inline delete confirmation
+    const [deletingId, setDeletingId] = useState<number | null>(null);
 
     useEffect(() => {
         if (isOpen) {
             loadTags();
-            setView('list');
+            resetView();
         }
     }, [isOpen]);
+
+    const resetView = () => {
+        setView('list');
+        setFormName('');
+        setFormColor('#3B82F6');
+        setEditingTag(null);
+        setDeletingId(null);
+    };
 
     const loadTags = async () => {
         try {
@@ -37,27 +51,13 @@ export default function TagManagementModal({ isOpen, onClose, ticketId, currentT
             const data = await tagService.getMyTags();
             setTags(Array.isArray(data) ? data : []);
         } catch (error) {
-            console.error("Failed to load tags", error);
+            console.error('Failed to load tags', error);
         } finally {
             setLoading(false);
         }
     };
 
-    const handleCreateTag = async () => {
-        if (!newTagName.trim()) return;
-        try {
-            setLoading(true);
-            await tagService.createTag({ nombre: newTagName, color: newTagColor });
-            setNewTagName('');
-            setView('list');
-            loadTags();
-        } catch (error) {
-            console.error("Failed to create tag", error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
+    /** Assign / unassign tag to the current ticket */
     const handleToggleTag = async (tag: Tag) => {
         if (!ticketId) return;
         try {
@@ -70,160 +70,220 @@ export default function TagManagementModal({ isOpen, onClose, ticketId, currentT
             if (onTagAssigned) onTagAssigned();
             onClose();
         } catch (error) {
-            console.error("Failed to toggle tag", error);
+            console.error('Failed to toggle tag', error);
         }
     };
 
-    const handleDeleteTag = async (id: number) => {
-        if (!confirm('¿Estás seguro de eliminar esta etiqueta?')) return;
+    /** Open the create form */
+    const openCreate = () => {
+        setFormName('');
+        setFormColor('#3B82F6');
+        setEditingTag(null);
+        setView('create');
+    };
+
+    /** Open the edit form pre-filled with tag data */
+    const openEdit = (tag: Tag) => {
+        setEditingTag(tag);
+        setFormName(tag.nombre);
+        setFormColor(tag.color);
+        setView('edit');
+    };
+
+    /** Save create or edit */
+    const handleSave = async () => {
+        if (!formName.trim()) return;
         try {
-            await tagService.deleteTag(id);
+            setLoading(true);
+            if (view === 'edit' && editingTag) {
+                await tagService.updateTag(editingTag.id, { nombre: formName, color: formColor });
+            } else {
+                await tagService.createTag({ nombre: formName, color: formColor });
+            }
+            resetView();
             loadTags();
         } catch (error) {
-            console.error("Failed to delete tag", error);
+            console.error('Failed to save tag', error);
+        } finally {
+            setLoading(false);
         }
     };
 
-    const COLORS = ['#EF4444', '#F59E0B', '#10B981', '#3B82F6', '#6366F1', '#8B5CF6', '#EC4899', '#6B7280'];
+    /** Confirm + delete */
+    const handleDelete = async (id: number) => {
+        try {
+            setLoading(true);
+            await tagService.deleteTag(id);
+            setDeletingId(null);
+            loadTags();
+        } catch (error) {
+            console.error('Failed to delete tag', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const modalTitle =
+        view === 'create' ? 'Nueva Etiqueta' :
+            view === 'edit' ? 'Editar Etiqueta' :
+                ticketId ? 'Gestionar Etiquetas' : 'Mis Etiquetas';
 
     return (
-        <Modal
-            isOpen={isOpen}
-            onClose={onClose}
-            title={view === 'list'
-                ? (ticketId ? 'Gestionar Etiquetas' : 'Mis Etiquetas')
-                : 'Nueva Etiqueta'
-            }
-            className="max-w-md"
-        >
-            <div className="space-y-6">
-                {view === 'list' ? (
+        <Modal isOpen={isOpen} onClose={onClose} title={modalTitle} className="max-w-md">
+            <div className="space-y-4">
+
+                {/* ───── LIST VIEW ───── */}
+                {view === 'list' && (
                     <>
-                        <div className="min-h-[120px]">
+                        <div className="min-h-[140px]">
                             {loading && tags.length === 0 ? (
-                                <div className="flex justify-center py-8">
-                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-blue"></div>
+                                <div className="flex justify-center py-10">
+                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-blue" />
+                                </div>
+                            ) : tags.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center py-10 bg-gray-50 rounded-xl border border-dashed border-gray-200 gap-2">
+                                    <Icon name="label_off" className="text-gray-300 text-4xl" />
+                                    <p className="text-gray-400 text-sm">No tienes etiquetas creadas.</p>
                                 </div>
                             ) : (
-                                <div className="flex flex-wrap gap-2">
-                                    {tags.length === 0 && (
-                                        <div className="w-full text-center py-6 bg-gray-50 rounded-lg border border-dashed border-gray-200">
-                                            <Icon name="label_off" className="text-gray-400 text-3xl mb-2" />
-                                            <p className="text-gray-500 text-sm">No tienes etiquetas creadas.</p>
-                                        </div>
-                                    )}
+                                <ul className="divide-y divide-gray-100">
                                     {tags.map(tag => {
                                         const isAssigned = ticketId && currentTags?.some(t => t.id === tag.id);
+                                        const isConfirmingDelete = deletingId === tag.id;
+
                                         return (
-                                            <button
-                                                key={tag.id}
-                                                onClick={() => ticketId ? handleToggleTag(tag) : null}
-                                                className={`
-                                                    group relative inline-flex items-center rounded-full pl-2.5 pr-3 py-1 text-sm font-medium transition-all
-                                                    border border-transparent
-                                                    ${ticketId ? 'hover:shadow-sm hover:scale-105 active:scale-95 cursor-pointer' : 'cursor-default'}
-                                                    ${isAssigned ? 'ring-2 ring-offset-1 ring-green-500 opacity-90' : 'hover:border-opacity-20'}
-                                                `}
-                                                style={{
-                                                    backgroundColor: tag.color + '15',
-                                                    color: tag.color,
-                                                    borderColor: ticketId ? tag.color + '30' : 'transparent'
-                                                }}
-                                                title={ticketId ? (isAssigned ? 'Click para remover' : 'Click para asignar') : ''}
-                                            >
-                                                <span className="mr-1.5 inline-block w-2.5 h-2.5 rounded-full" style={{ backgroundColor: tag.color }}></span>
-                                                {tag.nombre}
+                                            <li key={tag.id} className="flex items-center gap-3 py-2.5 px-1">
+                                                {/* Color dot + name */}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => ticketId ? handleToggleTag(tag) : undefined}
+                                                    disabled={!ticketId}
+                                                    className={`flex-1 flex items-center gap-2 min-w-0 text-left rounded-lg px-2 py-1 transition-colors
+                                                        ${ticketId ? 'hover:bg-gray-50 cursor-pointer' : 'cursor-default'}`}
+                                                >
+                                                    <span
+                                                        className="shrink-0 w-3 h-3 rounded-full"
+                                                        style={{ backgroundColor: tag.color }}
+                                                    />
+                                                    <span className="text-sm font-medium text-gray-800 truncate">{tag.nombre}</span>
+                                                    {isAssigned && (
+                                                        <span className="ml-auto shrink-0 inline-flex items-center gap-1 text-xs font-medium text-emerald-600 bg-emerald-50 rounded-full px-2 py-0.5">
+                                                            <Icon name="check" className="text-[13px]" />
+                                                            Asignada
+                                                        </span>
+                                                    )}
+                                                </button>
 
-                                                {isAssigned && (
-                                                    <Icon name="check" className="ml-1.5 text-[16px]" />
-                                                )}
-
-                                                {!ticketId && (
-                                                    <div
-                                                        onClick={(e) => { e.stopPropagation(); handleDeleteTag(tag.id); }}
-                                                        className="ml-2 -mr-1 p-0.5 rounded-full hover:bg-red-50 text-gray-400 hover:text-red-500 transition-all opacity-0 group-hover:opacity-100 cursor-pointer"
-                                                        title="Eliminar etiqueta"
-                                                    >
-                                                        <Icon name="close" className="text-[16px] block" />
+                                                {/* Actions */}
+                                                {isConfirmingDelete ? (
+                                                    <div className="flex items-center gap-1 shrink-0">
+                                                        <span className="text-xs text-red-600 font-medium mr-1">¿Eliminar?</span>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleDelete(tag.id)}
+                                                            disabled={loading}
+                                                            className="p-1 rounded text-xs font-semibold text-white bg-red-500 hover:bg-red-600 transition-colors px-2"
+                                                        >
+                                                            Sí
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setDeletingId(null)}
+                                                            className="p-1 rounded text-xs font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors px-2"
+                                                        >
+                                                            No
+                                                        </button>
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex items-center gap-0.5 shrink-0">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => openEdit(tag)}
+                                                            className="p-1.5 rounded-md text-gray-400 hover:text-brand-blue hover:bg-blue-50 transition-colors"
+                                                            title="Editar etiqueta"
+                                                        >
+                                                            <Icon name="edit" className="text-[16px]" />
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setDeletingId(tag.id)}
+                                                            className="p-1.5 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                                                            title="Eliminar etiqueta"
+                                                        >
+                                                            <Icon name="delete" className="text-[16px]" />
+                                                        </button>
                                                     </div>
                                                 )}
-                                            </button>
+                                            </li>
                                         );
                                     })}
-                                </div>
+                                </ul>
                             )}
                         </div>
 
-                        <div className="flex justify-end pt-4 border-t border-gray-100">
-                            <Button
-                                variant="brand"
-                                onClick={() => setView('create')}
-                                className="w-full sm:w-auto"
-                            >
+                        <div className="flex justify-end pt-3 border-t border-gray-100">
+                            <Button variant="brand" onClick={openCreate} className="w-full sm:w-auto">
                                 <Icon name="add" className="mr-2 text-sm" />
                                 Nueva Etiqueta
                             </Button>
                         </div>
                     </>
-                ) : (
-                    <>
-                        <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
-                            <Input
-                                label="Nombre de la etiqueta"
-                                value={newTagName}
-                                onChange={(e) => setNewTagName(e.target.value)}
-                                placeholder="Ej. Urgente"
-                                autoFocus
-                            />
+                )}
 
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Color</label>
-                                <div className="grid grid-cols-8 gap-2">
-                                    {COLORS.map(color => (
-                                        <button
-                                            key={color}
-                                            type="button"
-                                            onClick={() => setNewTagColor(color)}
-                                            className={`
-                                                h-8 w-8 rounded-full border-2 transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-brand-blue
-                                                ${newTagColor === color ? 'border-gray-900 scale-110 shadow-sm' : 'border-transparent'}
-                                            `}
-                                            style={{ backgroundColor: color }}
-                                            title={color}
-                                        />
-                                    ))}
-                                </div>
+                {/* ───── CREATE / EDIT FORM ───── */}
+                {(view === 'create' || view === 'edit') && (
+                    <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-200">
+                        <Input
+                            label="Nombre de la etiqueta"
+                            value={formName}
+                            onChange={e => setFormName(e.target.value)}
+                            placeholder="Ej. Urgente"
+                            autoFocus
+                        />
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Color</label>
+                            <div className="grid grid-cols-8 gap-2">
+                                {COLORS.map(color => (
+                                    <button
+                                        key={color}
+                                        type="button"
+                                        onClick={() => setFormColor(color)}
+                                        className={`h-8 w-8 rounded-full border-2 transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-brand-blue
+                                            ${formColor === color ? 'border-gray-900 scale-110 shadow-sm' : 'border-transparent'}`}
+                                        style={{ backgroundColor: color }}
+                                        title={color}
+                                    />
+                                ))}
                             </div>
-
-                            {/* Preview */}
-                            {newTagName && (
-                                <div className="p-4 bg-gray-50 rounded-lg flex justify-center items-center">
-                                    <div className="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium border"
-                                        style={{
-                                            backgroundColor: newTagColor + '15',
-                                            color: newTagColor,
-                                            borderColor: newTagColor + '30'
-                                        }}>
-                                        <span className="w-2.5 h-2.5 rounded-full mr-2" style={{ backgroundColor: newTagColor }}></span>
-                                        {newTagName}
-                                    </div>
-                                </div>
-                            )}
                         </div>
 
-                        <div className="flex justify-end gap-3 pt-4 border-t border-gray-100 mt-6">
-                            <Button variant="ghost" onClick={() => setView('list')} disabled={loading}>
+                        {/* Preview */}
+                        {formName && (
+                            <div className="p-4 bg-gray-50 rounded-lg flex justify-center items-center">
+                                <div
+                                    className="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium border"
+                                    style={{ backgroundColor: formColor + '15', color: formColor, borderColor: formColor + '30' }}
+                                >
+                                    <span className="w-2.5 h-2.5 rounded-full mr-2" style={{ backgroundColor: formColor }} />
+                                    {formName}
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="flex justify-end gap-3 pt-3 border-t border-gray-100">
+                            <Button variant="ghost" onClick={resetView} disabled={loading}>
                                 Cancelar
                             </Button>
                             <Button
                                 variant="brand"
-                                onClick={handleCreateTag}
-                                disabled={!newTagName.trim() || loading}
+                                onClick={handleSave}
+                                disabled={!formName.trim() || loading}
                             >
-                                {loading ? 'Creando...' : 'Guardar'}
+                                {loading ? 'Guardando...' : view === 'edit' ? 'Actualizar' : 'Crear'}
                             </Button>
                         </div>
-                    </>
+                    </div>
                 )}
             </div>
         </Modal>
