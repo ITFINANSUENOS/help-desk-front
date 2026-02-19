@@ -1,12 +1,7 @@
 export interface Workflow {
     id: number;
     nombre: string;
-    descripcion?: string; // It seems entity doesn't have descripcion, let's keep it optional or remove if not in entity (entity has nombre and subcategoriaId only)
-    // Wait, entity Flujo does NOT have descripcion. I should verify if user wants it.
-    // The user asked "haz completo el form". Entity has: nombre, subcategoriaId, estado, nombreAdjunto.
-    // I will keep descripcion as UI concept but maybe map it or remove it if backend rejects it.
-    // Actually backend Does NOT have description in Flujo entity.
-    // I will REMOVE descripcion from Interface and DTO to match backend.
+    descripcion?: string;
     subcategoriaId: number;
     estado: number; // 1 = Activo, 0 = Inactivo
     nombreAdjunto?: string;
@@ -14,6 +9,12 @@ export interface Workflow {
         id: number;
         nombre: string;
     };
+    observadoresIds?: number[]; // IDs of observer users
+    usuariosObservadores?: Array<{ // Full observer objects
+        id: number;
+        nombre: string;
+        apellido: string;
+    }>;
     createdAt?: string;
     updatedAt?: string;
 }
@@ -22,7 +23,7 @@ export interface CreateWorkflowDto {
     nombre: string;
     subcategoriaId: number;
     nombreAdjunto?: string;
-    // estado default 1
+    observadoresIds?: number[];
 }
 
 export interface UpdateWorkflowDto {
@@ -30,6 +31,7 @@ export interface UpdateWorkflowDto {
     subcategoriaId?: number;
     estado?: number;
     nombreAdjunto?: string;
+    observadoresIds?: number[];
 }
 
 export interface WorkflowFilter {

@@ -5,11 +5,12 @@ import type { User, UserSelectResult } from '../interfaces/User';
 import type { UserCandidate } from '../../tickets/interfaces/Ticket';
 
 interface UserSelectProps {
-    value?: number;
-    onChange: (value: number | undefined) => void;
+    value?: number | number[];
+    onChange: (value: number | number[] | undefined) => void;
     placeholder?: string;
     className?: string;
     candidates?: (User | UserCandidate)[]; // Optional list of users to select from (Restricted mode)
+    isMulti?: boolean;
 }
 
 interface UserOption {
@@ -24,7 +25,8 @@ export const UserSelect: React.FC<UserSelectProps> = ({
     onChange,
     placeholder = 'Buscar usuario...',
     className,
-    candidates
+    candidates,
+    isMulti = false
 }) => {
     // Ref for debounce timer
     const debounceTimer = React.useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -113,57 +115,77 @@ export const UserSelect: React.FC<UserSelectProps> = ({
         })
     };
 
-    // We need to fetch the initial user if a value is provided but no options are loaded yet
-    // However, AsyncSelect handles this via defaultOptions or loadOptions. 
-    // If value is provided, we might need to fetch that specific user to display correctly 
-    // if we don't have the full object.
-    // For now, let's rely on the consumer to maybe provide the object or just load options.
-    // Actually, AsyncSelect with just a 'value' ID won't show the label unless we provide the option object.
-
-    // To simplify: we'll use a controlled component approach where we load the selected user if needed.
-    // But since the parent only has ID, we might need a small useEffect here to fetch the selected user label
-    // if it's not in the current options. 
-    // OR we can make this component accept `initialUser` prop.
-
-    // Let's stick to the simplest implementation first: loadOptions returns options.
-    // When `value` (ID) changes, we need to map it to an option.
-    // Since `react-select` expects an object `{value, label}` as value, not just ID.
-
-    const [selectedOption, setSelectedOption] = React.useState<UserOption | null>(null);
+    // State for selected option(s)
+    const [selectedOption, setSelectedOption] = React.useState<UserOption | UserOption[] | null>(null);
 
     React.useEffect(() => {
         let isMounted = true;
 
         const fetchUser = async () => {
-            if (value) {
-                // If we already have the option and it matches, don't refetch
-                if (selectedOption?.value === value) return;
+            if (isMulti) {
+                const ids = value as number[];
+                if (Array.isArray(ids) && ids.length > 0) {
+                    // Check if we need to update
+                    if (Array.isArray(selectedOption) && selectedOption.every(opt => ids.includes(opt.value)) && selectedOption.length === ids.length) return;
 
-                try {
-                    const user = await userService.getUser(value);
-                    if (isMounted && user) {
-                        setSelectedOption({
-                            value: user.id,
-                            label: `${user.nombre} ${user.apellido}${user.email ? ` (${user.email})` : ''}`,
-                            data: user
-                        });
+                    try {
+                        // Parallel fetch for simplified implementation (or bulk endpoint if available)
+                        const promises = ids.map(id => userService.getUser(id));
+                        const users = await Promise.all(promises);
+
+                        if (isMounted) {
+                            const options = users.filter((u): u is User => !!u).map(user => ({
+                                value: user.id,
+                                label: `${user.nombre} ${user.apellido}${user.email ? ` (${user.email})` : ''}`,
+                                data: user
+                            }));
+                            setSelectedOption(options);
+                        }
+
+                    } catch (error) {
+                        console.error('Error fetching selected users:', error);
                     }
-                } catch (error) {
-                    console.error('Error fetching selected user:', error);
+                } else if (!ids || ids.length === 0) {
+                    setSelectedOption([]);
                 }
             } else {
-                setSelectedOption(null);
+                const id = value as number;
+                if (id) {
+                    // If we already have the option and it matches, don't refetch
+                    if (selectedOption && !Array.isArray(selectedOption) && selectedOption.value === id) return;
+
+                    try {
+                        const user = await userService.getUser(id);
+                        if (isMounted && user) {
+                            setSelectedOption({
+                                value: user.id,
+                                label: `${user.nombre} ${user.apellido}${user.email ? ` (${user.email})` : ''}`,
+                                data: user
+                            });
+                        }
+                    } catch (error) {
+                        console.error('Error fetching selected user:', error);
+                    }
+                } else {
+                    setSelectedOption(null);
+                }
             }
         };
 
         fetchUser();
 
         return () => { isMounted = false; };
-    }, [value]);
+    }, [value, isMulti]);
 
-    const handleChange = (option: UserOption | null) => {
+    const handleChange = (option: any) => {
         setSelectedOption(option);
-        onChange(option ? option.value : undefined);
+        if (isMulti) {
+            const opts = option as UserOption[];
+            onChange(opts ? opts.map(o => o.value) : []);
+        } else {
+            const opt = option as UserOption | null;
+            onChange(opt ? opt.value : undefined);
+        }
     };
 
     return (
@@ -174,10 +196,11 @@ export const UserSelect: React.FC<UserSelectProps> = ({
                 defaultOptions={true}
                 loadOptions={loadOptions}
                 value={selectedOption}
-                onChange={handleChange as any}
+                onChange={handleChange}
                 placeholder={placeholder}
                 styles={customStyles}
                 isClearable
+                isMulti={isMulti}
                 loadingMessage={() => "Cargando..."}
                 noOptionsMessage={() => "No se encontraron usuarios"}
             />

@@ -22,7 +22,7 @@ export const workflowService = {
 
     async getWorkflow(id: number): Promise<Workflow> {
         const response = await api.get<Workflow>(`/workflows/${id}`, {
-            params: { included: 'subcategoria' }
+            params: { included: 'subcategoria,usuariosObservadores' }
         });
         return response.data;
     },

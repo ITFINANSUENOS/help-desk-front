@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { FormModal } from '../../../shared/components/FormModal';
 import { Input } from '../../../shared/components/Input';
 import { Select } from '../../../shared/components/Select';
+import { UserSelect } from '../../users/components/UserSelect';
 
 interface WorkflowModalProps {
     isOpen: boolean;
@@ -33,7 +34,8 @@ export const WorkflowModal = ({ isOpen, onClose, onSuccess, workflow }: Workflow
                         reset({
                             nombre: fullWorkflow.nombre,
                             subcategoriaId: fullWorkflow.subcategoriaId || fullWorkflow.subcategoria?.id,
-                            nombreAdjunto: fullWorkflow.nombreAdjunto
+                            nombreAdjunto: fullWorkflow.nombreAdjunto,
+                            observadoresIds: fullWorkflow.usuariosObservadores?.map(u => u.id) || []
                         });
                     })
                     .catch(error => {
@@ -41,7 +43,7 @@ export const WorkflowModal = ({ isOpen, onClose, onSuccess, workflow }: Workflow
                         toast.error("Error al cargar detalles del flujo");
                     });
             } else {
-                reset({ nombre: '', subcategoriaId: undefined, nombreAdjunto: '' });
+                reset({ nombre: '', subcategoriaId: undefined, nombreAdjunto: '', observadoresIds: [] });
             }
         }
     }, [isOpen, workflow, reset]);
@@ -113,6 +115,22 @@ export const WorkflowModal = ({ isOpen, onClose, onSuccess, workflow }: Workflow
                     placeholder="Ej: Informe Técnico"
                     className="w-full"
                 />
+
+                <div className="flex flex-col gap-2">
+                    <label className="text-[#121617] text-sm font-semibold">Observadores (Opcional)</label>
+                    <Controller
+                        name="observadoresIds"
+                        control={control}
+                        render={({ field }) => (
+                            <UserSelect
+                                value={field.value}
+                                onChange={field.onChange}
+                                isMulti={true}
+                                placeholder="Seleccione observadores..."
+                            />
+                        )}
+                    />
+                </div>
             </div>
         </FormModal>
     );
