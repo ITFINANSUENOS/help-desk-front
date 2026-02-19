@@ -24,8 +24,7 @@ interface TicketResponsePanelProps {
     assignedToId?: number;
     assignedToIds?: number[]; // Support parallel assignees
     assignedToName?: string;
-    creatorId: number; // Required for checking permissions
-    creatorName: string;
+
     onSuccess: () => void;
     templateFields?: TemplateField[];
     isParallelStep?: boolean;
@@ -41,8 +40,7 @@ export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
     assignedToId,
     assignedToIds,
     assignedToName,
-    creatorId,
-    creatorName,
+
     onSuccess,
     templateFields = [],
     isParallelStep = false,
@@ -110,9 +108,9 @@ export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
     // Permission Logic
     const isExplicitlyAssigned = Number(user?.id) === Number(assignedToId);
     const isInAssignedList = assignedToIds ? assignedToIds.includes(Number(user?.id)) : false;
-    const isCreator = Number(user?.id) === Number(creatorId);
 
-    const canInteract = isExplicitlyAssigned || isInAssignedList || isCreator;
+
+    const canInteract = isExplicitlyAssigned || isInAssignedList;
 
     // Hook logic
     const {
@@ -353,7 +351,7 @@ export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
                 </div>
                 <h3 className="text-gray-900 font-semibold mb-1">Modo de Solo Lectura</h3>
                 <p className="text-gray-500 text-sm max-w-md">
-                    Solo el usuario asignado ({assignedToName || 'Sin asignar'}) o el creador ({creatorName}) pueden responder o avanzar el flujo en este momento.
+                    Solo el usuario asignado ({assignedToName || 'Sin asignar'}) puede responder o avanzar el flujo en este momento.
                 </p>
                 <div className="mt-4 text-xs text-brand-teal font-medium bg-teal-50 px-3 py-1 rounded-full border border-teal-100">
                     Tú eres: {user?.nombre} {user?.apellido}

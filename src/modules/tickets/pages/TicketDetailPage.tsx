@@ -11,9 +11,11 @@ import { TicketResponsePanel } from '../components/TicketResponsePanel';
 import { useLayout } from '../../../core/layout/context/LayoutContext';
 import TagManagementModal from '../components/TagManagementModal';
 import { Icon } from '../../../shared/components/Icon';
+import { useAuth } from '../../auth/context/useAuth';
 
 export default function TicketDetailPage() {
     const { setTitle } = useLayout();
+    const { user } = useAuth();
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const [ticket, setTicket] = useState<TicketDetail | null>(null);
@@ -204,10 +206,17 @@ export default function TicketDetailPage() {
                         <Icon name="print" className="mr-2" />
                         Imprimir
                     </Button>
-                    <Button variant="secondary" onClick={() => setIsTagModalOpen(true)}>
-                        <Icon name="label" className="mr-2" />
-                        Etiquetas
-                    </Button>
+                    {(
+                        (ticket && user && (
+                            Number(user.id) === Number(ticket.assignedToId) ||
+                            (ticket.assignedToIds && ticket.assignedToIds.includes(Number(user.id)))
+                        ))
+                    ) && (
+                            <Button variant="secondary" onClick={() => setIsTagModalOpen(true)}>
+                                <Icon name="label" className="mr-2" />
+                                Etiquetas
+                            </Button>
+                        )}
                 </div>
             </div>
 
@@ -311,8 +320,7 @@ export default function TicketDetailPage() {
                     assignedToId={ticket.assignedToId}
                     assignedToIds={ticket.assignedToIds}
                     assignedToName={effectiveAssignedToName}
-                    creatorId={ticket.creatorId}
-                    creatorName={ticket.creatorName}
+
                     onSuccess={fetchData}
                     isParallelStep={ticket.isParallelStep}
                     stepRequiresSignature={ticket.stepRequiresSignature}

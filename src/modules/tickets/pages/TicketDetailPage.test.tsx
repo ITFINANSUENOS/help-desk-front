@@ -4,6 +4,11 @@ import TicketDetailPage from './TicketDetailPage';
 import { ticketService } from '../services/ticket.service';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 
+vi.mock('../../auth/context/useAuth', () => ({
+    useAuth: () => ({
+        user: { id: 100, nombre: 'Test', apellido: 'User' }
+    })
+}));
 vi.mock('../services/ticket.service');
 
 vi.mock('../layout/DashboardLayout', () => ({
@@ -97,31 +102,32 @@ describe('TicketDetailPage', () => {
         await waitFor(() => expect(screen.getByText(/Test Ticket/i)).toBeTruthy());
 
         // Default: All items visible
-        expect(screen.getByText('Comment: Comment 1')).toBeTruthy();
-        expect(screen.getByText('Status: Pausado')).toBeTruthy();
-        expect(screen.getByText('Assignment: Assigned to Admin')).toBeTruthy();
+        expect(screen.getAllByText('Comment: Comment 1')[0]).toBeTruthy();
+        expect(screen.getAllByText('Status: Pausado')[0]).toBeTruthy();
+        expect(screen.getAllByText('Assignment: Assigned to Admin')[0]).toBeTruthy();
 
         // Switch to comments
         const commentsBtn = screen.getByText('Comentarios');
         fireEvent.click(commentsBtn);
 
-        expect(screen.getByText('Comment: Comment 1')).toBeTruthy();
-        expect(screen.queryByText('Status: Pausado')).toBeNull();
-        expect(screen.queryByText('Assignment: Assigned to Admin')).toBeNull();
+        expect(screen.getAllByText('Comment: Comment 1')[0]).toBeTruthy();
+        // Since print view always shows all items, filtered items still appear once (in print section)
+        expect(screen.getAllByText('Status: Pausado')).toHaveLength(1);
+        expect(screen.getAllByText('Assignment: Assigned to Admin')).toHaveLength(1);
 
         // Switch to history
         const historyBtn = screen.getByText('Historial');
         fireEvent.click(historyBtn);
 
-        expect(screen.queryByText('Comment: Comment 1')).toBeNull();
-        expect(screen.getByText('Status: Pausado')).toBeTruthy();
-        expect(screen.getByText('Assignment: Assigned to Admin')).toBeTruthy();
+        expect(screen.getAllByText('Comment: Comment 1')).toHaveLength(1);
+        expect(screen.getAllByText('Status: Pausado')[0]).toBeTruthy();
+        expect(screen.getAllByText('Assignment: Assigned to Admin')[0]).toBeTruthy();
 
         // Switch back to all
         const allBtn = screen.getByText('Toda la Actividad');
         fireEvent.click(allBtn);
 
-        expect(screen.getByText('Comment: Comment 1')).toBeTruthy();
-        expect(screen.getByText('Status: Pausado')).toBeTruthy();
+        expect(screen.getAllByText('Comment: Comment 1')[0]).toBeTruthy();
+        expect(screen.getAllByText('Status: Pausado')[0]).toBeTruthy();
     });
 });
