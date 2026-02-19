@@ -1,0 +1,62 @@
+---
+sidebar_position: 0
+---
+
+# Gestión de Flujos de Trabajo
+
+El módulo de **Flujos de Trabajo (Workflows)** permite crear y administrar los procesos que definen el ciclo de vida de los tickets según su subcategoría.
+
+## Acceso
+
+Para acceder, seleccione **Workflows** en el menú lateral.
+
+## ¿Qué es un Flujo de Trabajo?
+
+Un flujo de trabajo define la secuencia de pasos por la que transita un ticket desde su creación hasta su cierre. Cada flujo está asociado a una **subcategoría** y contiene:
+
+- **Pasos**: Las etapas que el ticket debe recorrer.
+- **Transiciones**: Las reglas que definen de qué paso a qué paso puede moverse un ticket.
+- **Rutas**: Secuencias de pasos predefinidas reutilizables.
+
+## Listado de Flujos
+
+La tabla muestra los flujos registrados con las columnas:
+
+- **ID**: Identificador único.
+- **Subcategoría**: Subcategoría asociada al flujo.
+- **Estado**: Activo o Inactivo.
+- **Acciones**:
+    - **Editar** (lápiz): Modificar nombre o estado.
+    - **Gestionar Pasos** (árbol): Abrir la configuración de pasos, transiciones y rutas del flujo.
+    - **Eliminar** (papelera): Eliminar el flujo.
+
+### Filtros
+
+- **Buscador**: Busque por nombre del flujo.
+- **Estado**: Filtre por Activo, Inactivo o Todos.
+
+## Crear Flujo
+
+1.  Haga clic en **Nuevo Flujo**.
+2.  Ingrese el **Nombre** del flujo.
+3.  Seleccione la **Subcategoría** asociada.
+4.  Guarde.
+
+## Editar Flujo
+
+1.  Haga clic en el botón de **Editar** (lápiz).
+2.  Modifique el nombre, subcategoría o estado.
+3.  Guarde los cambios.
+
+## Eliminar Flujo
+
+1.  Haga clic en **Eliminar** (papelera).
+2.  Confirme la acción.
+
+:::warning Precaución
+Eliminar un flujo puede afectar tickets en proceso que dependan de este flujo. Se recomienda desactivarlo en lugar de eliminarlo.
+:::
+
+## Siguiente Paso
+
+Una vez creado el flujo, haga clic en **Gestionar Pasos** para configurar la secuencia de etapas y transiciones. Consulte [Gestión de Pasos](./gestion-pasos.mdx) para más detalles.

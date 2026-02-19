@@ -1,0 +1,64 @@
+---
+sidebar_position: 11
+---
+
+# Reglas de Mapeo
+
+El módulo de **Reglas de Mapeo** define cómo se asignan automáticamente los tickets según la subcategoría seleccionada al momento de su creación.
+
+## Acceso
+
+Para acceder, seleccione **Administración > Reglas de Mapeo** en el menú lateral.
+
+## ¿Qué es una Regla de Mapeo?
+
+Una regla de mapeo vincula una **subcategoría** con los **creadores** (quiénes pueden crear tickets de ese tipo) y los **asignados** (a quién se asigna automáticamente el ticket). Esto permite:
+
+- Controlar qué usuarios o perfiles pueden crear tickets de determinado tipo.
+- Asignar automáticamente el ticket al cargo o área correcta.
+- Estandarizar el flujo de trabajo desde la creación.
+
+## Listado de Reglas
+
+La tabla muestra las reglas existentes con las siguientes columnas:
+
+- **ID**: Identificador único de la regla.
+- **Subcategoría**: Subcategoría a la que aplica, mostrando también la categoría padre.
+- **Creadores**: Cargos y/o perfiles autorizados para crear tickets con esta regla (etiquetas azules para cargos, moradas para perfiles).
+- **Asignados**: Cargos a los que se asignará automáticamente el ticket (etiquetas verdes).
+- **Estado**: Activo o Inactivo.
+- **Acciones**: Editar o eliminar.
+
+### Filtros
+
+Puede filtrar las reglas usando:
+- **Buscador**: Busque por texto libre.
+- **Estado**: Filtre por Activos, Inactivos o Todos.
+- **Subcategoría**: Filtre por una subcategoría específica.
+
+## Crear Regla
+
+1.  Haga clic en **Crear Regla**.
+2.  Seleccione la **Subcategoría** a la que aplicará la regla.
+3.  Configure los **Creadores**: seleccione los cargos y/o perfiles que podrán crear tickets para esta subcategoría.
+4.  Configure los **Asignados**: seleccione los cargos a los que se asignará el ticket automáticamente.
+5.  Guarde.
+
+## Editar Regla
+
+1.  Haga clic en el botón de **Editar** (lápiz) en la regla deseada.
+2.  Modifique la subcategoría, creadores, asignados o estado.
+3.  Guarde los cambios.
+
+## Eliminar Regla
+
+1.  Haga clic en el botón de **Eliminar** (papelera).
+2.  Confirme la acción en el cuadro de diálogo.
+
+:::warning Importante
+Al eliminar una regla, los tickets ya creados bajo esa regla no se ven afectados. Sin embargo, los usuarios ya no podrán crear tickets nuevos con esa combinación de subcategoría y cargo/perfil.
+:::
+
+:::tip Consejo
+Si un usuario reporta que no puede ver una subcategoría al crear un ticket, verifique que exista una regla de mapeo activa que incluya su cargo o perfil como creador.
+:::
