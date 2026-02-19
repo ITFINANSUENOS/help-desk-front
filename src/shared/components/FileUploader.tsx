@@ -17,7 +17,7 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
     files,
     onFilesChange,
     label = 'Adjuntar Archivos',
-    maxFiles = 5,
+    maxFiles = 10,
     accept,
     maxIndividualSize = 2 * 1024 * 1024, // 2MB
     maxTotalSize = 8 * 1024 * 1024 // 8MB

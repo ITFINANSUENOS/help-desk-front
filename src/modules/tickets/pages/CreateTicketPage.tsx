@@ -454,7 +454,7 @@ export default function CreateTicketPage() {
                                 files={files}
                                 onFilesChange={setFiles}
                                 label="Adjuntos"
-                                maxFiles={5}
+                                maxFiles={10}
                                 accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.xls,.xlsx"
                             />
                         </div>

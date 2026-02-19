@@ -99,7 +99,7 @@ export const CreateNoveltyModal: React.FC<CreateNoveltyModalProps> = ({
                             files={files}
                             onFilesChange={setFiles}
                             label="Adjuntos (Opcional)"
-                            maxFiles={5}
+                            maxFiles={10}
                             accept=".jpg,.jpeg,.png,.pdf,.doc,.docx"
                         />
                     </div>

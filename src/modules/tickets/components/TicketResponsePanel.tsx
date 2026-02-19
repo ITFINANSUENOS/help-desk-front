@@ -410,7 +410,7 @@ export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
                         files={files}
                         onFilesChange={setFiles}
                         label="Adjuntos (Opcional)"
-                        maxFiles={5}
+                        maxFiles={10}
                         accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.xls,.xlsx"
                     />
                 </div>
@@ -656,7 +656,7 @@ export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
                             files={filesForClose}
                             onFilesChange={setFilesForClose}
                             label="Adjuntar Evidencias de Cierre (Opcional)"
-                            maxFiles={5}
+                            maxFiles={10}
                             accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.xls,.xlsx"
                         />
                     </div>
