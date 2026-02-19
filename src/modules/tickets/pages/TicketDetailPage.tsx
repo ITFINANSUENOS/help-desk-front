@@ -87,10 +87,16 @@ export default function TicketDetailPage() {
         return true;
     });
 
-    // Extract creation attachments from the timeline to show in the dedicated panel
+    // Extract creation attachments from the timeline to show in the dedicated panel.
+    // Filter out intermediate signature files (parallel_signature_*, signature_*) which are
+    // system-generated and should never appear as user-visible attachments.
+    const SIGNATURE_PREFIXES = ['parallel_signature_', 'signature_'];
     const creationAttachments = timeline
         .filter(item => item.type === 'creation')
-        .flatMap(item => item.metadata?.attachments || []);
+        .flatMap(item => item.metadata?.attachments || [])
+        .filter((att: { nombre: string }) =>
+            !SIGNATURE_PREFIXES.some(prefix => att.nombre?.startsWith(prefix))
+        );
 
     // Logic to resolve the effective "Assigned To" name
     // Because the main endpoint might return "Usuario (ID: 123)" if relation is missing,
