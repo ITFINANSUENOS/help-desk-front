@@ -123,10 +123,15 @@ export function TicketTimeline({ items }: TicketTimelineProps) {
                                         {item.content}
                                     </p>
                                     <div className="flex flex-wrap gap-2 items-center">
-                                        {item.asignadoA && (
+                                        {item.asignadoA ? (
                                             <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 p-2 rounded-lg border border-gray-100 w-fit">
                                                 <Icon name="person" className="text-[18px]" />
                                                 <span>Asignado a: <strong>{item.asignadoA.nombre}</strong></span>
+                                            </div>
+                                        ) : (
+                                            <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 p-2 rounded-lg border border-gray-100 w-fit">
+                                                <Icon name="groups" className="text-[18px]" />
+                                                <span>Asignado a: <strong>Múltiples usuarios (Pool)</strong></span>
                                             </div>
                                         )}
                                         {/* SLA Status Badge */}

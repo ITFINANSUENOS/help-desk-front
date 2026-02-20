@@ -108,7 +108,7 @@ export const SpecificAssignmentConfig = ({ assignments, onChange }: SpecificAssi
                         options={users
                             .filter(u => !assignments.some(a => a.usuarioId === u.id))
                             .map(user => ({
-                                value: user.id,
+                                value: String(user.id),
                                 label: `${user.nombre} ${user.apellido} - ${user.email}`
                             }))
                         }
@@ -140,7 +140,7 @@ export const SpecificAssignmentConfig = ({ assignments, onChange }: SpecificAssi
                         options={positions
                             .filter(p => !assignments.some(a => a.cargoId === p.id))
                             .map(position => ({
-                                value: position.id,
+                                value: String(position.id),
                                 label: position.nombre
                             }))
                         }

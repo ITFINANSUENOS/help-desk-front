@@ -68,6 +68,7 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
                             permiteCerrar: fullStep.permiteCerrar,
                             necesitaAprobacionJefe: !!fullStep.necesitaAprobacionJefe,
                             esParalelo: !!fullStep.esParalelo,
+                            esPool: !!fullStep.esPool,
                             requiereFirma: !!fullStep.requiereFirma,
                             requiereCamposPlantilla: fullStep.requiereCamposPlantilla,
                             asignarCreador: !!fullStep.asignarCreador,
@@ -113,6 +114,13 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
         templateService.getAllFields().then(setTemplateFields).catch(console.error);
     };
 
+    const isPool = watch('esPool');
+    useEffect(() => {
+        if (isPool) {
+            setValue('cargoAsignadoId', undefined);
+        }
+    }, [isPool, setValue]);
+
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             setPdfFile(e.target.files[0]);
@@ -127,7 +135,15 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
 
             data.orden = Number(data.orden);
             data.flujoId = Number(flujoId);
-            if (data.cargoAsignadoId) data.cargoAsignadoId = Number(data.cargoAsignadoId);
+
+            if (data.esPool) {
+                (data as any).cargoAsignadoId = null;
+            } else if (data.cargoAsignadoId) {
+                data.cargoAsignadoId = Number(data.cargoAsignadoId);
+            } else {
+                (data as any).cargoAsignadoId = null;
+            }
+
             if (data.tiempoHabil) data.tiempoHabil = Number(data.tiempoHabil);
 
             data.requiereSeleccionManual = data.requiereSeleccionManual ? 1 : 0;
@@ -209,19 +225,22 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
                 {/* Assignment & SLA */}
                 <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-700">Cargo Asignado (Default)</label>
-                    <label className="text-sm font-medium text-gray-700">Cargo Asignado (Default)</label>
                     <Controller
                         name="cargoAsignadoId"
                         control={control}
                         render={({ field }) => (
                             <Select
                                 {...field}
+                                disabled={!!watch('esPool')}
                                 options={positions.map(p => ({ value: p.id, label: p.nombre }))}
                                 onChange={(val) => field.onChange(val)}
                                 placeholder="-- Seleccionar --"
                             />
                         )}
                     />
+                    {!!watch('esPool') && (
+                        <p className="text-xs text-brand-teal mt-1">Cargo deshabilitado por ser asignación en Pool. Escoge los usuarios abajo.</p>
+                    )}
                 </div>
 
                 <div className="space-y-2">
@@ -271,10 +290,12 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
                             <span className="text-sm text-gray-700">Selección Manual</span>
                         </label>
 
-                        {/* Show Specific Assignment Config when manual selection is enabled */}
-                        {!!watch('requiereSeleccionManual') && (
+                        {/* Show Specific Assignment Config when manual selection is enabled OR when esPool is used */}
+                        {(!!watch('requiereSeleccionManual') || !!watch('esPool')) && (
                             <div className="col-span-full mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                                <h4 className="text-sm font-semibold text-gray-900 mb-3">Usuarios y Cargos Específicos</h4>
+                                <h4 className="text-sm font-semibold text-gray-900 mb-3">
+                                    {watch('esPool') ? "Usuarios del Grupo (Pool)" : "Usuarios y Cargos Específicos"}
+                                </h4>
                                 <Controller
                                     control={control}
                                     name="usuariosEspecificos"
@@ -311,6 +332,11 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
                         <label className="flex items-center gap-2 cursor-pointer">
                             <input type="checkbox" {...register('esParalelo')} className="rounded text-brand-teal focus:ring-brand-teal" />
                             <span className="text-sm text-gray-700">Es Paralelo</span>
+                        </label>
+
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" {...register('esPool')} className="rounded text-brand-teal focus:ring-brand-teal" />
+                            <span className="text-sm text-gray-700 font-medium">Asignación Grupo (Pool)</span>
                         </label>
 
                         <label className="flex items-center gap-2 cursor-pointer">

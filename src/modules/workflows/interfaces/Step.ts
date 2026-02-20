@@ -20,6 +20,7 @@ export interface Step {
     permiteCerrar?: number; // 1 or 0
     necesitaAprobacionJefe?: boolean;
     esParalelo?: boolean;
+    esPool?: boolean;
     requiereFirma?: boolean;
     requiereCamposPlantilla?: number; // 1 or 0
     asignarCreador?: boolean;
@@ -71,6 +72,7 @@ export interface CreateStepDto {
     permiteCerrar?: number;
     necesitaAprobacionJefe?: boolean;
     esParalelo?: boolean;
+    esPool?: boolean;
     requiereFirma?: boolean;
     requiereCamposPlantilla?: number;
     asignarCreador?: boolean;
