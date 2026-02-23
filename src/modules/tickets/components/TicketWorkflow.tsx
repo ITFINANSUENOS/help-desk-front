@@ -35,7 +35,7 @@ export function TicketWorkflow({ ticket }: TicketWorkflowProps) {
                                     value={ticket.description}
                                     onChange={() => { }} // Read-only
                                     disabled={true}
-                                    height={150}
+                                    height={350}
                                 />
                             </div>
                             {/* Print View: Raw HTML to avoid iframe cutoff */}
