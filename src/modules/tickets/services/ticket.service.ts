@@ -61,6 +61,8 @@ interface RawTicket {
     prioridadDefecto?: string;
     prioridadSubcategoria?: string;
 
+    campoValores?: { campoId: number; valor: string; campo?: { nombre: string; codigo: string; tipo: string } }[];
+
     // Legacy/List fields fallback (if list endpoint uses different structure)
     creadorNombre?: string;
     asignadoNombre?: string;
@@ -230,6 +232,13 @@ export const ticketService = {
             allowsClosing: !!t.pasoActual?.permiteCerrar || !!t.pasoActual?.cerrarTicketObligatorio,
             isForcedClose: !!t.pasoActual?.cerrarTicketObligatorio,
             stepDescription: t.pasoActual?.descripcion || '',
+            campoValores: t.campoValores ? t.campoValores.map(cv => ({
+                campoId: cv.campoId,
+                valor: cv.valor,
+                campoNombre: cv.campo?.nombre,
+                campoCodigo: cv.campo?.codigo,
+                campoTipo: cv.campo?.tipo
+            })) : [],
             tags: (t.etiquetas || []).map(e => ({ id: e.id || 0, name: e.nombre, color: e.color }))
         };
     },

@@ -100,6 +100,7 @@ export interface TicketDetail extends Ticket {
     allowsClosing?: boolean;
     isForcedClose?: boolean;
     stepDescription?: string; // HTML content from pasoActual.descripcion
+    campoValores?: { campoId: number; valor: string; campoNombre?: string; campoCodigo?: string; campoTipo?: string }[];
 }
 
 export interface TicketTimelineItem {
