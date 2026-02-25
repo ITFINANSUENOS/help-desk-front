@@ -39,6 +39,7 @@ const RankingUsuariosPage = lazy(() => import('../modules/reports/pages/RankingU
 const RegionalesPage = lazy(() => import('../modules/reports/pages/Regionales'));
 const MapaCalorPage = lazy(() => import('../modules/reports/pages/MapaCalor'));
 const CategoriasPage = lazy(() => import('../modules/reports/pages/Categorias'));
+const CuellosBottleneckPage = lazy(() => import('../modules/reports/pages/CuellosBottleneck'));
 
 export const appRoutes: RouteObject[] = [
     {
@@ -300,6 +301,14 @@ export const appRoutes: RouteObject[] = [
                         element: (
                             <Suspense fallback={<PageLoader />}>
                                 <CategoriasPage />
+                            </Suspense>
+                        )
+                    },
+                    {
+                        path: '/reports/dashboard/cuellos-botella',
+                        element: (
+                            <Suspense fallback={<PageLoader />}>
+                                <CuellosBottleneckPage />
                             </Suspense>
                         )
                     },

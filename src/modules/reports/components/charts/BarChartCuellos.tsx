@@ -1,4 +1,4 @@
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell} from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import type { CuelloBottleneck } from '../../types/dashboard.types';
 
 interface BarChartCuellosProps {
@@ -14,8 +14,8 @@ const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<
         return (
             <div className="bg-white p-3 border border-gray-200 rounded shadow-sm text-sm">
                 <p className="font-bold text-gray-800 mb-1">{data.paso_flujo}</p>
-                <p className="text-gray-600">Duración promedio: <span className="font-medium text-gray-900">{data.duracion_promedio.toFixed(1)}h</span></p>
-                <p className="text-gray-600">% Atrasos: <span className="font-medium text-gray-900">{data.pct_atrasos.toFixed(1)}%</span></p>
+                <p className="text-gray-600">Duración promedio: <span className="font-medium text-gray-900">{Number(data.duracion_promedio).toFixed(1)}h</span></p>
+                <p className="text-gray-600">% Atrasos: <span className="font-medium text-gray-900">{Number(data.pct_atrasos).toFixed(1)}%</span></p>
                 <p className="text-gray-600 mt-1 pt-1 border-t border-gray-100">
                     Severidad: <span className="font-medium uppercase" style={{ color: payload[0].fill }}>{data.severidad}</span>
                 </p>
