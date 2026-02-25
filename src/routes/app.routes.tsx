@@ -31,6 +31,7 @@ const MappingRulesPage = lazy(() => import('../modules/mapping-rules/pages/Mappi
 const NotificationsPage = lazy(() => import('../modules/notifications/pages/NotificationsPage'));
 const ReportsPage = lazy(() => import('../modules/reports/pages/ReportsPage'));
 const MainDashboardPage = lazy(() => import('../modules/reports/pages/MainDashboard'));
+const RankingUsuariosPage = lazy(() => import('../modules/reports/pages/RankingUsuarios'));
 
 export const appRoutes: RouteObject[] = [
     {
@@ -244,6 +245,14 @@ export const appRoutes: RouteObject[] = [
                         element: (
                             <Suspense fallback={<PageLoader />}>
                                 <MainDashboardPage />
+                            </Suspense>
+                        )
+                    },
+                    {
+                        path: '/reports/dashboard/ranking',
+                        element: (
+                            <Suspense fallback={<PageLoader />}>
+                                <RankingUsuariosPage />
                             </Suspense>
                         )
                     },
