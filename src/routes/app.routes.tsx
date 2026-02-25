@@ -34,6 +34,7 @@ const MainDashboardPage = lazy(() => import('../modules/reports/pages/MainDashbo
 const RankingUsuariosPage = lazy(() => import('../modules/reports/pages/RankingUsuarios'));
 const RegionalesPage = lazy(() => import('../modules/reports/pages/Regionales'));
 const MapaCalorPage = lazy(() => import('../modules/reports/pages/MapaCalor'));
+const CategoriasPage = lazy(() => import('../modules/reports/pages/Categorias'));
 
 export const appRoutes: RouteObject[] = [
     {
@@ -271,6 +272,14 @@ export const appRoutes: RouteObject[] = [
                         element: (
                             <Suspense fallback={<PageLoader />}>
                                 <MapaCalorPage />
+                            </Suspense>
+                        )
+                    },
+                    {
+                        path: '/reports/dashboard/categorias',
+                        element: (
+                            <Suspense fallback={<PageLoader />}>
+                                <CategoriasPage />
                             </Suspense>
                         )
                     },
