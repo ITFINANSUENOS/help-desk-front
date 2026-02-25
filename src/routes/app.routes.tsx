@@ -36,6 +36,7 @@ const PriceListsAdminPage = lazy(() => import('../modules/price-lists/pages/Pric
 
 const MainDashboardPage = lazy(() => import('../modules/reports/pages/MainDashboard'));
 const RankingUsuariosPage = lazy(() => import('../modules/reports/pages/RankingUsuarios'));
+const RegionalesPage = lazy(() => import('../modules/reports/pages/Regionales'));
 
 export const appRoutes: RouteObject[] = [
     {
@@ -273,6 +274,14 @@ export const appRoutes: RouteObject[] = [
                         element: (
                             <Suspense fallback={<PageLoader />}>
                                 <RankingUsuariosPage />
+                            </Suspense>
+                        )
+                    },
+                    {
+                        path: '/reports/dashboard/regionales',
+                        element: (
+                            <Suspense fallback={<PageLoader />}>
+                                <RegionalesPage />
                             </Suspense>
                         )
                     },
