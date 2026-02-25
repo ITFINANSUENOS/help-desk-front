@@ -6,7 +6,7 @@ import type {
     DetallePaso
 } from '../types/dashboard.types';
 
-const BASE = '/api/dashboard';
+const BASE = '/reports/dashboard';
 
 export const dashboardApi = {
     getKpis: () =>
