@@ -34,6 +34,8 @@ const FlowOpenTicketsPage = lazy(() => import('../modules/reports/pages/FlowOpen
 const PriceListsPage = lazy(() => import('../modules/price-lists/pages/PriceListsPage'));
 const PriceListsAdminPage = lazy(() => import('../modules/price-lists/pages/PriceListsAdminPage'));
 
+const MainDashboardPage = lazy(() => import('../modules/reports/pages/MainDashboard'));
+const RankingUsuariosPage = lazy(() => import('../modules/reports/pages/RankingUsuarios'));
 
 export const appRoutes: RouteObject[] = [
     {
@@ -263,6 +265,14 @@ export const appRoutes: RouteObject[] = [
                         element: (
                             <Suspense fallback={<PageLoader />}>
                                 <PriceListsAdminPage />
+                            </Suspense>
+                        )
+                    },
+                    {
+                        path: '/reports/dashboard/ranking',
+                        element: (
+                            <Suspense fallback={<PageLoader />}>
+                                <RankingUsuariosPage />
                             </Suspense>
                         )
                     },
