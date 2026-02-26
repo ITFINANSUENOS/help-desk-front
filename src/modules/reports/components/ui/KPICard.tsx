@@ -1,11 +1,11 @@
-import React from 'react';
 import { type Clasificacion, getHexClasificacion } from '../../utils/colores';
+import { Icon } from '../../../../shared/components/Icon';
 
 interface KPICardProps {
     titulo: string;
     valor: string | number;
     subtitulo?: string;
-    icono: React.ElementType;
+    icono: string;
     clasificacion?: Clasificacion;
     sufijo?: string;
     isLoading?: boolean;
@@ -15,7 +15,7 @@ export const KPICard = ({
     titulo,
     valor,
     subtitulo,
-    icono: Icono,
+    icono,
     clasificacion,
     sufijo,
     isLoading
@@ -39,8 +39,8 @@ export const KPICard = ({
                 </div>
                 {subtitulo && <p className="text-xs text-gray-400 mt-1">{subtitulo}</p>}
             </div>
-            <div className="p-3 bg-blue-50 text-[#43BBCA] rounded-full">
-                <Icono size={24} />
+            <div className="flex items-center justify-center p-3 bg-blue-50 text-[#43BBCA] rounded-full">
+                <Icon name={icono} className="text-2xl" />
             </div>
         </div>
     );
