@@ -6,7 +6,9 @@ import { ClasificacionDot } from '../components/ui/ClasificacionDot';
 import { LoadingSkeleton } from '../components/ui/LoadingSkeleton';
 import { EmptyState } from '../../../shared/components/EmptyState';
 import { formatHoras, formatPct, formatNumero } from '../utils/formatters';
+import { Icon } from '../../../shared/components/Icon';
 import { IconAlertCircle, IconAlertTriangle, IconMedal, IconTrophy } from '@tabler/icons-react';
+
 /** Renders the position cell for the top-performers table.
  * Positions 1-3 get coloured medal icons; rest show a plain number. */
 function PodiumCell({ position, isTop }: { position: number; isTop: boolean }) {
@@ -94,8 +96,8 @@ export default function TopPerformers() {
                 <button
                     onClick={() => setType('top')}
                     className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors ${type === 'top'
-                            ? 'bg-[#2B378A] text-white shadow'
-                            : 'bg-white border border-gray-200 text-gray-600 hover:border-[#2B378A] hover:text-[#2B378A]'
+                        ? 'bg-[#2B378A] text-white shadow'
+                        : 'bg-white border border-gray-200 text-gray-600 hover:border-[#2B378A] hover:text-[#2B378A]'
                         }`}
                 >
                     🏆 TOP 10
@@ -103,12 +105,20 @@ export default function TopPerformers() {
                 <button
                     onClick={() => setType('bottom')}
                     className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors ${type === 'bottom'
-                            ? 'bg-[#2B378A] text-white shadow'
-                            : 'bg-white border border-gray-200 text-gray-600 hover:border-[#2B378A] hover:text-[#2B378A]'
+                        ? 'bg-[#2B378A] text-white shadow'
+                        : 'bg-white border border-gray-200 text-gray-600 hover:border-[#2B378A] hover:text-[#2B378A]'
                         }`}
                 >
                     ⚠️ NECESITAN APOYO
                 </button>
+            </div>
+
+            {/* ── Info banner for score system ───────────────────────────── */}
+            <div className="mb-5 flex items-start gap-2 rounded-lg bg-blue-50/80 border border-blue-100 px-4 py-3 text-sm text-blue-900">
+                <Icon name="info" className="text-blue-500 mt-0.5 text-[1.1rem]" />
+                <p>
+                    <strong>¿Cómo funciona el Ranking?</strong> Premia a quien hace muchas cosas bien y penaliza fuerte a quien comete errores, sin importar cuántos tickets tenga. <span className="opacity-80 block mt-0.5">Un usuario con 10 tickets perfectos es bueno, pero uno con 100 tickets casi perfectos es mejor. Y uno con muchos tickets pero lleno de errores cae al fondo sin importar su volumen.</span>
+                </p>
             </div>
 
             {/* ── Info banner for bottom view ───────────────────────────── */}

@@ -35,6 +35,7 @@ export interface UsuarioRanking {
     score_cumplimiento: number;
     score_calidad: number;
     score_total: number;
+    score_ponderado: number;
     ranking: number;
     clasificacion: 'verde' | 'amarillo' | 'rojo';
 }
