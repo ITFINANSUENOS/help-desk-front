@@ -38,6 +38,7 @@ const CategoriasPage = lazy(() => import('../modules/reports/pages/Categorias'))
 const CuellosBottleneckPage = lazy(() => import('../modules/reports/pages/CuellosBottleneck'));
 const DistribucionTiemposPage = lazy(() => import('../modules/reports/pages/DistribucionTiempos'));
 const TopPerformersPage = lazy(() => import('../modules/reports/pages/TopPerformers'));
+const NovedadesPage = lazy(() => import('../modules/reports/pages/Novedades'));
 
 export const appRoutes: RouteObject[] = [
     {
@@ -307,6 +308,14 @@ export const appRoutes: RouteObject[] = [
                         element: (
                             <Suspense fallback={<PageLoader />}>
                                 <TopPerformersPage />
+                            </Suspense>
+                        )
+                    },
+                    {
+                        path: '/reports/dashboard/novedades',
+                        element: (
+                            <Suspense fallback={<PageLoader />}>
+                                <NovedadesPage />
                             </Suspense>
                         )
                     },
