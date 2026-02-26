@@ -3,7 +3,7 @@ import { dashboardApi } from '../services/dashboard.api';
 
 // Keys centralizadas para invalidación
 export const DASHBOARD_KEYS = {
-    kpis: ['dashboard', 'kpis'],
+    kpis: (regional?: string) => ['dashboard', 'kpis', regional ?? 'global'],
     ranking: (limit: number, page: number) => ['dashboard', 'ranking', limit, page],
     regionales: ['dashboard', 'regionales'],
     mapaCalor: (regional?: string) => ['dashboard', 'mapa-calor', regional ?? 'all'],
@@ -16,8 +16,12 @@ export const DASHBOARD_KEYS = {
     novedades: ['dashboard', 'novedades'],
 };
 
-export const useKpis = () =>
-    useQuery({ queryKey: DASHBOARD_KEYS.kpis, queryFn: dashboardApi.getKpis, staleTime: 30_000 });
+export const useKpis = (regional?: string) =>
+    useQuery({
+        queryKey: DASHBOARD_KEYS.kpis(regional),
+        queryFn: () => dashboardApi.getKpis(regional),
+        staleTime: 30_000,
+    });
 
 export const useRanking = (limit = 50, page = 1) =>
     useQuery({ queryKey: DASHBOARD_KEYS.ranking(limit, page), queryFn: () => dashboardApi.getRanking(limit, page) });

@@ -15,20 +15,19 @@ export default function MainDashboard() {
     const [selectedRegional, setSelectedRegional] = useState<string | undefined>();
 
     // Fetch data
-    const { data: kpis, isLoading: loadingKpis, isError: errorKpis, refetch: refetchKpis } = useKpis();
+    // useKpis recibe selectedRegional: cuando cambia, React Query re-fetcha automáticamente
+    // porque regional forma parte de la queryKey.
+    const { data: kpis, isLoading: loadingKpis, isError: errorKpis, refetch: refetchKpis } = useKpis(selectedRegional);
+    // useRegionales no se filtra: necesitamos todos los valores para el dropdown.
     const { data: regionalesData, isLoading: loadingRegionales, isError: errorRegionales, refetch: refetchRegionales } = useRegionales();
 
     // Derived states
     const isLoading = loadingKpis || loadingRegionales;
     const isError = errorKpis || errorRegionales;
 
-    // Optional client-side filtering logic if you wanted it, but global kpis are fixed for now
-    // We just trigger refetches
+    // Solo actualiza el estado; React Query se encarga del refetch por cambio de queryKey.
     const handleRegionalChange = (regional?: string) => {
         setSelectedRegional(regional);
-        // If the APIs are ever updated to use this, refetch will run query functions with new keys or params.
-        refetchKpis();
-        refetchRegionales();
     };
 
     // Extract all unique regions for the filter
