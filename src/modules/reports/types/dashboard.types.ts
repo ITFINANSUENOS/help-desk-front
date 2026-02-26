@@ -89,13 +89,13 @@ export interface CategoriaStats {
 // ─── Cuellos de Botella ───────────────────────────────────────────
 export interface CuelloBottleneck {
     paso_flujo: string;
-    total_ocurrencias: number;
+    total_asignaciones: number;
     tickets_unicos: number;
     duracion_promedio: number;
     duracion_maxima: number;
-    duracion_total: number;
-    atrasados: number;
-    pct_atrasos: number;
+    total_atrasados: number;
+    total_novedades: number;
+    pct_atrasados: number;
     severidad: 'critico' | 'moderado' | 'normal';
     color: 'rojo' | 'amarillo' | 'verde';
 }
