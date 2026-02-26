@@ -43,6 +43,7 @@ const CuellosBottleneckPage = lazy(() => import('../modules/reports/pages/Cuello
 const DistribucionTiemposPage = lazy(() => import('../modules/reports/pages/DistribucionTiempos'));
 const TopPerformersPage = lazy(() => import('../modules/reports/pages/TopPerformers'));
 const NovedadesPage = lazy(() => import('../modules/reports/pages/Novedades'));
+const DetalleUsuarioPage = lazy(() => import('../modules/reports/pages/DetalleUsuario'));
 
 export const appRoutes: RouteObject[] = [
     {
@@ -336,6 +337,14 @@ export const appRoutes: RouteObject[] = [
                         element: (
                             <Suspense fallback={<PageLoader />}>
                                 <NovedadesPage />
+                            </Suspense>
+                        )
+                    },
+                    {
+                        path: '/reports/dashboard/usuario/:id',
+                        element: (
+                            <Suspense fallback={<PageLoader />}>
+                                <DetalleUsuarioPage />
                             </Suspense>
                         )
                     },
