@@ -2,8 +2,7 @@ import { api as axios } from '../../../core/api/api';
 import type {
     KpisGlobales, RankingResponse, RegionalStats, MapaCalorItem,
     CategoriaStats, CuelloBottleneck, DistribucionTiempos,
-    DetalleUsuario, UsuarioRanking, Novedades,
-    DetallePaso
+    DetalleUsuario, UsuarioRanking, Novedades
 } from '../types/dashboard.types';
 
 const BASE = '/reports/dashboard';
@@ -33,8 +32,7 @@ export const dashboardApi = {
     getDetalleUsuario: (id: number) =>
         axios.get<DetalleUsuario>(`${BASE}/usuario/${id}/detalle`).then(r => r.data),
 
-    getPasosUsuario: (id: number) =>
-        axios.get<DetallePaso[]>(`${BASE}/usuario/${id}/pasos`).then(r => r.data),
+
 
     getTopPerformers: (typeParam: 'top' | 'bottom' = 'top', limitParam = 10) =>
         axios.get<UsuarioRanking[]>(`${BASE}/top-performers`, { params: { type: typeParam, limit: limitParam } }).then(r => r.data),

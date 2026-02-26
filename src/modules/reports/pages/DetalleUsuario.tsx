@@ -1,6 +1,8 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { IconArrowLeft, IconUser, IconTicket, IconTarget, IconAlertTriangle, IconClock, IconChartBar } from '@tabler/icons-react';
-import { useDetalleUsuario, usePasosUsuario } from '../hooks/useDashboard';
+import { useDetalleUsuario } from '../hooks/useDashboard';
+import { Icon } from '../../../shared/components/Icon';
+import { useLayout } from '../../../core/layout/context/LayoutContext';
+import { useEffect } from 'react';
 import { KPICard } from '../components/ui/KPICard';
 import { ScoreBadge } from '../components/ui/ScoreBadge';
 import { ClasificacionDot } from '../components/ui/ClasificacionDot';
@@ -102,8 +104,13 @@ function Avatar({ nombre }: { nombre: string }) {
 export default function DetalleUsuario() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const { setTitle } = useLayout();
 
     const userId = Number(id);
+
+    useEffect(() => {
+        setTitle('Dashboard Analytics');
+    }, [setTitle]);
 
     const {
         data: detalle,
@@ -112,15 +119,8 @@ export default function DetalleUsuario() {
         refetch: refetchDetalle,
     } = useDetalleUsuario(userId);
 
-    const {
-        data: pasos,
-        isLoading: loadingPasos,
-        isError: errorPasos,
-        refetch: refetchPasos,
-    } = usePasosUsuario(userId);
-
     // ── Error state ──────────────────────────────────────────────────────
-    if (errorDetalle || errorPasos) {
+    if (errorDetalle) {
         return (
             <div className="p-8">
                 <EmptyState
@@ -131,7 +131,6 @@ export default function DetalleUsuario() {
                         label: 'Reintentar',
                         onClick: () => {
                             void refetchDetalle();
-                            void refetchPasos();
                         },
                     }}
                 />
@@ -140,7 +139,7 @@ export default function DetalleUsuario() {
     }
 
     const clasificacionSla = detalle
-        ? getClasificacionCumplimiento(detalle.pct_cumplimiento)
+        ? getClasificacionCumplimiento(detalle.pct_cumplimiento_sla)
         : undefined;
 
     const clasificacionError = detalle
@@ -148,15 +147,15 @@ export default function DetalleUsuario() {
         : undefined;
 
     return (
-        <div className="flex h-full flex-col p-4 md:p-6 lg:p-8 overflow-y-auto">
+        <div className="flex-1 flex flex-col p-4 md:p-6 lg:p-8 overflow-y-auto min-h-0">
 
             {/* ── Breadcrumb + Back button ─────────────────────────────── */}
             <div className="mb-6 flex items-center gap-3">
                 <button
                     onClick={() => navigate(-1)}
-                    className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-[#2B378A] transition-colors"
+                    className="flex items-center gap-1.5 text-sm font-semibold text-gray-500 hover:text-[#2B378A] transition-colors"
                 >
-                    <IconArrowLeft size={18} />
+                    <Icon name="arrow_back" className="text-[1.1rem]" />
                     Volver
                 </button>
                 <span className="text-gray-300">/</span>
@@ -202,7 +201,7 @@ export default function DetalleUsuario() {
                                     {detalle.regional}
                                 </p>
                                 <p className="mt-3 text-xs text-gray-400 flex items-center gap-1">
-                                    <IconChartBar size={14} />
+                                    <Icon name="bar_chart" className="text-[1.1rem]" />
                                     Ranking actual:{' '}
                                     <span className="font-semibold text-gray-700 ml-1">
                                         #{detalle.ranking}
@@ -234,49 +233,49 @@ export default function DetalleUsuario() {
                 <KPICard
                     titulo="Tickets Gestionados"
                     valor={loadingDetalle ? '…' : formatNumero(detalle?.tickets_gestionados ?? 0)}
-                    icono={IconTicket}
+                    icono="confirmation_number"
                     isLoading={loadingDetalle}
                 />
                 <KPICard
                     titulo="% Cumplimiento SLA"
-                    valor={loadingDetalle ? '…' : formatPct(detalle?.pct_cumplimiento ?? 0)}
-                    icono={IconTarget}
+                    valor={loadingDetalle ? '…' : formatPct(detalle?.pct_cumplimiento_sla ?? 0)}
+                    icono="my_location"
                     clasificacion={clasificacionSla}
                     isLoading={loadingDetalle}
                 />
                 <KPICard
                     titulo="% Error Proceso"
                     valor={loadingDetalle ? '…' : formatPct(detalle?.pct_error_proceso ?? 0)}
-                    icono={IconAlertTriangle}
+                    icono="warning"
                     clasificacion={clasificacionError}
                     isLoading={loadingDetalle}
                 />
                 <KPICard
                     titulo="Tiempo Promedio"
                     valor={loadingDetalle ? '…' : formatHoras(detalle?.tiempo_promedio ?? 0)}
-                    icono={IconClock}
+                    icono="schedule"
                     isLoading={loadingDetalle}
                 />
             </div>
 
             {/* ── Row 3: Workflow step performance table ───────────────── */}
-            <div className="flex-1 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-6">
                 {/* Table header */}
                 <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-2">
                     <div className="p-1.5 bg-blue-50 rounded-lg text-[#2B378A]">
-                        <IconUser size={18} />
+                        <Icon name="person" className="text-[1.1rem]" />
                     </div>
                     <h3 className="text-base font-semibold text-gray-900">
                         Desempeño por Paso de Flujo
                     </h3>
                 </div>
 
-                {loadingPasos ? (
+                {loadingDetalle ? (
                     <div className="p-6">
                         <LoadingSkeleton rows={6} />
                     </div>
                 ) : (
-                    <div className="overflow-x-auto max-h-80 overflow-y-auto">
+                    <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                             <thead className="sticky top-0 z-10">
                                 <tr className="bg-[#2B378A] text-white text-xs font-semibold uppercase tracking-wider">
@@ -288,7 +287,7 @@ export default function DetalleUsuario() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
-                                {!pasos || pasos.length === 0 ? (
+                                {!detalle?.detalle_por_paso || detalle.detalle_por_paso.length === 0 ? (
                                     <tr>
                                         <td
                                             colSpan={5}
@@ -298,7 +297,7 @@ export default function DetalleUsuario() {
                                         </td>
                                     </tr>
                                 ) : (
-                                    pasos
+                                    detalle.detalle_por_paso
                                         .slice()
                                         .sort((a, b) => b.veces_asignado - a.veces_asignado)
                                         .map((paso, idx) => {

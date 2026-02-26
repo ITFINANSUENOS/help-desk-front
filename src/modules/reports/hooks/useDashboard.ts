@@ -11,7 +11,6 @@ export const DASHBOARD_KEYS = {
     cuellos: (limit: number) => ['dashboard', 'cuellos', limit],
     distribucion: ['dashboard', 'distribucion'],
     detalle: (id: number) => ['dashboard', 'usuario', id, 'detalle'],
-    pasos: (id: number) => ['dashboard', 'usuario', id, 'pasos'],
     topPerf: (type: string, limit: number) => ['dashboard', 'top-performers', type, limit],
     novedades: ['dashboard', 'novedades'],
 };
@@ -44,8 +43,7 @@ export const useDistribucion = () =>
 export const useDetalleUsuario = (id: number) =>
     useQuery({ queryKey: DASHBOARD_KEYS.detalle(id), queryFn: () => dashboardApi.getDetalleUsuario(id), enabled: !!id });
 
-export const usePasosUsuario = (id: number) =>
-    useQuery({ queryKey: DASHBOARD_KEYS.pasos(id), queryFn: () => dashboardApi.getPasosUsuario(id), enabled: !!id });
+
 
 export const useTopPerformers = (type: 'top' | 'bottom' = 'top', limit = 10) =>
     useQuery({ queryKey: DASHBOARD_KEYS.topPerf(type, limit), queryFn: () => dashboardApi.getTopPerformers(type, limit) });
