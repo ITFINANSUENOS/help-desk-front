@@ -9,8 +9,8 @@ import type {
 const BASE = '/reports/dashboard';
 
 export const dashboardApi = {
-    getKpis: () =>
-        axios.get<KpisGlobales>(`${BASE}/kpis`).then(r => r.data),
+    getKpis: (regional?: string) =>
+        axios.get<KpisGlobales>(`${BASE}/kpis`, { params: regional ? { regional } : {} }).then(r => r.data),
 
     getRanking: (limitParam = 50, pageParam = 1) =>
         axios.get<RankingResponse>(`${BASE}/ranking`, { params: { limit: limitParam, page: pageParam } }).then(r => r.data),
