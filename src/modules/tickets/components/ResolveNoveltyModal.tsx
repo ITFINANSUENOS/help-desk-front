@@ -3,11 +3,12 @@ import { Button } from '../../../shared/components/Button';
 import { Modal } from '../../../shared/components/Modal';
 import { FileUploader } from '../../../shared/components/FileUploader';
 import { Icon } from '../../../shared/components/Icon';
+import { toast } from 'sonner';
 
 interface ResolveNoveltyModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onConfirm: (files: File[]) => void;
+    onConfirm: (description: string, files: File[]) => void;
     isLoading?: boolean;
 }
 
@@ -17,16 +18,22 @@ export const ResolveNoveltyModal: React.FC<ResolveNoveltyModalProps> = ({
     onConfirm,
     isLoading = false
 }) => {
+    const [description, setDescription] = useState('');
     const [files, setFiles] = useState<File[]>([]);
 
     useEffect(() => {
         if (isOpen) {
+            setDescription('');
             setFiles([]);
         }
     }, [isOpen]);
 
     const handleSubmit = () => {
-        onConfirm(files);
+        if (!description.trim()) {
+            toast.warning('Debe escribir una respuesta antes de resolver la novedad.');
+            return;
+        }
+        onConfirm(description, files);
     };
 
     return (
@@ -34,7 +41,7 @@ export const ResolveNoveltyModal: React.FC<ResolveNoveltyModalProps> = ({
             isOpen={isOpen}
             onClose={onClose}
             title="Resolver Novedad"
-            className="max-w-md"
+            className="max-w-lg"
         >
             <div className="space-y-6">
                 <div className="bg-green-50 border border-green-100 rounded-lg p-4 flex gap-3">
@@ -42,6 +49,19 @@ export const ResolveNoveltyModal: React.FC<ResolveNoveltyModalProps> = ({
                     <p className="text-sm text-green-800">
                         Al resolver la novedad, el ticket se reanudará y el SLA continuará su conteo normal.
                     </p>
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Respuesta / Resolución <span className="text-red-500">*</span>
+                    </label>
+                    <textarea
+                        className="w-full border border-gray-300 rounded-lg shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm p-3 min-h-[120px] resize-y"
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        placeholder="Describa cómo resolvió la novedad..."
+                        disabled={isLoading}
+                    />
                 </div>
 
                 <div>

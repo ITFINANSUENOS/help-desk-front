@@ -314,10 +314,10 @@ export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
         }
     };
 
-    const handleResolveNovelty = async (files: File[]) => {
+    const handleResolveNovelty = async (description: string, files: File[]) => {
         setIsSubmitting(true);
         try {
-            await ticketService.resolveNovelty(ticketId, files);
+            await ticketService.resolveNovelty(ticketId, description, files);
             toast.success('Novedad resuelta. El ticket ha sido reanudado.');
             setIsResolveNoveltyModalOpen(false);
             onSuccess();
