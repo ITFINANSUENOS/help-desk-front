@@ -132,6 +132,7 @@ export interface DetallePaso {
 }
 
 export interface DetalleUsuario {
+    usuario_id: number;
     usuario_nombre: string;
     regional: string;
     rol: string;
@@ -142,10 +143,15 @@ export interface DetalleUsuario {
     errores_proceso: number;
     errores_informativo: number;
     tiempo_promedio: number;
-    pct_cumplimiento: number;
+    tiempo_total: number;
+    pct_cumplimiento_sla: number;
     pct_error_proceso: number;
+    score_cumplimiento: number;
+    score_calidad: number;
     score_total: number;
+    score_ponderado: number;
     ranking: number;
+    clasificacion: 'verde' | 'amarillo' | 'rojo';
     detalle_por_paso: DetallePaso[];
 }
 
