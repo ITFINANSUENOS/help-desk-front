@@ -114,13 +114,15 @@ export interface CuelloBottleneck {
 // ─── Distribución de Tiempos ──────────────────────────────────────
 export interface EstadisticasTiempo {
     media: number;
-    desviacion_estandar: number;
+    desviacion_std: number;
     minimo: number;
     maximo: number;
+    mediana_aprox: number;
+    total_registros: number;
 }
 
 export interface RangoTiempo {
-    rango_tiempo: string;
+    rango_horas: string;
     orden: number;
     cantidad: number;
     pct_total: number;

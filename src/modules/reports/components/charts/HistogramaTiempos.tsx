@@ -12,7 +12,7 @@ export const HistogramaTiempos = ({ data }: HistogramaTiemposProps) => {
                 <ComposedChart data={data} margin={{ top: 20, right: 20, left: 0, bottom: 20 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
                     <XAxis
-                        dataKey="rango_tiempo"
+                        dataKey="rango_horas"
                         scale="band"
                         tick={{ fontSize: 12, fill: '#6b7280' }}
                         interval={0}
