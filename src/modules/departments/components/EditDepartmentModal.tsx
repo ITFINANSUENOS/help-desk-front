@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { FormModal } from '../../../shared/components/FormModal';
 import { Input } from '../../../shared/components/Input';
+import { Select, type Option } from '../../../shared/components/Select';
 import type { Department, UpdateDepartmentDto } from '../interfaces/Department';
-import { departmentService } from '../../../shared/services/catalog.service';
+import { departmentService } from '../services/department.service';
+import { userService } from '../../users/services/user.service';
 
 export interface EditDepartmentModalProps {
     isOpen: boolean;
@@ -19,31 +21,50 @@ export function EditDepartmentModal({
 }: EditDepartmentModalProps) {
     const [formData, setFormData] = useState<UpdateDepartmentDto>({
         nombre: '',
-        estado: 1
+        estado: 1,
+        jefeId: undefined
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [users, setUsers] = useState<Option[]>([]);
+    const [loadingUsers, setLoadingUsers] = useState(false);
 
-    // Cargar datos del departamento cuando se abre el modal
     useEffect(() => {
-        if (department) {
-            // Fetch fresh data
-            departmentService.getDepartment(department.id)
+        if (isOpen) {
+            setLoadingUsers(true);
+            userService.getUsers({ limit: 500 })
+                .then(response => {
+                    const userOptions: Option[] = response.data.map(user => ({
+                        value: user.id,
+                        label: `${user.nombre} ${user.apellido || ''}`.trim()
+                    }));
+                    setUsers(userOptions);
+                })
+                .catch(err => console.error('Error loading users:', err))
+                .finally(() => setLoadingUsers(false));
+        }
+    }, [isOpen]);
+
+    useEffect(() => {
+        if (department && isOpen) {
+            departmentService.getById(department.id)
                 .then(dept => {
                     setFormData({
                         nombre: dept.nombre,
-                        estado: dept.estado
+                        estado: dept.estado,
+                        jefeId: dept.jefeId ?? undefined
                     });
                 })
                 .catch(err => {
                     console.error("Error loading department", err);
                     setFormData({
                         nombre: department.nombre,
-                        estado: department.estado
+                        estado: department.estado,
+                        jefeId: (department as any).jefeId ?? undefined
                     });
                 });
         }
-    }, [department]);
+    }, [department, isOpen]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -53,7 +74,10 @@ export function EditDepartmentModal({
         setLoading(true);
 
         try {
-            await onSubmit(department.id, formData);
+            await onSubmit(department.id, {
+                ...formData,
+                jefeId: formData.jefeId ?? null
+            });
             onClose();
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Error al actualizar departamento');
@@ -93,6 +117,16 @@ export function EditDepartmentModal({
                     placeholder="Ej: Sistemas, Recursos Humanos"
                     required
                     disabled={loading}
+                />
+
+                <Select
+                    label="Jefe del Departamento"
+                    value={formData.jefeId ?? ''}
+                    onChange={(val) => setFormData({ ...formData, jefeId: val as number | undefined })}
+                    options={users}
+                    placeholder={loadingUsers ? 'Cargando usuarios...' : 'Seleccionar jefe...'}
+                    disabled={loading || loadingUsers}
+                    isClearable
                 />
 
                 <div className="flex items-center gap-2">

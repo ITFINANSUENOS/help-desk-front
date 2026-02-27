@@ -32,6 +32,8 @@ export const departmentService = {
             params.append('limit', filters.limit.toString());
         }
 
+        params.append('included', 'jefe');
+
         const response = await api.get<any>(`/departments?${params.toString()}`);
 
         // Normalización de la respuesta

@@ -141,6 +141,15 @@ export default function DepartmentsPage() {
             render: (dept: Department) => dept.nombre
         },
         {
+            key: 'jefe',
+            header: 'Jefe',
+            render: (dept: Department) => {
+                const jefe = (dept as any).jefe;
+                if (!jefe) return <span className="text-gray-400">-</span>;
+                return `${jefe.usu_nom || ''} ${jefe.usu_ape || ''}`.trim() || `${jefe.nombre || ''} ${jefe.apellido || ''}` || '-';
+            }
+        },
+        {
             key: 'estado',
             header: 'Estado',
             render: (dept: Department) => (
