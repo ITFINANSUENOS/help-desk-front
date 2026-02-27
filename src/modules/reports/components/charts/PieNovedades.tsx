@@ -5,10 +5,13 @@ interface PieNovedadesProps {
     data: TipoNovedad[];
 }
 
+/** Paleta semántica: rojo = grave, amarillo/verde = leve */
 const COLORS: Record<string, string> = {
-    'Error de Proceso': '#D92323', // brand-red
-    'Error Informativo': '#43BBCA', // brand-teal
-    Otros: '#94a3b8' // slate-400
+    'Error Proceso': '#D92323', // rojo intenso
+    'Cierre Forzoso': '#F97316', // naranja (grave secundario)
+    'Error Informativo': '#EAB308', // amarillo
+    'Novedad Asignada': '#3B82F6', // azul
+    'Novedad Resuelta': '#22C55E', // verde
 };
 
 // Tooltip extraído afuera
@@ -43,13 +46,12 @@ export const PieNovedades = ({ data }: PieNovedadesProps) => {
                         dataKey="cantidad"
                         nameKey="tipo_novedad"
                     >
-                        {data.map((entry, index) => {
-                            const fill = entry.tipo_novedad.includes('Proceso') ? COLORS['Error de Proceso'] :
-                                entry.tipo_novedad.includes('Informativo') ? COLORS['Error Informativo'] :
-                                    COLORS.Otros;
-
-                            return <Cell key={`cell-${index}`} fill={fill} />;
-                        })}
+                        {data.map((entry, index) => (
+                            <Cell
+                                key={`cell-${index}`}
+                                fill={COLORS[entry.tipo_novedad] ?? '#94a3b8'}
+                            />
+                        ))}
                     </Pie>
                     <Tooltip content={<CustomTooltip />} />
                     <Legend layout="horizontal" verticalAlign="bottom" align="center" wrapperStyle={{ paddingTop: '10px' }} />
