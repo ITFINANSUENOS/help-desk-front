@@ -85,6 +85,21 @@ export interface MapaCalorItem {
 }
 
 // ─── Categorías ───────────────────────────────────────────────────
+// ─── Categorías y Subcategorías ───────────────────────────────────
+export interface SubcategoriaStats {
+    categoria: string;
+    subcategoria: string;
+    total_tickets: number;
+    total_pasos: number;
+    pasos_por_ticket: number;
+    duracion_promedio: number;
+    duracion_maxima: number;
+    pct_cumplimiento: number;
+    pct_errores_graves: number;
+    pct_con_novedad: number;
+    clasificacion: 'verde' | 'amarillo' | 'rojo';
+}
+
 export interface CategoriaStats {
     categoria: string;
     total_tickets: number;
@@ -93,8 +108,10 @@ export interface CategoriaStats {
     duracion_promedio: number;
     duracion_maxima: number;
     pct_cumplimiento: number;
+    pct_errores_graves: number;
     pct_con_novedad: number;
     clasificacion: 'verde' | 'amarillo' | 'rojo';
+    subcategorias: SubcategoriaStats[];
 }
 
 // ─── Cuellos de Botella ───────────────────────────────────────────
