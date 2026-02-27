@@ -64,13 +64,23 @@ export interface RegionalStats {
 
 // ─── Mapa de Calor ────────────────────────────────────────────────
 export interface MapaCalorItem {
+    usuario_id: number;
     usuario_nombre: string;
     regional: string;
     tickets_gestionados: number;
-    pct_cumplimiento_sla: number;
+    a_tiempo: number;
+    atrasados: number;
+    cant_errores_graves: number;
+    cant_errores_leves: number;
+    pct_errores_graves: number;
+    pct_errores_leves: number;
     pct_total_errores: number;
+    pct_cumplimiento_sla: number;
     tiempo_promedio: number;
+    tiempo_total: number;
+    score_ponderado: number;
     score_total: number;
+    ranking: number;
     clasificacion: 'verde' | 'amarillo' | 'rojo';
 }
 

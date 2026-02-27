@@ -1,15 +1,21 @@
-import { useState, useMemo } from 'react';
-import { useMapaCalor } from '../hooks/useDashboard';
-import { useRegionales } from '../hooks/useDashboard';
+import { useEffect, useState, useMemo } from 'react';
+import { useMapaCalor, useRegionales } from '../hooks/useDashboard';
 import { FiltroRegional } from '../components/ui/FiltroRegional';
 import { ScoreBadge } from '../components/ui/ScoreBadge';
 import { LoadingSkeleton } from '../components/ui/LoadingSkeleton';
 import { EmptyState } from '../../../shared/components/EmptyState';
-import { formatHoras, formatPct } from '../utils/formatters';
-import { COLORES_SISTEMA, getClasificacionCumplimiento, getClasificacionErrores, getClasificacionTiempo } from '../utils/colores';
-import { IconFlame } from '@tabler/icons-react';
+import { Icon } from '../../../shared/components/Icon';
+import { useLayout } from '../../../core/layout/context/LayoutContext';
+import { formatHoras, formatPct, formatNumero } from '../utils/formatters';
+import {
+    COLORES_SISTEMA,
+    getClasificacionCumplimiento,
+    getClasificacionTiempo,
+    getColorErroresGraves,
+    getColorErroresLeves,
+} from '../utils/colores';
 
-/** Devuelve estilos inline según la clasificación para la celda de mapa de calor */
+/** Retorna estilos inline para las celdas del mapa de calor */
 function celda(clasificacion: 'verde' | 'amarillo' | 'rojo') {
     const c = COLORES_SISTEMA[clasificacion];
     return { backgroundColor: c.bg, color: c.text };
@@ -20,20 +26,24 @@ export default function MapaCalor() {
 
     const { data, isLoading, isError, refetch } = useMapaCalor(selectedRegional);
     const { data: regionalesData } = useRegionales();
+    const { setTitle } = useLayout();
 
-    // Lista de regionales para el filtro
+    useEffect(() => {
+        setTitle('Dashboard Analytics');
+    }, [setTitle]);
+
     const listRegionales = useMemo(() => {
         if (!regionalesData) return [];
         return regionalesData.map(r => r.regional).sort();
     }, [regionalesData]);
 
-    // Todos los tiempos promedio para calcular percentiles
+    /** Todos los tiempos para cálculo de percentil */
     const todosTiempos = useMemo(
-        () => (data ?? []).map(u => Number(u.tiempo_promedio)),
+        () => (data ?? []).map(u => u.tiempo_promedio),
         [data]
     );
 
-    // Agrupar datos por regional
+    /** Agrupar usuarios por regional respetando el orden del backend */
     const gruposPorRegional = useMemo(() => {
         if (!data) return [];
         const map = new Map<string, typeof data>();
@@ -41,7 +51,7 @@ export default function MapaCalor() {
             if (!map.has(item.regional)) map.set(item.regional, []);
             map.get(item.regional)!.push(item);
         }
-        return Array.from(map.entries()); // [regional, items[]]
+        return Array.from(map.entries());
     }, [data]);
 
     if (isError) {
@@ -58,21 +68,24 @@ export default function MapaCalor() {
     }
 
     return (
-        <div className="flex h-full flex-col p-4 md:p-6 lg:p-8 overflow-y-auto">
-            {/* Header */}
-            <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                    <div className="p-2 bg-orange-50 rounded-lg text-orange-500">
-                        <IconFlame size={24} />
+        <div className="flex flex-col gap-6 -mx-4 md:-mx-8">
+
+            {/* ── Sticky Header ────────────────────────────────────────── */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-6 py-5 lg:px-8 border-b border-gray-100 bg-white/90 backdrop-blur-xl z-20 sticky top-0">
+                <div className="flex items-center gap-4">
+                    <div className="flex items-center justify-center p-3 bg-orange-50 rounded-xl text-orange-500 shadow-sm border border-orange-100">
+                        <Icon name="local_fire_department" className="text-2xl" />
                     </div>
                     <div>
-                        <h2 className="text-2xl font-bold text-gray-900">Mapa de Calor</h2>
+                        <h2 className="text-xl font-bold text-gray-900 leading-tight">Mapa de Calor</h2>
                         <p className="text-sm text-gray-500 mt-0.5">
                             Visualización de rendimiento individual por usuario y regional.
                         </p>
                     </div>
                 </div>
-                <div className="w-full sm:w-56">
+
+                {/* Filtro de regional alineado a la derecha */}
+                <div className="w-full sm:w-56 shrink-0">
                     <FiltroRegional
                         value={selectedRegional}
                         onChange={setSelectedRegional}
@@ -82,116 +95,143 @@ export default function MapaCalor() {
                 </div>
             </div>
 
-            {/* Leyenda */}
-            <div className="mb-4 flex flex-wrap gap-4 text-xs text-gray-600">
-                <span className="font-semibold text-gray-700">Colores de celda:</span>
-                <div className="flex items-center gap-1.5">
-                    <span className="w-4 h-4 rounded" style={{ backgroundColor: COLORES_SISTEMA.verde.bg }} />
-                    <span style={{ color: COLORES_SISTEMA.verde.text }}>✓ Bueno</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                    <span className="w-4 h-4 rounded" style={{ backgroundColor: COLORES_SISTEMA.amarillo.bg }} />
-                    <span style={{ color: COLORES_SISTEMA.amarillo.text }}>⚠ Atención</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                    <span className="w-4 h-4 rounded" style={{ backgroundColor: COLORES_SISTEMA.rojo.bg }} />
-                    <span style={{ color: COLORES_SISTEMA.rojo.text }}>✗ Crítico</span>
-                </div>
-            </div>
+            {/* ── Contenido ────────────────────────────────────────────── */}
+            <div className="flex flex-col gap-6 px-6 pt-2 pb-16 lg:px-8">
 
-            {/* Tabla */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                {isLoading ? (
-                    <div className="p-6"><LoadingSkeleton rows={10} /></div>
-                ) : !data || data.length === 0 ? (
-                    <div className="py-16 text-center text-gray-500 text-sm">
-                        No hay datos disponibles para los filtros seleccionados.
+                {/* Leyenda */}
+                <div className="flex flex-wrap items-center gap-6 text-xs text-gray-600">
+                    <span className="font-semibold text-gray-700">Colores de celda:</span>
+                    <div className="flex items-center gap-1.5">
+                        <span className="w-4 h-4 rounded" style={{ backgroundColor: COLORES_SISTEMA.verde.bg }} />
+                        <span style={{ color: COLORES_SISTEMA.verde.text }}>✓ Bueno</span>
                     </div>
-                ) : (
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse text-sm">
-                            <thead>
-                                <tr className="bg-[#2B378A] text-white text-xs font-semibold uppercase tracking-wider">
-                                    <th className="py-3 px-4">Usuario</th>
-                                    <th className="py-3 px-4 text-right">Tickets</th>
-                                    <th className="py-3 px-4 text-right">% SLA</th>
-                                    <th className="py-3 px-4 text-right">% Errores</th>
-                                    <th className="py-3 px-4 text-right">T. Promedio</th>
-                                    <th className="py-3 px-4 text-center">Score</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {gruposPorRegional.map(([regional, usuarios]) => (
-                                    <>
-                                        {/* Separador de regional */}
-                                        <tr key={`header-${regional}`}>
-                                            <td
-                                                colSpan={6}
-                                                className="py-2 px-4 text-xs font-bold uppercase tracking-widest text-white"
-                                                style={{ backgroundColor: '#2B378A' }}
-                                            >
-                                                📍 {regional}
-                                            </td>
-                                        </tr>
+                    <div className="flex items-center gap-1.5">
+                        <span className="w-4 h-4 rounded" style={{ backgroundColor: COLORES_SISTEMA.amarillo.bg }} />
+                        <span style={{ color: COLORES_SISTEMA.amarillo.text }}>⚠ Atención</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                        <span className="w-4 h-4 rounded" style={{ backgroundColor: COLORES_SISTEMA.rojo.bg }} />
+                        <span style={{ color: COLORES_SISTEMA.rojo.text }}>✗ Crítico</span>
+                    </div>
+                    <span className="text-gray-400 ml-2">
+                        🔴 Err. Graves: &gt;5% = rojo · &nbsp;🟡 Err. Leves: &gt;25% = rojo
+                    </span>
+                </div>
 
-                                        {/* Filas de usuarios en esa regional */}
-                                        {usuarios.map((u, idx) => {
-                                            const claSla = getClasificacionCumplimiento(Number(u.pct_cumplimiento_sla));
-                                            const claErr = getClasificacionErrores(Number(u.pct_total_errores));
-                                            const claTiempo = getClasificacionTiempo(Number(u.tiempo_promedio), todosTiempos);
-
-                                            return (
-                                                <tr
-                                                    key={`${regional}-${u.usuario_nombre}-${idx}`}
-                                                    className="border-b border-gray-100 hover:brightness-95 transition-all"
+                {/* Tabla */}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                    {isLoading ? (
+                        <div className="p-6"><LoadingSkeleton rows={10} /></div>
+                    ) : !data || data.length === 0 ? (
+                        <div className="py-16 text-center text-gray-500 text-sm">
+                            No hay datos disponibles para los filtros seleccionados.
+                        </div>
+                    ) : (
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left border-collapse text-sm">
+                                <thead>
+                                    <tr className="bg-[#2B378A] text-white text-xs font-semibold uppercase tracking-wider">
+                                        <th className="py-3 px-4">#</th>
+                                        <th className="py-3 px-4">Usuario</th>
+                                        <th className="py-3 px-4 text-right">Tickets</th>
+                                        <th className="py-3 px-4 text-right">% SLA</th>
+                                        <th className="py-3 px-4 text-right text-red-200">🔴 Err. Graves</th>
+                                        <th className="py-3 px-4 text-right text-yellow-200">🟡 Err. Leves</th>
+                                        <th className="py-3 px-4 text-right">T. Prom.</th>
+                                        <th className="py-3 px-4 text-center">Score</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {gruposPorRegional.map(([regional, usuarios]) => (
+                                        <>
+                                            {/* Separador de regional */}
+                                            <tr key={`header-${regional}`}>
+                                                <td
+                                                    colSpan={8}
+                                                    className="py-2 px-4 text-xs font-bold uppercase tracking-widest text-white"
+                                                    style={{ backgroundColor: '#2B378A' }}
                                                 >
-                                                    {/* Usuario */}
-                                                    <td className="py-2.5 px-4 font-medium text-gray-900">
-                                                        {u.usuario_nombre}
-                                                    </td>
+                                                    📍 {regional}
+                                                </td>
+                                            </tr>
 
-                                                    {/* Tickets — sin color especial */}
-                                                    <td className="py-2.5 px-4 text-right text-gray-700">
-                                                        {u.tickets_gestionados}
-                                                    </td>
+                                            {/* Filas de usuarios */}
+                                            {usuarios.map((u, idx) => {
+                                                const claSla = getClasificacionCumplimiento(u.pct_cumplimiento_sla);
+                                                const claGraves = getColorErroresGraves(u.pct_errores_graves);
+                                                const claLeves = getColorErroresLeves(u.pct_errores_leves);
+                                                const claTiempo = getClasificacionTiempo(u.tiempo_promedio, todosTiempos);
 
-                                                    {/* % SLA — coloreado */}
-                                                    <td
-                                                        className="py-2.5 px-4 text-right font-semibold"
-                                                        style={celda(claSla)}
+                                                return (
+                                                    <tr
+                                                        key={`${regional}-${u.usuario_id}-${idx}`}
+                                                        className="border-b border-gray-100 hover:brightness-95 transition-all"
                                                     >
-                                                        {formatPct(Number(u.pct_cumplimiento_sla))}
-                                                    </td>
+                                                        {/* Ranking */}
+                                                        <td className="py-2.5 px-4 text-xs text-gray-400 font-semibold">
+                                                            {u.ranking}
+                                                        </td>
 
-                                                    {/* % Errores totales — coloreado (invertido) */}
-                                                    <td
-                                                        className="py-2.5 px-4 text-right font-semibold"
-                                                        style={celda(claErr)}
-                                                    >
-                                                        {formatPct(Number(u.pct_total_errores))}
-                                                    </td>
+                                                        {/* Usuario */}
+                                                        <td className="py-2.5 px-4 font-medium text-gray-900">
+                                                            {u.usuario_nombre}
+                                                        </td>
 
-                                                    {/* T. Promedio — coloreado por percentil */}
-                                                    <td
-                                                        className="py-2.5 px-4 text-right font-semibold"
-                                                        style={celda(claTiempo)}
-                                                    >
-                                                        {formatHoras(Number(u.tiempo_promedio))}
-                                                    </td>
+                                                        {/* Tickets */}
+                                                        <td className="py-2.5 px-4 text-right text-gray-700">
+                                                            {formatNumero(u.tickets_gestionados)}
+                                                        </td>
 
-                                                    {/* Score */}
-                                                    <td className="py-2.5 px-4 text-center">
-                                                        <ScoreBadge score={Number(u.score_total)} />
-                                                    </td>
-                                                </tr>
-                                            );
-                                        })}
-                                    </>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
+                                                        {/* % SLA — coloreado */}
+                                                        <td
+                                                            className="py-2.5 px-4 text-right font-semibold"
+                                                            style={celda(claSla)}
+                                                        >
+                                                            {formatPct(u.pct_cumplimiento_sla)}
+                                                        </td>
+
+                                                        {/* % Errores Graves — coloreado */}
+                                                        <td
+                                                            className="py-2.5 px-4 text-right font-semibold"
+                                                            style={celda(claGraves)}
+                                                        >
+                                                            {u.cant_errores_graves > 0
+                                                                ? `${u.cant_errores_graves} (${formatPct(u.pct_errores_graves)})`
+                                                                : '—'}
+                                                        </td>
+
+                                                        {/* % Errores Leves — coloreado */}
+                                                        <td
+                                                            className="py-2.5 px-4 text-right font-semibold"
+                                                            style={celda(claLeves)}
+                                                        >
+                                                            {u.cant_errores_leves > 0
+                                                                ? `${u.cant_errores_leves} (${formatPct(u.pct_errores_leves)})`
+                                                                : '—'}
+                                                        </td>
+
+                                                        {/* T. Promedio — coloreado por percentil */}
+                                                        <td
+                                                            className="py-2.5 px-4 text-right font-semibold"
+                                                            style={celda(claTiempo)}
+                                                        >
+                                                            {formatHoras(u.tiempo_promedio)}
+                                                        </td>
+
+                                                        {/* Score total */}
+                                                        <td className="py-2.5 px-4 text-center">
+                                                            <ScoreBadge score={u.score_total} />
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })}
+                                        </>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );

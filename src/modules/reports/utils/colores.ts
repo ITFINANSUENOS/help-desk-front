@@ -40,3 +40,15 @@ export const getHexClasificacion = (c: Clasificacion) => ({
     amarillo: '#eab308',
     rojo: '#ef4444',
 }[c]);
+
+// Errores graves sobre tickets (invertido — 0 = verde, cualquier valor > 5 = rojo)
+export const getColorErroresGraves = (pct: number): Clasificacion =>
+    pct === 0 ? 'verde' :
+        pct <= 5 ? 'amarillo' :
+            'rojo';
+
+// Errores leves sobre tickets (umbral más permisivo)
+export const getColorErroresLeves = (pct: number): Clasificacion =>
+    pct <= 10 ? 'verde' :
+        pct <= 25 ? 'amarillo' :
+            'rojo';
