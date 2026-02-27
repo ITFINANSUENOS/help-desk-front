@@ -163,11 +163,28 @@ export interface TipoNovedad {
 }
 
 export interface UsuarioNovedad {
+    usuario_id: number;
     usuario_nombre: string;
     regional: string;
-    total_novedades: number;
+    total_asignaciones: number;
+    // Cantidades individuales
+    cant_error_proceso: number;
+    cant_cierre_forzoso: number;
+    cant_error_informativo: number;
+    cant_novedad_asignada: number;
+    cant_novedad_resuelta: number;
+    // Totales agrupados
+    total_graves: number;
+    total_leves: number;
+    // Porcentajes
+    pct_error_proceso: number;
+    pct_cierre_forzoso: number;
+    pct_error_informativo: number;
+    pct_novedad_asignada: number;
+    pct_novedad_resuelta: number;
+    pct_graves: number;
+    // Tickets afectados
     tickets_afectados: number;
-    pct_tickets_con_novedad: number;
     clasificacion: 'verde' | 'amarillo' | 'rojo';
 }
 
