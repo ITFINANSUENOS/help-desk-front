@@ -23,7 +23,9 @@ class DepartmentService {
     }
 
     async getDepartment(id: number): Promise<Department> {
-        const { data } = await api.get<Department>(`/departments/${id}`);
+        const { data } = await api.get<Department>(`/departments/${id}`, {
+            params: { included: 'jefe' }
+        });
         return data;
     }
 }

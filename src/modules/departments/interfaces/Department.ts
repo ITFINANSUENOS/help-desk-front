@@ -6,6 +6,16 @@ export interface Department {
     id: number;
     /** Nombre del departamento */
     nombre: string;
+    /** ID del usuario jefe del departamento */
+    jefeId?: number | null;
+    /** Datos del jefe del departamento */
+    jefe?: {
+        id: number;
+        nombre: string;
+        apellido: string;
+        usu_nom?: string;
+        usu_ape?: string;
+    } | null;
     /** Estado del departamento (1=activo, 0=inactivo) */
     estado: number;
     /** Fecha de creación */
@@ -20,6 +30,8 @@ export interface Department {
 export interface CreateDepartmentDto {
     /** Nombre del departamento */
     nombre: string;
+    /** ID del usuario jefe del departamento */
+    jefeId?: number | null;
     /** Estado del departamento (opcional, por defecto 1) */
     estado?: number;
 }
@@ -30,6 +42,8 @@ export interface CreateDepartmentDto {
 export interface UpdateDepartmentDto {
     /** Nombre del departamento */
     nombre?: string;
+    /** ID del usuario jefe del departamento */
+    jefeId?: number | null;
     /** Estado del departamento */
     estado?: number;
 }
