@@ -37,6 +37,7 @@ export interface StepSignature {
     usuarioId?: number;
     usuario?: { id: number; nombre: string; apellido: string };
     cargoId?: number;
+    cargosIds?: number[];
     cargo?: { id: number; nombre: string };
     coordX: number;
     coordY: number;

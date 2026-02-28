@@ -2,8 +2,6 @@ import { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { Button } from '../../../shared/components/Button';
 import { Input } from '../../../shared/components/Input';
-import { Select } from '../../../shared/components/Select';
-
 import type { StepSignature } from '../interfaces/Step';
 import type { Position } from '../../../shared/interfaces/Catalog';
 import { toast } from 'sonner';
@@ -16,32 +14,30 @@ interface SignatureConfigProps {
 }
 
 export const SignatureConfig = ({ firmas, onChange, positions }: SignatureConfigProps) => {
-    // Local state for the form being added
     const [isAdding, setIsAdding] = useState(false);
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
     const { register, handleSubmit, reset, setValue, control } = useForm<StepSignature>();
 
     const onSubmit = (data: StepSignature) => {
+        const selectedCargosIds = data.cargosIds ? data.cargosIds.map(Number).filter(n => !isNaN(n)) : undefined;
         const newFirma = {
             ...data,
             coordX: Number(data.coordX) || 0,
             coordY: Number(data.coordY) || 0,
-
             pagina: Number(data.pagina),
-            cargoId: data.cargoId ? Number(data.cargoId) : undefined,
+            cargoId: selectedCargosIds && selectedCargosIds.length > 0 ? undefined : (data.cargoId ? Number(data.cargoId) : undefined),
+            cargosIds: selectedCargosIds && selectedCargosIds.length > 0 ? selectedCargosIds : undefined,
             usuarioId: undefined
         };
 
         if (editingIndex !== null) {
-            // Update existing
             const newFirmas = [...firmas];
             newFirmas[editingIndex] = newFirma;
             onChange(newFirmas);
             setEditingIndex(null);
             toast.success('Zona actualizada');
         } else {
-            // Add new
             onChange([...firmas, newFirma]);
             toast.success('Zona agregada');
         }
@@ -59,6 +55,7 @@ export const SignatureConfig = ({ firmas, onChange, positions }: SignatureConfig
         setValue('coordX', firma.coordX);
         setValue('coordY', firma.coordY);
         setValue('cargoId', firma.cargoId);
+        setValue('cargosIds', firma.cargosIds || []);
 
         setIsAdding(true);
     };
@@ -74,6 +71,17 @@ export const SignatureConfig = ({ firmas, onChange, positions }: SignatureConfig
         const newFirmas = [...firmas];
         newFirmas.splice(index, 1);
         onChange(newFirmas);
+    };
+
+    const getCargoDisplay = (firma: StepSignature) => {
+        if (firma.cargoId) {
+            return positions.find(p => p.id === firma.cargoId)?.nombre || 'Cargo específico';
+        }
+        if (firma.cargosIds && firma.cargosIds.length > 0) {
+            const names = firma.cargosIds.map(id => positions.find(p => p.id === id)?.nombre).filter(Boolean);
+            return names.join(', ');
+        }
+        return 'Cualquiera';
     };
 
 
@@ -114,9 +122,7 @@ export const SignatureConfig = ({ firmas, onChange, positions }: SignatureConfig
                                 </span>
                             )}
                             <span className="truncate col-span-2">
-                                {firma.cargoId
-                                    ? positions.find(p => p.id === firma.cargoId)?.nombre
-                                    : 'Cualquiera'}
+                                {getCargoDisplay(firma)}
                             </span>
                         </div>
                         <div className="flex gap-1">
@@ -164,22 +170,36 @@ export const SignatureConfig = ({ firmas, onChange, positions }: SignatureConfig
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Cargo (Opcional)</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Cargos Permitidos (Opcional)</label>
+                        <p className="text-xs text-gray-500 mb-2">Seleccione uno o más cargos. Si el usuario tiene alguno de estos cargos, podrá firmar en este espacio.</p>
                         <Controller
-                            name="cargoId"
+                            name="cargosIds"
                             control={control}
+                            defaultValue={[]}
                             render={({ field }) => (
-                                <Select
-                                    {...field}
-                                    options={[
-                                        { value: '', label: '-- Cualquiera --' },
-                                        ...positions.map(p => ({ value: p.id, label: p.nombre }))
-                                    ]}
-                                    onChange={(val) => field.onChange(val)}
-                                    placeholder="-- Seleccionar --"
-                                />
+                                <div className="max-h-32 overflow-y-auto border rounded p-2 space-y-1">
+                                    {positions.map(p => (
+                                        <label key={p.id} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-gray-50 p-1 rounded">
+                                            <input
+                                                type="checkbox"
+                                                checked={field.value?.includes(Number(p.id))}
+                                                onChange={(e) => {
+                                                    const selected = field.value || [];
+                                                    if (e.target.checked) {
+                                                        field.onChange([...selected, Number(p.id)]);
+                                                    } else {
+                                                        field.onChange(selected.filter((id: number) => id !== Number(p.id)));
+                                                    }
+                                                }}
+                                                className="rounded border-gray-300"
+                                            />
+                                            {p.nombre}
+                                        </label>
+                                    ))}
+                                </div>
                             )}
                         />
+                        <p className="text-xs text-gray-400 mt-1">Deja vacío para que cualquier usuario pueda firmar.</p>
                     </div>
                     <div className="flex justify-end gap-2 pt-2">
                         <Button type="button" size="sm" variant="ghost" onClick={handleCancel}>Cancelar</Button>
