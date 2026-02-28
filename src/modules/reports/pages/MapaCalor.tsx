@@ -68,12 +68,12 @@ export default function MapaCalor() {
     }
 
     return (
-        <div className="flex flex-col gap-6 -mx-4 md:-mx-8">
+        <div className="flex h-full flex-col bg-gray-50/50">
 
             {/* ── Sticky Header ────────────────────────────────────────── */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-6 py-5 lg:px-8 border-b border-gray-100 bg-white/90 backdrop-blur-xl z-20 sticky top-0">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-6 py-5 lg:px-8 border-b border-gray-100 bg-white/60 backdrop-blur-xl z-20 shrink-0 sticky top-0">
                 <div className="flex items-center gap-4">
-                    <div className="flex items-center justify-center p-3 bg-orange-50 rounded-xl text-orange-500 shadow-sm border border-orange-100">
+                    <div className="flex items-center justify-center p-3 bg-red-50 rounded-xl text-red-600 shadow-sm border border-red-100">
                         <Icon name="local_fire_department" className="text-2xl" />
                     </div>
                     <div>

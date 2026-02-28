@@ -76,7 +76,7 @@ export default function Regionales() {
             {/* ── Sticky Header ────────────────────────────────────────── */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-6 py-5 lg:px-8 border-b border-gray-100 bg-white/60 backdrop-blur-xl z-20 shrink-0 sticky top-0">
                 <div className="flex items-center gap-4">
-                    <div className="flex items-center justify-center p-3 bg-blue-50 rounded-xl text-blue-600 shadow-sm border border-blue-100">
+                    <div className="flex items-center justify-center p-3 bg-red-50 rounded-xl text-red-600 shadow-sm border border-red-100">
                         <Icon name="map" className="text-2xl" />
                     </div>
                     <div>
