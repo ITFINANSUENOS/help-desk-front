@@ -102,6 +102,9 @@ class ReportService {
         const filename = `Reporte_Tickets_${dateFrom || ''}_${dateTo || ''}.xlsx`.replace(/ /g, '_');
         await this.downloadFile(url, filename);
     }
+    async exportDashboard(): Promise<void> {
+        await this.downloadFile('/reports/dashboard/export', `Dashboard_Completo_${new Date().toISOString().split('T')[0]}.xlsx`);
+    }
 
     private async downloadFile(url: string, filename: string): Promise<void> {
         const response = await api.get(url, { responseType: 'blob' });
