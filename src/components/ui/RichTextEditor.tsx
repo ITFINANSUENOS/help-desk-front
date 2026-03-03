@@ -63,12 +63,8 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
         }
     }, [value]);
 
-    const handleChange = (
-        content: string,
-        _delta: unknown,
-        _source: string,
-        _editor: { getHTML: () => string }
-    ) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const handleChange = (content: string, _delta?: unknown, _source?: string, _editor?: unknown) => {
         lastExternalValue.current = content;
         onChange(content);
     };
