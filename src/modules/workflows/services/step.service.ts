@@ -77,5 +77,25 @@ export const stepService = {
                 'Content-Type': 'multipart/form-data',
             },
         });
+    },
+
+    async getArchivosByPaso(pasoId: number): Promise<any[]> {
+        const response = await api.get(`/workflows/steps/${pasoId}/archivos`);
+        return response.data.data || response.data || [];
+    },
+
+    async uploadArchivo(pasoId: number, file: File, nombre: string, tipo: 'descargable' | 'plantilla'): Promise<any> {
+        const formData = new FormData();
+        formData.append('archivo', file);
+        formData.append('nombre', nombre);
+        formData.append('tipo', tipo);
+        const response = await api.post(`/workflows/steps/${pasoId}/archivos`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        return response.data;
+    },
+
+    async deleteArchivo(archivoId: number): Promise<void> {
+        await api.delete(`/workflows/steps/archivos/${archivoId}`);
     }
 };

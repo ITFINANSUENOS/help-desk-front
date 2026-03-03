@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ticketService } from '../services/ticket.service';
-import type { TicketDetail, TicketTimelineItem, TicketStatus, TicketPriority } from '../interfaces/Ticket';
+import type { TicketDetail, TicketTimelineItem, TicketStatus, TicketPriority, PasoArchivo, TemplateField } from '../interfaces/Ticket';
 import { Button } from '../../../shared/components/Button';
 import { TicketWorkflow } from '../components/TicketWorkflow';
 import { TicketTimeline } from '../components/TicketTimeline';
@@ -25,6 +25,8 @@ export default function TicketDetailPage() {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isTagModalOpen, setIsTagModalOpen] = useState(false);
     const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+    const [stepFiles, setStepFiles] = useState<PasoArchivo[]>([]);
+    const [stepTemplateFields, setStepTemplateFields] = useState<TemplateField[]>([]);
 
     useEffect(() => {
         setTitle('Gestión de Tickets');
@@ -40,6 +42,19 @@ export default function TicketDetailPage() {
             ]);
             setTicket(ticketData);
             setTimeline(timelineData);
+
+            // Obtener archivos y campos de plantilla del paso actual
+            try {
+                const nextStepData = await ticketService.checkNextStep(Number(id));
+                if (nextStepData.stepFiles) {
+                    setStepFiles(nextStepData.stepFiles);
+                }
+                if (nextStepData.stepTemplateFields) {
+                    setStepTemplateFields(nextStepData.stepTemplateFields);
+                }
+            } catch (e) {
+                console.error('Error fetching step files:', e);
+            }
         } catch (error) {
             console.error("Error fetching ticket details:", error);
         } finally {
@@ -328,6 +343,8 @@ export default function TicketDetailPage() {
                     isForcedClose={ticket.isForcedClose}
                     allowsClosing={ticket.allowsClosing}
                     stepDescription={ticket.stepDescription}
+                    templateFields={stepTemplateFields}
+                    stepFiles={stepFiles}
                 />
             </div>
 

@@ -7,7 +7,7 @@ import { DynamicStepForm } from './DynamicStepForm';
 import { UnifiedSignatureModal } from '../../../shared/components/UnifiedSignatureModal';
 import type { SignatureData } from '../../../shared/components/UnifiedSignatureModal';
 import { ticketService } from '../services/ticket.service';
-import type { TransitionTicketDto, TemplateField } from '../interfaces/Ticket';
+import type { TransitionTicketDto, TemplateField, PasoArchivo } from '../interfaces/Ticket';
 import { toast } from 'sonner';
 import { useAuth } from '../../auth/context/useAuth';
 
@@ -27,6 +27,7 @@ interface TicketResponsePanelProps {
 
     onSuccess: () => void;
     templateFields?: TemplateField[];
+    stepFiles?: PasoArchivo[]; // Archivos asociados al paso
     isParallelStep?: boolean;
     stepRequiresSignature?: boolean;
     status: TicketStatus;
@@ -43,6 +44,7 @@ export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
 
     onSuccess,
     templateFields = [],
+    stepFiles = [],
     isParallelStep = false,
     stepRequiresSignature = false,
     status,
@@ -366,12 +368,61 @@ export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
                 {isParallelStep ? 'Tarea Paralela Asignada' : (isFinalStep ? 'Finalizar Ticket' : 'Responder / Avanzar Flujo')}
             </h3>
 
+            {/* STEP FILES AREA - Archivos asociados al paso */}
+            {!isFinalStep && stepFiles && stepFiles.length > 0 && (
+                <div className="mb-6 space-y-4">
+                    {/* Archivos descargables */}
+                    {stepFiles.filter(f => f.tipo === 'descargable').length > 0 && (
+                        <div className="rounded-xl border border-blue-100 bg-blue-50 p-4">
+                            <div className="flex items-center gap-2 mb-3">
+                                <Icon name="download" className="text-blue-600" />
+                                <h3 className="font-semibold text-blue-900">Archivos de referencia</h3>
+                            </div>
+                            <div className="space-y-2">
+                                {stepFiles.filter(f => f.tipo === 'descargable').map((file) => (
+                                    <a
+                                        key={file.id}
+                                        href={`${import.meta.env.VITE_API_URL || ''}/documents/step-file/${file.nombreArchivo}`}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="flex items-center gap-2 p-2 bg-white rounded-lg border border-blue-200 hover:bg-blue-100 transition-colors"
+                                    >
+                                        <Icon name="picture_as_pdf" className="text-red-500" />
+                                        <span className="text-sm font-medium text-blue-800">{file.nombre}</span>
+                                        <Icon name="open_in_new" className="text-blue-400 ml-auto w-4 h-4" />
+                                    </a>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Archivos tipo plantilla - mostrar campos dinámicos */}
+                    {stepFiles.filter(f => f.tipo === 'plantilla').length > 0 && (
+                        <div className="rounded-xl border border-teal-100 bg-teal-50 p-4">
+                            <div className="flex items-center gap-2 mb-3">
+                                <Icon name="description" className="text-teal-600" />
+                                <h3 className="font-semibold text-teal-900">Formulario requerido</h3>
+                            </div>
+                            <p className="text-sm text-teal-700 mb-4">
+                                Por favor complete el siguiente formulario antes de continuar.
+                            </p>
+                            {templateFields.length > 0 && (
+                                <DynamicStepForm
+                                    fields={templateFields}
+                                    onChange={setDynamicValues}
+                                />
+                            )}
+                        </div>
+                    )}
+                </div>
+            )}
+
             {/* DYNAMIC FORM AREA - Hide on Final Step? User said "desapareeria description" but meant generic fields? 
                 Usually Final Step has no fields, but if it did, we might want to hide them. 
                 User said: "desapareeria cuando sea el ultimpo paso del ticket la descripcion".
                 Assuming dynamic form is fine if empty.
             */}
-            {!isFinalStep && templateFields.length > 0 && (
+            {!isFinalStep && templateFields.length > 0 && stepFiles.filter(f => f.tipo === 'plantilla').length === 0 && (
                 <DynamicStepForm
                     fields={templateFields}
                     onChange={setDynamicValues}

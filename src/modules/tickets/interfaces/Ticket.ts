@@ -101,6 +101,9 @@ export interface TicketDetail extends Ticket {
     isForcedClose?: boolean;
     stepDescription?: string; // HTML content from pasoActual.descripcion
     campoValores?: { campoId: number; valor: string; campoNombre?: string; campoCodigo?: string; campoTipo?: string }[];
+    // Archivos y campos de plantilla del paso actual
+    stepFiles?: PasoArchivo[];
+    stepTemplateFields?: TemplateField[];
 }
 
 export interface TicketTimelineItem {
@@ -177,11 +180,21 @@ export interface ParallelStatus {
     pendingTasks: any[];
 }
 
+export interface PasoArchivo {
+    id: number;
+    nombre: string;
+    nombreArchivo: string;
+    tipo: 'descargable' | 'plantilla';
+    orden: number;
+}
+
 export interface CheckNextStepResponse {
     transitionType: 'linear' | 'decision' | 'parallel_pending' | 'final';
     linear?: LinearTransition;
     decisions?: DecisionOption[];
     parallelStatus?: ParallelStatus;
+    stepFiles?: PasoArchivo[];
+    stepTemplateFields?: TemplateField[];
 }
 
 export interface TransitionTicketDto {
