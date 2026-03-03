@@ -1,5 +1,6 @@
-import React from 'react';
-import { Editor } from '@tinymce/tinymce-react';
+import React, { useMemo, useRef } from 'react';
+import ReactQuill from 'react-quill-new';
+import 'react-quill-new/dist/quill.snow.css';
 
 interface RichTextEditorProps {
     value: string;
@@ -7,7 +8,6 @@ interface RichTextEditorProps {
     placeholder?: string;
     disabled?: boolean;
     height?: number;
-    initialValue?: string;
 }
 
 export const RichTextEditor: React.FC<RichTextEditorProps> = ({
@@ -15,41 +15,89 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     onChange,
     placeholder,
     disabled = false,
-    height = 300,
-    initialValue
+    height = 300
 }) => {
+    const quillRef = useRef<ReactQuill>(null);
+    const lastEmittedValue = useRef<string>('');
+
+    const modules = useMemo(() => ({
+        toolbar: [
+            [{ 'header': [1, 2, 3, false] }],
+            ['bold', 'italic', 'underline', 'strike'],
+            [{ 'color': [] }, { 'background': [] }],
+            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+            [{ 'align': [] }],
+            ['link', 'image'],
+            ['table'],
+            ['clean']
+        ],
+        table: {
+            cellMinWidth: 50,
+        }
+    }), []);
+
+    const formats = [
+        'header',
+        'bold', 'italic', 'underline', 'strike',
+        'color', 'background',
+        'list',
+        'align',
+        'link', 'image',
+        'table'
+    ];
+
+    const handlePaste = (e: React.ClipboardEvent) => {
+        const text = e.clipboardData?.getData('text/plain');
+        
+        if (text && (text.includes('\t') || text.includes('\n'))) {
+            e.preventDefault();
+            const quill = quillRef.current?.getEditor();
+            if (!quill) return;
+            
+            const range = quill.getSelection();
+            if (!range) return;
+            
+            const rows = text.trim().split('\n');
+            let tableHtml = '<table><tbody>';
+            
+            rows.forEach(row => {
+                const cells = row.split('\t');
+                tableHtml += '<tr>';
+                cells.forEach(cell => {
+                    tableHtml += `<td>${cell}</td>`;
+                });
+                tableHtml += '</tr>';
+            });
+            
+            tableHtml += '</tbody></table>';
+            
+            const delta = quill.clipboard.convert({ html: tableHtml });
+            quill.updateContents(delta, 'silent');
+            quill.setSelection(range.index + delta.length(), 0, 'silent');
+        }
+    };
+
+    const handleChange = (_content: string, _delta: unknown, _source: string, editor: { getHTML: () => string }) => {
+        const newHtml = editor.getHTML();
+        if (newHtml !== lastEmittedValue.current) {
+            lastEmittedValue.current = newHtml;
+            onChange(newHtml);
+        }
+    };
+
+    const editorModule = {
+        height,
+        theme: 'snow',
+        modules,
+        formats,
+        placeholder: placeholder || '',
+        readOnly: disabled,
+        onChange: handleChange
+    };
+
     return (
-        <Editor
-            apiKey='5sv5ok11xoxd0rq3nanhcuz7yzx3twatav2h0pv0eln2oa9p'
-            value={value}
-            initialValue={initialValue}
-            onEditorChange={(content) => onChange(content)}
-            init={{
-                height: height,
-                menubar: false,
-                plugins: [
-                    'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-                    'anchor', 'searchreplace', 'visualblocks', 'fullscreen',
-                    'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
-                ],
-                toolbar: 'undo redo | blocks | ' +
-                    'bold italic forecolor | alignleft aligncenter ' +
-                    'alignright alignjustify | bullist numlist outdent indent | ' +
-                    'removeformat | table | help',
-                content_style: `
-                    body { font-family:Inter,sans-serif; font-size:14px }
-                    @media print {
-                        body { height: auto !important; overflow: visible !important; }
-                        .mce-content-body { height: auto !important; overflow: visible !important; }
-                    }
-                `,
-                placeholder: placeholder,
-                forced_root_block: 'p', // Keeps paragraphs clean
-                paste_data_images: true, // Allows pasting images
-                statusbar: true,
-                resize: true,
-            }}
-            disabled={disabled}
-        />
+        <div className="rich-text-editor" onPaste={handlePaste}>
+            <ReactQuill ref={quillRef} value={value} {...editorModule} />
+        </div>
     );
 };
