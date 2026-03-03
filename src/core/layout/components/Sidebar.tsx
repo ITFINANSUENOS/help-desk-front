@@ -93,6 +93,7 @@ export function Sidebar({ isCollapsed, toggleCollapse, isMobileOpen, closeMobile
         { to: '/permissions', icon: 'lock_open', label: 'Catálogo Permisos', subject: 'Permission', action: 'manage' },
         { to: '/departments', icon: 'corporate_fare', label: 'Departamentos', subject: 'Department', action: 'manage' },
         { to: '/companies', icon: 'business', label: 'Empresas', subject: 'Company' as any, action: 'manage' },
+        { to: '/viaticos/conceptos', icon: 'flight', label: 'Viáticos', subject: 'Company' as any, action: 'manage' },
         { to: '/categories', icon: 'category', label: 'Categorías', subject: 'Category', action: 'manage' },
         { to: '/subcategories', icon: 'segment', label: 'Subcategorías', subject: 'Category' as any, action: 'manage' },
         { to: '/workflows', icon: 'schema', label: 'Gestión de Flujos', subject: 'Workflow' as any, action: 'manage' },

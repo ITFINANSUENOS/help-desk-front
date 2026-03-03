@@ -40,6 +40,7 @@ const DistribucionTiemposPage = lazy(() => import('../modules/reports/pages/Dist
 const TopPerformersPage = lazy(() => import('../modules/reports/pages/TopPerformers'));
 const NovedadesPage = lazy(() => import('../modules/reports/pages/Novedades'));
 const DetalleUsuarioPage = lazy(() => import('../modules/reports/pages/DetalleUsuario'));
+const ConceptosViaticosPage = lazy(() => import('../modules/viaticos/pages/ConceptosViaticosPage'));
 
 export const appRoutes: RouteObject[] = [
     {
@@ -149,6 +150,14 @@ export const appRoutes: RouteObject[] = [
                         element: (
                             <Suspense fallback={<PageLoader />}>
                                 <CompaniesPage />
+                            </Suspense>
+                        )
+                    },
+                    {
+                        path: '/viaticos/conceptos',
+                        element: (
+                            <Suspense fallback={<PageLoader />}>
+                                <ConceptosViaticosPage />
                             </Suspense>
                         )
                     },
