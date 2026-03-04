@@ -36,7 +36,6 @@ const FORMATS = [
     'table'
 ];
 
-// Detects if the content has legacy HTML tables (from TinyMCE or similar)
 const hasLegacyTable = (html: string): boolean => {
     return /<table[\s>]/i.test(html);
 };
@@ -50,12 +49,14 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 }) => {
     const quillRef = useRef<ReactQuill>(null);
     const lastExternalValue = useRef<string>(value);
+    const legacyRef = useRef<HTMLDivElement>(null);
 
-    // If content has legacy HTML tables, render as plain HTML (read/edit via dangerouslySetInnerHTML)
-    const isLegacyContent = hasLegacyTable(value);
+    // ✅ Solo se evalúa UNA vez al montar el componente con el valor inicial de la BD.
+    // Si el usuario pega desde Excel después, Quill ya está montado y esto no cambia.
+    const isLegacyContent = useRef<boolean>(hasLegacyTable(value));
 
     useEffect(() => {
-        if (isLegacyContent) return; // skip Quill sync for legacy content
+        if (isLegacyContent.current) return;
 
         const editor = quillRef.current?.getEditor();
         if (!editor) return;
@@ -64,22 +65,27 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
         if (value !== lastExternalValue.current && value !== currentHTML) {
             lastExternalValue.current = value;
-
             const selection = editor.getSelection();
             editor.root.innerHTML = value;
             if (selection) {
                 requestAnimationFrame(() => editor.setSelection(selection));
             }
         }
-    }, [value, isLegacyContent]);
+    }, [value]);
 
     const handleChange = (content: string, _delta?: unknown, _source?: string, _editor?: unknown) => {
         lastExternalValue.current = content;
         onChange(content);
     };
 
-    // For legacy TinyMCE content with tables: render as a styled HTML div
-    if (isLegacyContent) {
+    // Contenido legacy de TinyMCE: usa contentEditable para que siga siendo editable
+    if (isLegacyContent.current) {
+        const handleLegacyInput = () => {
+            if (legacyRef.current) {
+                onChange(legacyRef.current.innerHTML);
+            }
+        };
+
         return (
             <div className="rich-text-editor">
                 <style>{`
@@ -94,11 +100,16 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
                         font-family: inherit;
                         background: #fff;
                         box-sizing: border-box;
+                        outline: none;
+                    }
+                    .rich-text-editor-legacy:focus {
+                        border-color: #4a90e2;
+                        box-shadow: 0 0 0 2px rgba(74,144,226,0.2);
                     }
                     .rich-text-editor-legacy table {
                         border-collapse: collapse;
                         width: 100%;
-                        table-layout: fixed;
+                        table-layout: auto;
                         word-break: break-word;
                     }
                     .rich-text-editor-legacy td,
@@ -106,7 +117,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
                         border: 1px solid #aaa;
                         padding: 6px 8px;
                         vertical-align: top;
-                        white-space: normal;
+                        white-space: normal !important;
                         overflow-wrap: break-word;
                         writing-mode: horizontal-tb !important;
                         text-orientation: mixed !important;
@@ -116,23 +127,19 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
                         margin: 0 0 6px 0;
                     }
                 `}</style>
-                {/* 
-                    Read-only view for legacy content. 
-                    If you need to allow editing, consider a migration step to strip/convert tables.
-                */}
                 <div
+                    ref={legacyRef}
                     className="rich-text-editor-legacy"
+                    contentEditable={!disabled}
+                    suppressContentEditableWarning
                     dangerouslySetInnerHTML={{ __html: value }}
+                    onInput={handleLegacyInput}
                 />
-                {!disabled && (
-                    <p style={{ fontSize: 12, color: '#888', marginTop: 4 }}>
-                        ⚠️ Este contenido fue creado con un editor anterior. Para editar, por favor recrea la tabla.
-                    </p>
-                )}
             </div>
         );
     }
 
+    // Contenido nuevo: usa Quill normalmente (pegar desde Excel funciona aquí)
     return (
         <div className="rich-text-editor">
             <style>{`
@@ -142,23 +149,24 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
                 }
                 .rich-text-editor .ql-editor {
                     min-height: ${height}px;
-                    /* Removed white-space: pre-wrap — it breaks table cell rendering */
                     word-break: break-word;
                     overflow-wrap: break-word;
                 }
-                /* Fix Quill table rendering */
                 .rich-text-editor .ql-editor table {
                     border-collapse: collapse;
-                    table-layout: fixed;
+                    table-layout: auto;
                     width: 100%;
+                    margin-bottom: 8px;
                 }
                 .rich-text-editor .ql-editor td,
                 .rich-text-editor .ql-editor th {
                     border: 1px solid #aaa;
-                    padding: 4px 6px;
+                    padding: 4px 8px;
                     vertical-align: top;
-                    white-space: normal;
+                    white-space: normal !important;
+                    overflow-wrap: break-word;
                     writing-mode: horizontal-tb !important;
+                    text-orientation: mixed !important;
                     transform: none !important;
                 }
             `}</style>
