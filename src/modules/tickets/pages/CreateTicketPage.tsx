@@ -375,6 +375,25 @@ export default function CreateTicketPage() {
                                                             if (dec.candidates) {
                                                                 setAssigneeCandidates(dec.candidates);
                                                             }
+                                                            // Update PDF template based on decision's target step
+                                                            if (dec.pdfTemplate) {
+                                                                setPdfTemplate(dec.pdfTemplate);
+                                                            }
+                                                            // Update template fields based on decision's target step
+                                                            // If decision has its own fields, use them
+                                                            // Otherwise, keep the existing fields from step 0 (for legacy flows)
+                                                            if (dec.templateFields && dec.templateFields.length > 0) {
+                                                                const filteredFields = dec.templateFields.filter(f =>
+                                                                    !['TICKET_ID', 'FECHA_CREACION', 'TITULO', 'SOLICITANTE', 'CARGO'].includes(f.codigo.toUpperCase())
+                                                                ).map(f => ({
+                                                                    ...f,
+                                                                    required: !!f.required
+                                                                }));
+                                                                setTemplateFields(filteredFields);
+                                                                setTemplateValues({});
+                                                            }
+                                                            // If no fields in decision, keep existing fields (for legacy flows)
+                                                            // Don't clear them
                                                             setAssigneeId(''); // Reset assignment when decision changes
                                                         }
                                                     }}
@@ -417,7 +436,7 @@ export default function CreateTicketPage() {
                                     </div>
                                 </div>
                                 <a
-                                    href={`${import.meta.env.VITE_API_URL || ''}/documents/template/${pdfTemplate}`}
+                                    href={`${import.meta.env.VITE_API_URL || ''}/documents/download/${pdfTemplate}`}
                                     target="_blank"
                                     rel="noreferrer"
                                     className="rounded-lg bg-white border border-teal-200 px-4 py-2 text-xs font-bold text-teal-700 shadow-sm hover:bg-teal-50 flex items-center gap-2"

@@ -12,6 +12,18 @@ export interface DecisionOption {
     targetStepId: number;
     requiresManualAssignment: boolean;
     candidates: UserCandidate[];
+    templateFields?: {
+        id: number;
+        nombre: string;
+        codigo: string;
+        tipo: string;
+        etiqueta?: string;
+        campoQuery?: string;
+        campoTrigger?: number;
+        required?: boolean;
+    }[];
+    templateFieldsOrigin?: 'step' | 'initial';
+    pdfTemplate?: string;
 }
 
 export interface CheckStartFlowResponse {
