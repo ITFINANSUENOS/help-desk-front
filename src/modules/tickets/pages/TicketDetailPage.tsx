@@ -14,6 +14,7 @@ import { Icon } from '../../../shared/components/Icon';
 import { useAuth } from '../../auth/context/useAuth';
 import { LegalizacionGastos } from '../../viaticos/components/LegalizacionGastos';
 import { AprobacionLegalizacion } from '../../viaticos/components/AprobacionLegalizacion';
+import { ContabilizacionLegalizacion } from '../../viaticos/components/ContabilizacionLegalizacion';
 
 export default function TicketDetailPage() {
     const { setTitle } = useLayout();
@@ -260,6 +261,19 @@ export default function TicketDetailPage() {
                         <AprobacionLegalizacion 
                             tickId={ticket.id}
                             esJefe={ticket.workflowStep.toLowerCase().replace(/[áéíóú]/g, (c: string) => 'aeiou'.charAt('áéíóú'.indexOf(c))).includes(' del viaje')}
+                            onSuccess={fetchData}
+                        />
+                    </div>
+                )
+            )}
+
+            {/* Contabilización de Legalización - Para analista contable */}
+            {ticket && user && ticket.workflowStep && (
+                ticket.workflowStep.toLowerCase().replace(/[áéíóú]/g, (c: string) => 'aeiou'.charAt('áéíóú'.indexOf(c))).includes('contabilizacion') &&
+                ticket.workflowStep.toLowerCase().replace(/[áéíóú]/g, (c: string) => 'aeiou'.charAt('áéíóú'.indexOf(c))).includes('legalizacion') && (
+                    <div className="mt-6">
+                        <ContabilizacionLegalizacion 
+                            tickId={ticket.id}
                             onSuccess={fetchData}
                         />
                     </div>
