@@ -87,7 +87,7 @@ export default function WorkflowListPage() {
             fetchWorkflows();
             setShowDeleteDialog(false);
             setWorkflowToDelete(null);
-        } catch (error) {
+        } catch {
             toast.error('Error al eliminar');
         }
     };

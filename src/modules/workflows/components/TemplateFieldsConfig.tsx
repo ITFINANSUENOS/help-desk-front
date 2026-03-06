@@ -9,11 +9,14 @@ import { excelDataService } from '../../imports/services/excel-data.service';
 import type { ExcelData } from '../../imports/interfaces/ExcelData';
 import { toast } from 'sonner';
 import { Icon } from '../../../shared/components/Icon';
+import { ModalSelectorCoordenadas } from './ModalSelectorCoordenadas';
 
 interface TemplateFieldsConfigProps {
     campos: StepTemplateField[];
     onChange: (campos: StepTemplateField[]) => void;
     flujoId: number;
+    pasoId?: number;
+    archivosPaso?: { id: number; nombre: string; nombreArchivo: string; tipo: string }[];
 }
 
 const ExcelQueryConfig = ({ control, flujoId, setValue }: { control: Control<StepTemplateField>, flujoId: number, setValue: UseFormSetValue<StepTemplateField> }) => {
@@ -112,13 +115,41 @@ const ExcelQueryConfig = ({ control, flujoId, setValue }: { control: Control<Ste
     );
 };
 
-export const TemplateFieldsConfig = ({ campos, onChange, flujoId }: TemplateFieldsConfigProps) => {
+export const TemplateFieldsConfig = ({ campos, onChange, flujoId, pasoId, archivosPaso }: TemplateFieldsConfigProps) => {
     const [isAdding, setIsAdding] = useState(false);
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
+    const [showCoordModal, setShowCoordModal] = useState(false);
+    const [selectedCampo, setSelectedCampo] = useState<StepTemplateField | null>(null);
     const { register, handleSubmit, reset, setValue, control } = useForm<StepTemplateField>();
+
+    // Calcular pdfUrl desde archivosPaso
+    const archivoPlantilla = archivosPaso?.find(a => a.tipo === 'plantilla');
+    const pdfUrl = archivoPlantilla 
+        ? `/api/documents/step-file/${archivoPlantilla.nombreArchivo.split('/').pop()}`
+        : null;
+    
+    // URL completa para descargar el PDF (con ruta del subdirectorio)
+    const pdfDownloadUrl = archivoPlantilla
+        ? `/api/documents/step-file/${archivoPlantilla.nombreArchivo.split('/').slice(-2).join('/')}`
+        : null;
+
+    console.log('TemplateFieldsConfig - archivosPaso:', archivosPaso, 'pdfUrl:', pdfUrl);
 
     // Filter only active campos (estado = 1)
     const activeCampos = campos.filter(campo => campo.estado === 1 || campo.estado === undefined);
+
+    const handleOpenCoordSelector = (campo: StepTemplateField) => {
+        console.log('handleOpenCoordSelector called', { campo, pasoId, pdfUrl, hasId: !!campo.id });
+        setSelectedCampo(campo);
+        setShowCoordModal(true);
+    };
+
+    const handleCoordSaved = (campoId: number, coordX: number, coordY: number) => {
+        const updated = campos.map(c => 
+            c.id === campoId ? { ...c, coordX, coordY } : c
+        );
+        onChange(updated);
+    };
 
     const handleAdd = (data: StepTemplateField) => {
         const newCampo: StepTemplateField = {
@@ -213,6 +244,14 @@ export const TemplateFieldsConfig = ({ campos, onChange, flujoId }: TemplateFiel
                                 )}
                             </div>
                             <div className="flex gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => handleOpenCoordSelector(campo)}
+                                    className="text-gray-400 hover:text-brand-teal"
+                                    title="Seleccionar coordenadas en PDF"
+                                >
+                                    <Icon name="map_pin" className="text-[20px]" />
+                                </button>
                                 <button
                                     type="button"
                                     onClick={() => handleEdit(index)}
@@ -360,6 +399,27 @@ export const TemplateFieldsConfig = ({ campos, onChange, flujoId }: TemplateFiel
                         </Button>
                     </div>
                 </div>
+            )}
+
+            {/* Modal para seleccionar coordenadas */}
+            {pasoId && pdfDownloadUrl && selectedCampo && (
+                <ModalSelectorCoordenadas
+                    open={showCoordModal}
+                    onOpenChange={setShowCoordModal}
+                    pasoId={pasoId}
+                    campo={{
+                        id: selectedCampo.id || 0,
+                        nombre: selectedCampo.nombre,
+                        codigo: selectedCampo.codigo,
+                        coordX: selectedCampo.coordX,
+                        coordY: selectedCampo.coordY,
+                        etiqueta: selectedCampo.etiqueta,
+                        fontSize: selectedCampo.fontSize,
+                        pagina: selectedCampo.pagina
+                    }}
+                    pdfUrl={pdfDownloadUrl}
+                    onSave={handleCoordSaved}
+                />
             )}
         </div>
     );

@@ -14,7 +14,7 @@ export interface Transition {
     condicionClave?: string;
     
     // New fields mapped from legacy
-    acciones?: any; 
+    acciones?: Record<string, unknown> | string; 
 }
 
 export interface CreateTransitionDto {
@@ -26,4 +26,4 @@ export interface CreateTransitionDto {
     condicionClave?: string;
 }
 
-export interface UpdateTransitionDto extends Partial<CreateTransitionDto> {}
+export interface UpdateTransitionDto extends Partial<CreateTransitionDto> {} // eslint-disable-line @typescript-eslint/no-empty-object-type

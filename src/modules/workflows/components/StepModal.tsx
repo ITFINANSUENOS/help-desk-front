@@ -6,7 +6,7 @@ import { Input } from '../../../shared/components/Input';
 import { Select } from '../../../shared/components/Select';
 import type { Step, CreateStepDto, StepSignature } from '../interfaces/Step';
 import type { StepTemplateField } from '../interfaces/TemplateField';
-import { stepService } from '../services/step.service';
+import { stepService, type PasoArchivo } from '../services/step.service';
 import { positionService } from '../../../shared/services/catalog.service';
 import type { Position } from '../../../shared/interfaces/Catalog';
 import { templateService } from '../../templates/services/template.service';
@@ -31,7 +31,7 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
     const [positions, setPositions] = useState<Position[]>([]);
     const [templateFields, setTemplateFields] = useState<TemplateField[]>([]);
     const [pdfFile, setPdfFile] = useState<File | null>(null);
-    const [archivosPaso, setArchivosPaso] = useState<{ id: number; nombre: string; nombreArchivo: string; tipo: string }[]>([]);
+    const [archivosPaso, setArchivosPaso] = useState<PasoArchivo[]>([]);
     const [archivoSubir, setArchivoSubir] = useState<File | null>(null);
     const [nombreArchivo, setNombreArchivo] = useState('');
     const [tipoArchivo, setTipoArchivo] = useState<'descargable' | 'plantilla'>('descargable');
@@ -68,12 +68,7 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
 
                         // Cargar archivos del paso
                         stepService.getArchivosByPaso(stepId).then(archivos => {
-                            setArchivosPaso(archivos.map((a: any) => ({
-                                id: a.id,
-                                nombre: a.nombre,
-                                nombreArchivo: a.nombreArchivo,
-                                tipo: a.tipo
-                            })));
+                            setArchivosPaso(archivos);
                         }).catch(console.error);
 
                         // Use setValue instead of reset to properly update form
@@ -158,11 +153,11 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
             data.flujoId = Number(flujoId);
 
             if (data.esPool) {
-                (data as any).cargoAsignadoId = null;
+                data.cargoAsignadoId = undefined;
             } else if (data.cargoAsignadoId) {
                 data.cargoAsignadoId = Number(data.cargoAsignadoId);
             } else {
-                (data as any).cargoAsignadoId = null;
+                data.cargoAsignadoId = undefined;
             }
 
             if (data.tiempoHabil) data.tiempoHabil = Number(data.tiempoHabil);
@@ -426,6 +421,8 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
                                 campos={localCampos as unknown as StepTemplateField[]}
                                 onChange={handleCamposChange}
                                 flujoId={Number(flujoId)}
+                                pasoId={step?.id}
+                                archivosPaso={archivosPaso}
                             />
                         </div>
                     )}
@@ -494,12 +491,7 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
                                             setArchivoSubir(null);
                                             setNombreArchivo('');
                                             const archivos = await stepService.getArchivosByPaso(step.id);
-                                            setArchivosPaso(archivos.map((a: any) => ({
-                                                id: a.id,
-                                                nombre: a.nombre,
-                                                nombreArchivo: a.nombreArchivo,
-                                                tipo: a.tipo
-                                            })));
+                                            setArchivosPaso(archivos);
                                         } catch (error) {
                                             console.error('Error uploading file:', error);
                                             toast.error('Error al subir archivo');

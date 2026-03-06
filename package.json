@@ -19,6 +19,7 @@
     "clsx": "^2.1.1",
     "dompurify": "^3.3.1",
     "mermaid": "^11.12.2",
+    "pdfjs-dist": "^5.5.207",
     "quill-table": "^1.0.0",
     "react": "^19.2.0",
     "react-d3-tree": "^3.6.6",

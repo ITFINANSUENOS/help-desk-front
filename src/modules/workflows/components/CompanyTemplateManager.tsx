@@ -6,7 +6,7 @@ import { templateService } from '../../templates/services/template.service';
 import { toast } from 'sonner';
 import { useForm, Controller } from 'react-hook-form';
 import { Select } from '../../../shared/components/Select';
-import { companyService } from '../../companies/services/company.service';
+import { companyService, type Company } from '../../companies/services/company.service';
 
 interface CompanyTemplateManagerProps {
     flujoId: number;
@@ -24,7 +24,7 @@ interface TemplateData {
 
 export const CompanyTemplateManager = ({ flujoId }: CompanyTemplateManagerProps) => {
     const [templates, setTemplates] = useState<TemplateData[]>([]);
-    const [companies, setCompanies] = useState<any[]>([]);
+    const [companies, setCompanies] = useState<Company[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isUploading, setIsUploading] = useState(false);
 
@@ -91,7 +91,7 @@ export const CompanyTemplateManager = ({ flujoId }: CompanyTemplateManagerProps)
             await templateService.deleteTemplate(id);
             toast.success("Plantilla eliminada");
             loadTemplates();
-        } catch (error) {
+        } catch {
             toast.error("Error al eliminar");
         }
     };

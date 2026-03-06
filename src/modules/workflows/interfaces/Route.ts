@@ -21,4 +21,4 @@ export interface CreateRouteDto {
     descripcion?: string;
 }
 
-export interface UpdateRouteDto extends Partial<CreateRouteDto> { }
+export interface UpdateRouteDto extends Partial<CreateRouteDto> {} // eslint-disable-line @typescript-eslint/no-empty-object-type

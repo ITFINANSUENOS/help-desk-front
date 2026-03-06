@@ -22,28 +22,28 @@ export const RouteStepsModal = ({ isOpen, onClose, route, flujoId }: RouteStepsM
     const [selectedStepId, setSelectedStepId] = useState<string>('');
     const [order, setOrder] = useState<number>(1);
     useEffect(() => {
-        if (isOpen) {
-            loadData();
-        }
-    }, [isOpen]);
+        if (!isOpen) return;
 
-    const loadData = async () => {
-        try {
-            const [rSteps, allSteps] = await Promise.all([
-                routeService.getRouteSteps(route.id),
-                stepService.getSteps({ flujoId, limit: 100 })
-            ]);
-            setRouteSteps(rSteps);
-            setAvailableSteps(allSteps.data);
+        const loadData = async () => {
+            try {
+                const [rSteps, allSteps] = await Promise.all([
+                    routeService.getRouteSteps(route.id),
+                    stepService.getSteps({ flujoId, limit: 100 })
+                ]);
+                setRouteSteps(rSteps);
+                setAvailableSteps(allSteps.data);
 
-            // Auto-increment order based on existing steps
-            const maxOrder = rSteps.reduce((max, s) => Math.max(max, s.orden), 0);
-            setOrder(maxOrder + 1);
-        } catch (error) {
-            console.error(error);
-            toast.error('Error al cargar datos');
-        }
-    };
+                // Auto-increment order based on existing steps
+                const maxOrder = rSteps.reduce((max, s) => Math.max(max, s.orden), 0);
+                setOrder(maxOrder + 1);
+            } catch (err) {
+                console.error('Error loading route steps:', err);
+                toast.error('Error al cargar pasos de la ruta');
+            }
+        };
+
+        loadData();
+    }, [isOpen, route.id, flujoId]);
 
     const handleAdd = async (e: React.FormEvent) => {
         e.preventDefault();

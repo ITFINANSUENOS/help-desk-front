@@ -3,7 +3,7 @@ import type { Route, CreateRouteDto, UpdateRouteDto, RouteStep } from '../interf
 
 export const routeService = {
     async getRoutes(flujoId?: number): Promise<Route[]> {
-        const params: any = {};
+        const params: Record<string, number> = {};
         if (flujoId) params['filter[flujo.id]'] = flujoId;
 
         const response = await api.get<{ data: Route[] }>('/workflows/routes', { params });

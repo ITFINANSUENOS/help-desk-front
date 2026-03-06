@@ -72,17 +72,18 @@ export const TransitionModal = ({ isOpen, onClose, stepOrigenId, stepOrigenNombr
     const onSubmit = async (data: CreateTransitionDto) => {
         try {
             // Sanitize payload
-            const cleanPayload: any = {
+            const cleanPayload: CreateTransitionDto = {
                 pasoOrigenId: stepOrigenId,
                 condicionNombre: data.condicionNombre,
                 condicionClave: data.condicionClave,
+                tipoDestino: data.tipoDestino,
                 estado: 1
             };
 
             if (data.tipoDestino === 'paso' && data.pasoDestinoId) {
                 cleanPayload.pasoDestinoId = Number(data.pasoDestinoId);
             } else if (data.tipoDestino === 'ruta' && data.rutaDestinoId) {
-                cleanPayload.rutaId = Number(data.rutaDestinoId);
+                cleanPayload.rutaDestinoId = Number(data.rutaDestinoId);
             }
 
             await transitionService.createTransition(cleanPayload);

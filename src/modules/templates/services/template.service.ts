@@ -45,6 +45,10 @@ class TemplateService {
     async deleteTemplate(id: number): Promise<void> {
         await api.delete(`${this.baseUrl}/${id}`);
     }
+
+    async updateCampoCoordenadas(campoId: number, coordX: number, coordY: number): Promise<void> {
+        await api.patch(`${this.baseUrl}/campo/${campoId}/coordenadas`, { coordX, coordY });
+    }
 }
 
 export const templateService = new TemplateService();

@@ -1,6 +1,16 @@
 import { api } from '../../../core/api/api';
 import type { Step, CreateStepDto, UpdateStepDto, StepFilter, StepListResponse } from '../interfaces/Step';
 
+export interface PasoArchivo {
+    id: number;
+    nombre: string;
+    nombreArchivo: string;
+    tipo: 'descargable' | 'plantilla';
+    estado: number;
+    pasoId: number;
+    orden: number;
+}
+
 export const stepService = {
     async getSteps(filter: StepFilter = {}): Promise<StepListResponse> {
         const params: Record<string, string | number> = {};
@@ -23,7 +33,7 @@ export const stepService = {
         // Note: Backend might need specific sort param, assuming default sort by ID or implementing logic. 
         // Ideally we sort by 'orden'. If backend doesn't support 'sort', we might need to sort client-side.
 
-        const response = await api.get<{ data: Step[], meta: any }>('/workflows/steps', { params });
+        const response = await api.get<{ data: Step[], meta: Record<string, number> }>('/workflows/steps', { params });
 
         const data = response.data.data || [];
         // Ensure meta exists or provide defaults
@@ -79,12 +89,12 @@ export const stepService = {
         });
     },
 
-    async getArchivosByPaso(pasoId: number): Promise<any[]> {
-        const response = await api.get(`/workflows/steps/${pasoId}/archivos`);
+    async getArchivosByPaso(pasoId: number): Promise<PasoArchivo[]> {
+        const response = await api.get<PasoArchivo[]>(`/workflows/steps/${pasoId}/archivos`);
         return response.data.data || response.data || [];
     },
 
-    async uploadArchivo(pasoId: number, file: File, nombre: string, tipo: 'descargable' | 'plantilla'): Promise<any> {
+    async uploadArchivo(pasoId: number, file: File, nombre: string, tipo: 'descargable' | 'plantilla'): Promise<PasoArchivo> {
         const formData = new FormData();
         formData.append('archivo', file);
         formData.append('nombre', nombre);
