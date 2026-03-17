@@ -31,6 +31,7 @@ const MappingRulesPage = lazy(() => import('../modules/mapping-rules/pages/Mappi
 const NotificationsPage = lazy(() => import('../modules/notifications/pages/NotificationsPage'));
 const ReportsPage = lazy(() => import('../modules/reports/pages/ReportsPage'));
 const FlowOpenTicketsPage = lazy(() => import('../modules/reports/pages/FlowOpenTicketsPage'));
+const PriceListsPage = lazy(() => import('../modules/price-lists/pages/PriceListsPage'));
 
 
 export const appRoutes: RouteObject[] = [
@@ -245,6 +246,14 @@ export const appRoutes: RouteObject[] = [
                         element: (
                             <Suspense fallback={<PageLoader />}>
                                 <FlowOpenTicketsPage />
+                            </Suspense>
+                        )
+                    },
+                    {
+                        path: '/price-lists',
+                        element: (
+                            <Suspense fallback={<PageLoader />}>
+                                <PriceListsPage />
                             </Suspense>
                         )
                     },
