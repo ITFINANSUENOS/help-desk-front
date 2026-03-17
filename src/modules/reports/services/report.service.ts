@@ -16,7 +16,7 @@ interface FlowOpenTicketsData {
         paso_id: number;
         paso_nombre: string;
         paso_orden: number;
-        tickets_abiertos: number;
+        tickets_count: number;
         tickets: {
             tick_id: number;
             tick_titulo: string;
@@ -25,10 +25,11 @@ interface FlowOpenTicketsData {
             dias_abierto: number;
         }[];
     }[];
-    total_abiertos: number;
+    total_tickets: number;
     filtros: {
         fechaInicio?: string;
         fechaFin?: string;
+        estado: string;
     };
 }
 
@@ -41,16 +42,11 @@ class ReportService {
         await this.downloadFile('/tickets/export/comments', `Reporte_Comentarios_${new Date().toISOString().split('T')[0]}.xlsx`);
     }
 
-    async exportFlowUsage(): Promise<void> {
-        await this.downloadFile('/workflows/reporte/uso/export', `Reporte_Flujos_En_Uso_${new Date().toISOString().split('T')[0]}.xlsx`);
-    }
-
-    async getFlowOpenTickets(flujoId: number, fechaInicio?: string, fechaFin?: string, estado?: string, regionalId?: number): Promise<FlowOpenTicketsData> {
+    async getFlowOpenTickets(flujoId: number, fechaInicio?: string, fechaFin?: string, estado?: string): Promise<FlowOpenTicketsData> {
         const params = new URLSearchParams();
         if (fechaInicio) params.append('fechaInicio', fechaInicio);
         if (fechaFin) params.append('fechaFin', fechaFin);
         if (estado) params.append('estado', estado);
-        if (regionalId) params.append('regionalId', String(regionalId));
         
         const queryString = params.toString();
         const url = queryString 
