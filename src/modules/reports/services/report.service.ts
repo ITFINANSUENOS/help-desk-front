@@ -1,8 +1,8 @@
 import { api } from "../../../core/api/api";
 
 interface Regional {
-    reg_id: number;
-    reg_nom: string;
+    id: number;
+    nombre: string;
 }
 
 interface FlowOpenTicketsData {
@@ -16,7 +16,7 @@ interface FlowOpenTicketsData {
         paso_id: number;
         paso_nombre: string;
         paso_orden: number;
-        tickets_count: number;
+        tickets_abiertos: number;
         tickets: {
             tick_id: number;
             tick_titulo: string;
@@ -25,12 +25,10 @@ interface FlowOpenTicketsData {
             dias_abierto: number;
         }[];
     }[];
-    total_tickets: number;
+    total_abiertos: number;
     filtros: {
         fechaInicio?: string;
         fechaFin?: string;
-        estado: string;
-        regionalId?: number;
     };
 }
 
