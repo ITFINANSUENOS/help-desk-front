@@ -103,6 +103,7 @@ export function Sidebar({ isCollapsed, toggleCollapse, isMobileOpen, closeMobile
         { to: '/organigrama', icon: 'account_tree', label: 'Organigrama', subject: 'Organigrama' as any, action: 'manage' },
         { to: '/error-types', icon: 'quick_phrases', label: 'Tipos de Error', subject: 'FastAnswer' as any, action: 'manage' },
         { to: '/mapping-rules', icon: 'rule', label: 'Reglas de Mapeo', subject: 'Rule' as any, action: 'manage' },
+        { to: "/reports/flow-open", icon: "pending_actions", label: "Tickets Abiertos por Flujo", subject: 'Report', action: 'read' },
         {
             to: '/reports',
             icon: 'bar_chart',
@@ -130,7 +131,7 @@ export function Sidebar({ isCollapsed, toggleCollapse, isMobileOpen, closeMobile
                 { to: '/reports/dashboard/novedades', icon: 'bug_report', label: 'Novedades' },
             ],
         },
-        { to: '/settings', icon: 'settings', label: 'Settings' },
+        { to: "/settings", icon: "settings", label: "Settings" }
     ];
 
     const filteredItems = menuItems.filter((item) => hasPermission(item.subject, item.action));
