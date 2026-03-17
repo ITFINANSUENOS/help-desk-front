@@ -52,7 +52,6 @@ export function Sidebar({ isCollapsed, toggleCollapse, isMobileOpen, closeMobile
         { to: "/error-types", icon: "quick_phrases", label: "Tipos de Error", subject: 'FastAnswer' as any, action: 'manage' },
         { to: "/mapping-rules", icon: "rule", label: "Reglas de Mapeo", subject: 'Rule' as any, action: 'manage' },
         { to: "/reports", icon: "bar_chart", label: "Reportes", subject: 'Report', action: 'read' },
-        { to: "/reports/flow-open", icon: "pending_actions", label: "Tickets Abiertos por Flujo", subject: 'Report', action: 'read' },
 
         { to: "/settings", icon: "settings", label: "Settings" }
     ];
