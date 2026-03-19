@@ -8,7 +8,7 @@ import { StatsCard } from '../../../modules/dashboard/components/StatsCard';
 import { PageLoader } from '../../../shared/components/PageLoader';
 import { reportService } from '../services/report.service';
 import { workflowService } from '../../workflows/services/workflow.service';
-import type { Workflow, WorkflowListResponse } from '../../workflows/interfaces/Workflow';
+import type { Workflow } from '../../workflows/interfaces/Workflow';
 
 interface FlowTicket {
     tick_id: number;
@@ -39,12 +39,19 @@ interface FlowData {
         fechaInicio?: string;
         fechaFin?: string;
         estado: string;
+        regionalId?: number;
     };
+}
+
+interface Regional {
+    reg_id: number;
+    reg_nom: string;
 }
 
 export default function FlowOpenTicketsPage() {
     const { setTitle } = useLayout();
     const [workflows, setWorkflows] = useState<Workflow[]>([]);
+    const [regionales, setRegionales] = useState<Regional[]>([]);
     const [selectedWorkflow, setSelectedWorkflow] = useState<string>('');
     const [flowData, setFlowData] = useState<FlowData | null>(null);
     const [loading, setLoading] = useState(false);
@@ -56,6 +63,7 @@ export default function FlowOpenTicketsPage() {
     const [fechaInicio, setFechaInicio] = useState<string>('');
     const [fechaFin, setFechaFin] = useState<string>('');
     const [estado, setEstado] = useState<string>('Abierto');
+    const [regionalId, setRegionalId] = useState<number | undefined>(undefined);
 
     const estadoOptions = [
         { value: 'Abierto', label: 'Abierto' },
@@ -63,22 +71,35 @@ export default function FlowOpenTicketsPage() {
         { value: 'Pausado', label: 'Pausado' },
     ];
 
+    const regionalesOptions = regionales.map(r => ({
+        value: r.reg_id as number,
+        label: r.reg_nom
+    }));
+
+    console.log('Regionales loaded:', regionales, 'Options:', regionalesOptions);
+
     useEffect(() => {
         setTitle('Tickets por Flujo');
     }, [setTitle]);
 
     useEffect(() => {
-        const loadWorkflows = async () => {
+        const loadData = async () => {
             try {
-                const result: WorkflowListResponse = await workflowService.getWorkflows({ estado: 1, limit: 100 });
-                setWorkflows(result.data || []);
+                const [workflowsResult, regionalesResult] = await Promise.all([
+                    workflowService.getWorkflows({ estado: 1, limit: 100 }),
+                    reportService.getRegionales().catch(() => [])
+                ]);
+                setWorkflows(workflowsResult.data || []);
+                setRegionales(regionalesResult || []);
             } catch (error) {
-                console.error('Error loading workflows', error);
+                console.error('Error loading data', error);
+                setWorkflows([]);
+                setRegionales([]);
             } finally {
                 setLoadingWorkflows(false);
             }
         };
-        loadWorkflows();
+        loadData();
     }, []);
 
     const handleWorkflowChange = (value: string | number | undefined) => {
@@ -99,7 +120,8 @@ export default function FlowOpenTicketsPage() {
                 flujoId,
                 fechaInicio || undefined,
                 fechaFin || undefined,
-                estado
+                estado,
+                regionalId
             );
             setFlowData(data);
             setExpandedSteps(new Set(data.pasos.map((p: PasoData) => p.paso_id)));
@@ -120,6 +142,7 @@ export default function FlowOpenTicketsPage() {
         setFechaInicio('');
         setFechaFin('');
         setEstado('Abierto');
+        setRegionalId(undefined);
         if (selectedWorkflow) {
             loadFlowDataData(Number(selectedWorkflow));
         }
@@ -223,6 +246,16 @@ export default function FlowOpenTicketsPage() {
                             label="Estado"
                         />
                     </div>
+
+                    <div className="w-full md:w-40">
+                        <Select
+                            value={regionalId}
+                            onChange={(val) => setRegionalId(val as number | undefined)}
+                            options={regionalesOptions}
+                            label="Regional"
+                            placeholder="Todas"
+                        />
+                    </div>
                     
                     <div className="w-full md:w-40">
                         <Input
@@ -266,12 +299,17 @@ export default function FlowOpenTicketsPage() {
                 </div>
 
                 {/* Filtros activos */}
-                {flowData?.filtros && (flowData.filtros.fechaInicio || flowData.filtros.fechaFin || flowData.filtros.estado) && (
+                {flowData?.filtros && (flowData.filtros.fechaInicio || flowData.filtros.fechaFin || flowData.filtros.estado || flowData.filtros.regionalId) && (
                     <div className="mt-3 flex items-center gap-2 flex-wrap">
                         <span className="text-xs text-gray-500">Filtros activos:</span>
                         {flowData.filtros.estado && flowData.filtros.estado !== 'Abierto' && (
                             <span className="px-2 py-1 bg-brand-teal/10 text-brand-teal rounded text-xs font-medium">
                                 Estado: {flowData.filtros.estado}
+                            </span>
+                        )}
+                        {flowData.filtros.regionalId && (
+                            <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-medium">
+                                Regional: {regionalesOptions.find(r => r.value === flowData.filtros.regionalId)?.label || flowData.filtros.regionalId}
                             </span>
                         )}
                         {flowData.filtros.fechaInicio && (
