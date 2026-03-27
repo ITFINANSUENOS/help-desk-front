@@ -194,8 +194,10 @@ export default function TicketDetailPage() {
         }
     };
 
-    // Check if user is admin (rolId === 3)
-    const isAdmin = user?.rolId === 3;
+    // Check if user has reassign permission
+    const canReassign = user?.permissions?.some(
+        (p) => p.action === 'reassign' && p.subject === 'Ticket'
+    );
 
     return (
         <>
@@ -250,7 +252,7 @@ export default function TicketDetailPage() {
                         <Icon name="print" className="mr-2" />
                         Imprimir
                     </Button>
-                    {isAdmin && (
+                    {canReassign && (
                         <Button variant="secondary" onClick={handleOpenReassignModal}>
                             <Icon name="swap_horiz" className="mr-2" />
                             Reasignar
