@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ticketService } from '../services/ticket.service';
-import type { TicketDetail, TicketTimelineItem, TicketStatus, TicketPriority } from '../interfaces/Ticket';
+import type { TicketDetail, TicketTimelineItem, TicketStatus, TicketPriority, ParallelTask } from '../interfaces/Ticket';
 import { Button } from '../../../shared/components/Button';
 import { TicketWorkflow } from '../components/TicketWorkflow';
 import { TicketTimeline } from '../components/TicketTimeline';
@@ -12,6 +12,8 @@ import { useLayout } from '../../../core/layout/context/LayoutContext';
 import TagManagementModal from '../components/TagManagementModal';
 import { Icon } from '../../../shared/components/Icon';
 import { useAuth } from '../../auth/context/useAuth';
+import { ReassignTicketModal } from '../components/ReassignTicketModal';
+import { toast } from 'sonner';
 
 export default function TicketDetailPage() {
     const { setTitle } = useLayout();
@@ -24,6 +26,9 @@ export default function TicketDetailPage() {
     const [activeFilter, setActiveFilter] = useState<'all' | 'comments' | 'history' | 'document'>('comments');
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isTagModalOpen, setIsTagModalOpen] = useState(false);
+    const [isReassignModalOpen, setIsReassignModalOpen] = useState(false);
+    const [parallelTasks, setParallelTasks] = useState<ParallelTask[]>([]);
+    const [reassignLoading, setReassignLoading] = useState(false);
     const [pdfUrl, setPdfUrl] = useState<string | null>(null);
 
     useEffect(() => {
@@ -153,6 +158,45 @@ export default function TicketDetailPage() {
         window.print();
     };
 
+    const handleOpenReassignModal = async () => {
+        if (ticket?.isParallelStep) {
+            try {
+                const tasks = await ticketService.getParallelTasks(ticket.id);
+                setParallelTasks(tasks);
+            } catch (error) {
+                console.error("Error fetching parallel tasks:", error);
+                toast.error("Error al cargar tareas paralelas");
+                return;
+            }
+        }
+        setIsReassignModalOpen(true);
+    };
+
+    const handleReassign = async (data: {
+        nuevoUsuarioId: number;
+        tipoAsignacion: 'principal' | 'paralelo';
+        paraleloId?: number;
+        comentario?: string;
+        crearNuevoParalelo?: boolean;
+    }) => {
+        if (!ticket) return;
+        try {
+            setReassignLoading(true);
+            await ticketService.reassignTicket(ticket.id, data);
+            toast.success("Operación realizada exitosamente");
+            setIsReassignModalOpen(false);
+            fetchData(); // Refresh ticket data
+        } catch (error) {
+            console.error("Error reassigning ticket:", error);
+            toast.error("Error al reasignar el ticket");
+        } finally {
+            setReassignLoading(false);
+        }
+    };
+
+    // Check if user is admin (rolId === 3)
+    const isAdmin = user?.rolId === 3;
+
     return (
         <>
             <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-start print:mb-2 text-black">
@@ -206,6 +250,12 @@ export default function TicketDetailPage() {
                         <Icon name="print" className="mr-2" />
                         Imprimir
                     </Button>
+                    {isAdmin && (
+                        <Button variant="secondary" onClick={handleOpenReassignModal}>
+                            <Icon name="swap_horiz" className="mr-2" />
+                            Reasignar
+                        </Button>
+                    )}
                     {(
                         (ticket && user && (
                             Number(user.id) === Number(ticket.assignedToId) ||
@@ -345,6 +395,16 @@ export default function TicketDetailPage() {
                 ticketId={ticket.id}
                 currentTags={ticket.tags}
                 onTagAssigned={fetchData}
+            />
+
+            <ReassignTicketModal
+                isOpen={isReassignModalOpen}
+                onClose={() => setIsReassignModalOpen(false)}
+                onConfirm={handleReassign}
+                isLoading={reassignLoading}
+                isParallelStep={ticket.isParallelStep || false}
+                currentAssignee={effectiveAssignedToName}
+                parallelTasks={parallelTasks}
             />
         </>
     );

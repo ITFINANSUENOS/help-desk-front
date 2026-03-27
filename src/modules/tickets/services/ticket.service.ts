@@ -416,6 +416,10 @@ export const ticketService = {
         await api.delete(`/tickets/${ticketId}/tags/${tagId}`);
     },
 
+    async reassignTicket(ticketId: number, data: { nuevoUsuarioId: number; tipoAsignacion?: 'principal' | 'paralelo'; paraleloId?: number; comentario?: string; crearNuevoParalelo?: boolean }): Promise<void> {
+        await api.post(`/tickets/${ticketId}/reassign`, data);
+    },
+
     async downloadFile(url: string, filename: string): Promise<void> {
         // If the URL is absolute, api.get should handle it.
         const response = await api.get(url, { responseType: 'blob' });
