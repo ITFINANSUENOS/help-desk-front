@@ -1,6 +1,13 @@
 import { api } from '../../../core/api/api';
 import type { ListaPrecio, CreateListaPrecioDto, UpdateListaPrecioDto } from '../interfaces/PriceList';
 
+export interface PriceListConfig {
+  id: number;
+  tipo: 'general' | 'promocional' | 'finansuenos';
+  departamentoId: number;
+  subcategoriaId?: number | null;
+}
+
 export interface PaginatedResponse<T> {
   data: T[];
   meta: {
@@ -16,7 +23,6 @@ class PriceListService {
     page?: number;
     limit?: number;
     search?: string;
-    marca?: string;
     tipo?: string;
     es_vigente?: number;
   }): Promise<PaginatedResponse<ListaPrecio>> {
@@ -24,7 +30,6 @@ class PriceListService {
     if (params?.page) queryParams.set('page', params.page.toString());
     if (params?.limit) queryParams.set('limit', params.limit.toString());
     if (params?.search) queryParams.set('search', params.search);
-    if (params?.marca) queryParams.set('filter[marca]', params.marca);
     if (params?.tipo) queryParams.set('filter[tipo]', params.tipo);
     if (params?.es_vigente !== undefined) queryParams.set('filter[es_vigente]', params.es_vigente.toString());
 
@@ -37,19 +42,8 @@ class PriceListService {
     return response.data;
   }
 
-  async getMarcas(): Promise<string[]> {
-    const response = await api.get('/price-lists/marcas');
-    return response.data.data;
-  }
-
-  async getByMarca(marca: string, tipo?: string): Promise<ListaPrecio[]> {
-    const queryParams = tipo ? `?tipo=${tipo}` : '';
-    const response = await api.get(`/price-lists/marca/${marca}${queryParams}`);
-    return response.data.data;
-  }
-
-  async getVigente(marca: string, tipo: string = 'venta'): Promise<ListaPrecio | null> {
-    const response = await api.get(`/price-lists/marca/${marca}/vigente?tipo=${tipo}`);
+  async getVigente(tipo: string): Promise<ListaPrecio | null> {
+    const response = await api.get(`/price-lists/vigente?tipo=${tipo}`);
     return response.data.data;
   }
 
@@ -80,6 +74,23 @@ class PriceListService {
     link.click();
     link.remove();
     window.URL.revokeObjectURL(blobUrl);
+  }
+
+  async getConfig(): Promise<PriceListConfig[]> {
+    const response = await api.get('/price-lists/config');
+    return response.data;
+  }
+
+  async updateConfig(tipo: string, departamentoId: number, subcategoriaId?: number | null): Promise<void> {
+    await api.put(`/price-lists/config/${tipo}`, { departamentoId, subcategoriaId });
+  }
+
+  async updateTicketSubcategory(subcategoriaId: number | null): Promise<void> {
+    // Update all price list configs with the same subcategoriaId
+    const configs = await this.getConfig();
+    for (const config of configs) {
+      await api.put(`/price-lists/config/${config.tipo}`, { departamentoId: config.departamentoId, subcategoriaId });
+    }
   }
 }
 

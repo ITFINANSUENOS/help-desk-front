@@ -5,19 +5,23 @@ import { ConfirmDialog } from '../../../shared/components/ConfirmDialog';
 import { FilterBar, type FilterConfig } from '../../../shared/components/FilterBar';
 import { priceListService } from '../services/price-list.service';
 import { CreatePriceListModal } from '../components/CreatePriceListModal';
+import { ReportErrorModal } from '../components/ReportErrorModal';
 import type { ListaPrecio, CreateListaPrecioDto } from '../interfaces/PriceList';
 import { useLayout } from '../../../core/layout/context/LayoutContext';
 import { Icon } from '../../../shared/components/Icon';
+import { usePermissions } from '../../../shared/hooks/usePermissions';
 
 export default function PriceListsPage() {
   const { setTitle } = useLayout();
+  const { can } = usePermissions();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [priceListToDelete, setPriceListToDelete] = useState<ListaPrecio | null>(null);
+  const [showReportErrorModal, setShowReportErrorModal] = useState(false);
+  const [priceListForError, setPriceListForError] = useState<ListaPrecio | null>(null);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [tipoFilter, setTipoFilter] = useState<string>('all');
-  const [marcaFilter, setMarcaFilter] = useState<string>('all');
   const [vigenteFilter, setVigenteFilter] = useState<string>('all');
 
   const [page, setPage] = useState(1);
@@ -26,25 +30,11 @@ export default function PriceListsPage() {
   const [totalPages, setTotalPages] = useState(1);
 
   const [priceLists, setPriceLists] = useState<ListaPrecio[]>([]);
-  const [marcas, setMarcas] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     setTitle('Listas de Precios');
   }, [setTitle]);
-
-  const loadMarcas = useCallback(async () => {
-    try {
-      const marcasData = await priceListService.getMarcas();
-      setMarcas(marcasData);
-    } catch (error) {
-      console.error('Error loading marcas:', error);
-    }
-  }, []);
-
-  useEffect(() => {
-    loadMarcas();
-  }, [loadMarcas]);
 
   const loadPriceLists = useCallback(async () => {
     setLoading(true);
@@ -52,7 +42,6 @@ export default function PriceListsPage() {
       const params: any = { page, limit };
       if (searchQuery) params.search = searchQuery;
       if (tipoFilter !== 'all') params.tipo = tipoFilter;
-      if (marcaFilter !== 'all') params.marca = marcaFilter;
       if (vigenteFilter !== 'all') params.es_vigente = parseInt(vigenteFilter);
 
       const response = await priceListService.getAll(params);
@@ -64,11 +53,11 @@ export default function PriceListsPage() {
     } finally {
       setLoading(false);
     }
-  }, [searchQuery, tipoFilter, marcaFilter, vigenteFilter, page, limit]);
+  }, [searchQuery, tipoFilter, vigenteFilter, page, limit]);
 
   useEffect(() => {
     setPage(1);
-  }, [searchQuery, tipoFilter, marcaFilter, vigenteFilter]);
+  }, [searchQuery, tipoFilter, vigenteFilter]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -83,7 +72,6 @@ export default function PriceListsPage() {
     try {
       await priceListService.create(data);
       await loadPriceLists();
-      await loadMarcas();
     } catch (error) {
       console.error('Error creating price list:', error);
       throw error;
@@ -116,7 +104,7 @@ export default function PriceListsPage() {
 
   const handleDownload = async (priceList: ListaPrecio) => {
     if (priceList.archivoUrl) {
-      const filename = priceList.archivoNombre || `Lista_${priceList.marca}.pdf`;
+      const filename = priceList.archivoNombre || `Lista_${priceList.id}.pdf`;
       try {
         const response = await fetch(priceList.archivoUrl);
         const blob = await response.blob();
@@ -146,38 +134,56 @@ export default function PriceListsPage() {
     }
   };
 
+  const handleReportError = (priceList: ListaPrecio) => {
+    setPriceListForError(priceList);
+    setShowReportErrorModal(true);
+  };
+
+  const getTipoLabel = (tipo: string) => {
+    switch (tipo) {
+      case 'general': return 'General';
+      case 'promocional': return 'Promocional';
+      case 'finansuenos': return 'Finansueños';
+      default: return tipo;
+    }
+  };
+
+  const getTipoBadgeColor = (tipo: string) => {
+    switch (tipo) {
+      case 'general': return 'bg-blue-100 text-blue-800';
+      case 'promocional': return 'bg-green-100 text-green-800';
+      case 'finansuenos': return 'bg-purple-100 text-purple-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const formatDateRange = (inicio: string | null, fin: string | null) => {
+    if (!inicio && !fin) return '-';
+    const f = (d: string) => new Date(d).toLocaleDateString('es-CO');
+    const i = inicio ? f(inicio) : '...';
+    const f2 = fin ? f(fin) : '...';
+    return `${i} - ${f2}`;
+  };
+
   const columns = [
     {
-      key: 'marca',
-      header: 'Marca',
-      render: (p: ListaPrecio) => (
-        <span className="font-semibold text-gray-900">{p.marca}</span>
-      ),
-    },
-    {
-      key: 'nombre',
-      header: 'Nombre',
-      render: (p: ListaPrecio) => p.nombre || '-',
+      key: 'descripcion',
+      header: 'Descripción',
+      render: (p: ListaPrecio) => p.descripcion || '-',
     },
     {
       key: 'tipo',
       header: 'Tipo',
       render: (p: ListaPrecio) => (
-        <span
-          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-            p.tipo === 'venta'
-              ? 'bg-blue-100 text-blue-800'
-              : 'bg-purple-100 text-purple-800'
-          }`}
-        >
-          {p.tipo === 'venta' ? 'Venta' : 'Costos'}
+        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTipoBadgeColor(p.tipo)}`}>
+          {getTipoLabel(p.tipo)}
         </span>
       ),
     },
     {
-      key: 'fechaVigencia',
+      key: 'vigencia',
       header: 'Vigencia',
-      render: (p: ListaPrecio) => p.fechaVigencia || '-',
+      render: (p: ListaPrecio) => formatDateRange(p.fechaInicio, p.fechaFin),
     },
     {
       key: 'esVigente',
@@ -213,7 +219,14 @@ export default function PriceListsPage() {
               <Icon name="download" className="text-[20px]" />
             </button>
           )}
-          {p.esVigente !== 1 && (
+          <button
+            className="text-gray-400 hover:text-red-600"
+            onClick={() => handleReportError(p)}
+            title="Reportar error"
+          >
+            <Icon name="error" className="text-[20px]" />
+          </button>
+          {can('manage', 'ListaPrecio') && p.esVigente !== 1 && (
             <button
               className="text-gray-400 hover:text-green-600"
               onClick={() => handleSetVigente(p)}
@@ -222,13 +235,15 @@ export default function PriceListsPage() {
               <Icon name="check_circle" className="text-[20px]" />
             </button>
           )}
-          <button
-            className="text-gray-400 hover:text-red-600"
-            onClick={() => handleDeleteClick(p)}
-            title="Eliminar"
-          >
-            <Icon name="delete" className="text-[20px]" />
-          </button>
+          {can('manage', 'ListaPrecio') && (
+            <button
+              className="text-gray-400 hover:text-red-600"
+              onClick={() => handleDeleteClick(p)}
+              title="Eliminar"
+            >
+              <Icon name="delete" className="text-[20px]" />
+            </button>
+          )}
         </div>
       ),
     },
@@ -238,7 +253,7 @@ export default function PriceListsPage() {
     {
       type: 'search',
       name: 'search',
-      placeholder: 'Buscar por marca o nombre...',
+      placeholder: 'Buscar por descripción...',
       value: searchQuery,
       onChange: (val) => setSearchQuery(val as string),
     },
@@ -249,18 +264,9 @@ export default function PriceListsPage() {
       onChange: (val) => setTipoFilter(val as string),
       options: [
         { label: 'Todos los Tipos', value: 'all' },
-        { label: 'Venta', value: 'venta' },
-        { label: 'Costos', value: 'costos' },
-      ],
-    },
-    {
-      type: 'select',
-      name: 'marca',
-      value: marcaFilter,
-      onChange: (val) => setMarcaFilter(val as string),
-      options: [
-        { label: 'Todas las Marcas', value: 'all' },
-        ...marcas.map((m) => ({ label: m, value: m })),
+        { label: 'General', value: 'general' },
+        { label: 'Promocional', value: 'promocional' },
+        { label: 'Finansueños', value: 'finansuenos' },
       ],
     },
     {
@@ -282,13 +288,15 @@ export default function PriceListsPage() {
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Listas de Precios</h2>
           <p className="mt-1 text-sm text-gray-500">
-            Gestiona las listas de precios por marca. Los coordinadores comerciales pueden subir y actualizar las listas.
+            Gestiona las listas de precios. Los coordinadores pueden subir y actualizar las listas.
           </p>
         </div>
-        <Button variant="brand" onClick={() => setShowCreateModal(true)}>
-          <Icon name="add" className="mr-2" />
-          Nueva Lista
-        </Button>
+        {can('manage', 'ListaPrecio') && (
+          <Button variant="brand" onClick={() => setShowCreateModal(true)}>
+            <Icon name="add" className="mr-2" />
+            Nueva Lista
+          </Button>
+        )}
       </div>
 
       <CreatePriceListModal
@@ -305,9 +313,18 @@ export default function PriceListsPage() {
         }}
         onConfirm={confirmDelete}
         title="Eliminar Lista de Precios"
-        message={`¿Estás seguro de que deseas eliminar la lista de "${priceListToDelete?.marca}"? Esta acción no se puede deshacer.`}
+        message={`¿Estás seguro de que deseas eliminar la lista "${priceListToDelete?.descripcion || priceListToDelete?.tipo}"? Esta acción no se puede deshacer.`}
         variant="danger"
         confirmText="Eliminar"
+      />
+
+      <ReportErrorModal
+        isOpen={showReportErrorModal}
+        onClose={() => {
+          setShowReportErrorModal(false);
+          setPriceListForError(null);
+        }}
+        priceList={priceListForError}
       />
 
       <FilterBar filters={filterConfig} className="mb-6" />

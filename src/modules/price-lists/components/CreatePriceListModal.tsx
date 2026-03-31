@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import { Button } from '../../../shared/components/Button';
 import { Modal } from '../../../shared/components/Modal';
 import { Icon } from '../../../shared/components/Icon';
-import { priceListService } from '../services/price-list.service';
+import { Select, type Option } from '../../../shared/components/Select';
 import type { ListaPrecio, CreateListaPrecioDto } from '../interfaces/PriceList';
+import { departmentService } from '../../../shared/services/catalog.service';
 
 interface CreatePriceListModalProps {
   isOpen: boolean;
@@ -12,42 +13,55 @@ interface CreatePriceListModalProps {
   priceList?: ListaPrecio | null;
 }
 
+const tipoOptions: Option[] = [
+  { value: 'general', label: 'General' },
+  { value: 'promocional', label: 'Promocional' },
+  { value: 'finansuenos', label: 'Finansueños' },
+];
+
 export function CreatePriceListModal({ isOpen, onClose, onSubmit, priceList }: CreatePriceListModalProps) {
   const [loading, setLoading] = useState(false);
-  const [marcas, setMarcas] = useState<string[]>([]);
-  const [showNewMarca, setShowNewMarca] = useState(false);
+  const [departments, setDepartments] = useState<{ id: number; nombre: string }[]>([]);
   const [formData, setFormData] = useState<CreateListaPrecioDto>({
-    marca: '',
-    nombre: '',
-    tipo: 'venta',
-    fechaVigencia: '',
+    descripcion: '',
+    tipo: 'general',
+    fechaInicio: '',
+    fechaFin: '',
     archivoUrl: '',
     archivoNombre: '',
+    departamentoId: undefined,
   });
 
   useEffect(() => {
     if (isOpen) {
-      priceListService.getMarcas().then(setMarcas).catch(console.error);
-      
+      departmentService.getAllActive().then((depts) => {
+        setDepartments(depts.map((d: any) => ({ id: d.id, nombre: d.nombre })));
+      });
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (isOpen) {
       if (priceList) {
         setFormData({
-          marca: priceList.marca,
-          nombre: priceList.nombre || '',
+          descripcion: priceList.descripcion || '',
           tipo: priceList.tipo,
-          fechaVigencia: priceList.fechaVigencia || '',
+          fechaInicio: priceList.fechaInicio || '',
+          fechaFin: priceList.fechaFin || '',
           archivoUrl: priceList.archivoUrl || '',
           archivoNombre: priceList.archivoNombre || '',
+          departamentoId: priceList.departamentoId || undefined,
         });
       } else {
         setFormData({
-          marca: '',
-          nombre: '',
-          tipo: 'venta',
-          fechaVigencia: '',
+          descripcion: '',
+          tipo: 'general',
+          fechaInicio: '',
+          fechaFin: '',
           archivoUrl: '',
           archivoNombre: '',
+          departamentoId: undefined,
         });
-        setShowNewMarca(false);
       }
     }
   }, [isOpen, priceList]);
@@ -68,13 +82,18 @@ export function CreatePriceListModal({ isOpen, onClose, onSubmit, priceList }: C
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         archivoNombre: file.name,
         archivoUrl: URL.createObjectURL(file),
       }));
     }
   };
+
+  const departmentOptions: Option[] = [
+    { value: '', label: 'Seleccione un departamento' },
+    ...departments.map((d) => ({ value: d.id.toString(), label: d.nombre })),
+  ];
 
   return (
     <Modal
@@ -85,101 +104,65 @@ export function CreatePriceListModal({ isOpen, onClose, onSubmit, priceList }: C
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Marca *
-            </label>
-            {showNewMarca ? (
-              <input
-                type="text"
-                value={formData.marca}
-                onChange={(e) => setFormData(prev => ({ ...prev, marca: e.target.value.toUpperCase() }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent"
-                placeholder="Ej: SAMSUNG"
-                required
-              />
-            ) : (
-              <div className="flex gap-2">
-                <select
-                  value={formData.marca}
-                  onChange={(e) => {
-                    if (e.target.value === '__NEW__') {
-                      setShowNewMarca(true);
-                    } else {
-                      setFormData(prev => ({ ...prev, marca: e.target.value }));
-                    }
-                  }}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent"
-                  required
-                >
-                  <option value="">Seleccionar marca</option>
-                  {marcas.map(m => (
-                    <option key={m} value={m}>{m}</option>
-                  ))}
-                  <option value="__NEW__">+ Nueva marca</option>
-                </select>
-                {formData.marca && (
-                  <button
-                    type="button"
-                    onClick={() => setShowNewMarca(true)}
-                    className="px-3 py-2 text-gray-500 hover:text-brand-blue"
-                    title="Editar marca"
-                  >
-                    <Icon name="edit" />
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
+          <Select
+            label="Tipo de Lista *"
+            value={formData.tipo}
+            onChange={(value) => setFormData((prev) => ({ ...prev, tipo: value as 'general' | 'promocional' | 'finansuenos' }))}
+            options={tipoOptions}
+            required
+          />
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Tipo de Lista *
-            </label>
-            <select
-              value={formData.tipo}
-              onChange={(e) => setFormData(prev => ({ ...prev, tipo: e.target.value as 'venta' | 'costos' }))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent"
-              required
-            >
-              <option value="venta">Precio de Venta (Asesores)</option>
-              <option value="costos">Costos y Protección (Sistemas/Financiero)</option>
-            </select>
-          </div>
+          <Select
+            label="Departamento Responsable"
+            value={formData.departamentoId?.toString() || ''}
+            onChange={(value) =>
+              setFormData((prev) => ({
+                ...prev,
+                departamentoId: value ? parseInt(value as string) : undefined,
+              }))
+            }
+            options={departmentOptions}
+          />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Nombre (Opcional)
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
           <input
             type="text"
-            value={formData.nombre || ''}
-            onChange={(e) => setFormData(prev => ({ ...prev, nombre: e.target.value }))}
+            value={formData.descripcion || ''}
+            onChange={(e) => setFormData((prev) => ({ ...prev, descripcion: e.target.value }))}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent"
-            placeholder="Descripción adicional de la lista"
+            placeholder="Ej: Lista promocional Samsung del 16 al 22 marzo"
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Fecha de Vigencia
-          </label>
-          <input
-            type="date"
-            value={formData.fechaVigencia || ''}
-            onChange={(e) => setFormData(prev => ({ ...prev, fechaVigencia: e.target.value }))}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent"
-          />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Inicio</label>
+            <input
+              type="date"
+              value={formData.fechaInicio || ''}
+              onChange={(e) => setFormData((prev) => ({ ...prev, fechaInicio: e.target.value }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Fin</label>
+            <input
+              type="date"
+              value={formData.fechaFin || ''}
+              onChange={(e) => setFormData((prev) => ({ ...prev, fechaFin: e.target.value }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent"
+            />
+          </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Archivo PDF *
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Archivo (PDF o Excel) *</label>
           <input
             type="file"
-            accept=".pdf"
+            accept=".pdf,.xlsx,.xls"
             onChange={handleFileChange}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent"
             required={!priceList}
