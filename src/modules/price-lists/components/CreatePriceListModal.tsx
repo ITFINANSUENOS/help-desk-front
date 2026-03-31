@@ -5,6 +5,7 @@ import { Icon } from '../../../shared/components/Icon';
 import { Select, type Option } from '../../../shared/components/Select';
 import type { ListaPrecio, CreateListaPrecioDto } from '../interfaces/PriceList';
 import { departmentService } from '../../../shared/services/catalog.service';
+import { priceListService } from '../services/price-list.service';
 
 interface CreatePriceListModalProps {
   isOpen: boolean;
@@ -21,7 +22,9 @@ const tipoOptions: Option[] = [
 
 export function CreatePriceListModal({ isOpen, onClose, onSubmit, priceList }: CreatePriceListModalProps) {
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [departments, setDepartments] = useState<{ id: number; nombre: string }[]>([]);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [formData, setFormData] = useState<CreateListaPrecioDto>({
     descripcion: '',
     tipo: 'general',
@@ -52,6 +55,7 @@ export function CreatePriceListModal({ isOpen, onClose, onSubmit, priceList }: C
           archivoNombre: priceList.archivoNombre || '',
           departamentoId: priceList.departamentoId || undefined,
         });
+        setSelectedFile(null);
       } else {
         setFormData({
           descripcion: '',
@@ -62,6 +66,7 @@ export function CreatePriceListModal({ isOpen, onClose, onSubmit, priceList }: C
           archivoNombre: '',
           departamentoId: undefined,
         });
+        setSelectedFile(null);
       }
     }
   }, [isOpen, priceList]);
@@ -70,7 +75,21 @@ export function CreatePriceListModal({ isOpen, onClose, onSubmit, priceList }: C
     e.preventDefault();
     setLoading(true);
     try {
-      await onSubmit(formData);
+      let finalFormData = { ...formData };
+
+      // Si hay un archivo seleccionado, subirlo a S3 primero
+      if (selectedFile) {
+        setUploading(true);
+        try {
+          const { url, filename } = await priceListService.uploadFile(selectedFile);
+          finalFormData.archivoUrl = url;
+          finalFormData.archivoNombre = filename;
+        } finally {
+          setUploading(false);
+        }
+      }
+
+      await onSubmit(finalFormData);
       onClose();
     } catch (error) {
       console.error('Error saving price list:', error);
@@ -82,10 +101,11 @@ export function CreatePriceListModal({ isOpen, onClose, onSubmit, priceList }: C
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setSelectedFile(file);
       setFormData((prev) => ({
         ...prev,
         archivoNombre: file.name,
-        archivoUrl: URL.createObjectURL(file),
+        archivoUrl: '', // Se llenará después de subir a S3
       }));
     }
   };
@@ -179,11 +199,11 @@ export function CreatePriceListModal({ isOpen, onClose, onSubmit, priceList }: C
           <Button type="button" variant="secondary" onClick={onClose}>
             Cancelar
           </Button>
-          <Button type="submit" variant="brand" disabled={loading}>
-            {loading ? (
+          <Button type="submit" variant="brand" disabled={loading || uploading}>
+            {loading || uploading ? (
               <>
                 <Icon name="sync" className="animate-spin mr-2" />
-                Guardando...
+                {uploading ? 'Subiendo archivo...' : 'Guardando...'}
               </>
             ) : (
               <>
