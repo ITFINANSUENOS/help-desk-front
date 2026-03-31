@@ -10,7 +10,7 @@ export type PermissionAction = typeof PERMISSION_ACTIONS[number];
 export const PERMISSION_SUBJECTS = [
     'User', 'Ticket', 'Category', 'Subcategoria', 'Department',
     'Role', 'Profile', 'Regional', 'Company', 'Permission',
-    'Zone', 'Priority', 'Position', 'Rule', 'Report', 'all'
+    'Zone', 'Priority', 'Position', 'Rule', 'Report', 'ListaPrecio', 'all'
 ] as const;
 
 export type PermissionSubject = typeof PERMISSION_SUBJECTS[number];
