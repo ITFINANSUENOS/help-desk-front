@@ -92,6 +92,21 @@ class PriceListService {
       await api.put(`/price-lists/config/${config.tipo}`, { departamentoId: config.departamentoId, subcategoriaId });
     }
   }
+
+  /**
+   * Sube un archivo de lista de precios a S3
+   */
+  async uploadFile(file: File): Promise<{ url: string; filename: string }> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await api.post<{ url: string; filename: string }>('/price-lists/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  }
 }
 
 export const priceListService = new PriceListService();
