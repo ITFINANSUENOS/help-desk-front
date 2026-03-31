@@ -32,6 +32,7 @@ const NotificationsPage = lazy(() => import('../modules/notifications/pages/Noti
 const ReportsPage = lazy(() => import('../modules/reports/pages/ReportsPage'));
 const FlowOpenTicketsPage = lazy(() => import('../modules/reports/pages/FlowOpenTicketsPage'));
 const PriceListsPage = lazy(() => import('../modules/price-lists/pages/PriceListsPage'));
+const PriceListsAdminPage = lazy(() => import('../modules/price-lists/pages/PriceListsAdminPage'));
 
 
 export const appRoutes: RouteObject[] = [
@@ -254,6 +255,14 @@ export const appRoutes: RouteObject[] = [
                         element: (
                             <Suspense fallback={<PageLoader />}>
                                 <PriceListsPage />
+                            </Suspense>
+                        )
+                    },
+                    {
+                        path: '/price-lists/admin',
+                        element: (
+                            <Suspense fallback={<PageLoader />}>
+                                <PriceListsAdminPage />
                             </Suspense>
                         )
                     },

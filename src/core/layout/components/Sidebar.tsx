@@ -52,6 +52,8 @@ export function Sidebar({ isCollapsed, toggleCollapse, isMobileOpen, closeMobile
         { to: "/error-types", icon: "quick_phrases", label: "Tipos de Error", subject: 'FastAnswer' as any, action: 'manage' },
         { to: "/mapping-rules", icon: "rule", label: "Reglas de Mapeo", subject: 'Rule' as any, action: 'manage' },
         { to: "/reports", icon: "bar_chart", label: "Reportes", subject: 'Report', action: 'read' },
+        { to: "/price-lists", icon: "price_change", label: "Listas de Precios", subject: 'ListaPrecio', action: 'read' },
+        { to: "/price-lists/admin", icon: "admin_panel_settings", label: "Admin Listas", subject: 'all', action: 'manage' },
 
         { to: "/settings", icon: "settings", label: "Settings" }
     ];
