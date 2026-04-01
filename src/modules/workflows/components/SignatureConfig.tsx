@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { Button } from '../../../shared/components/Button';
-import { Input } from '../../../shared/components/Input';
 import type { StepSignature } from '../interfaces/Step';
+import type { TemplateSignature } from '../interfaces/TemplateField';
 import type { Position } from '../../../shared/interfaces/Catalog';
 import { toast } from 'sonner';
 import { Icon } from '../../../shared/components/Icon';
@@ -11,9 +11,15 @@ interface SignatureConfigProps {
     firmas: StepSignature[];
     onChange: (firmas: StepSignature[]) => void;
     positions: Position[];
+    /** Available signature zones from the template */
+    templateFirmas?: TemplateSignature[];
 }
 
-export const SignatureConfig = ({ firmas, onChange, positions }: SignatureConfigProps) => {
+/**
+ * Signature configuration for a step.
+ * Now references TemplateSignature zones (coordinates configured at template level).
+ */
+export const SignatureConfig = ({ firmas, onChange, positions, templateFirmas = [] }: SignatureConfigProps) => {
     const [isAdding, setIsAdding] = useState(false);
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
@@ -23,9 +29,7 @@ export const SignatureConfig = ({ firmas, onChange, positions }: SignatureConfig
         const selectedCargosIds = data.cargosIds ? data.cargosIds.map(Number).filter(n => !isNaN(n)) : undefined;
         const newFirma = {
             ...data,
-            coordX: Number(data.coordX) || 0,
-            coordY: Number(data.coordY) || 0,
-            pagina: Number(data.pagina),
+            plantillaFirmaId: data.plantillaFirmaId ? Number(data.plantillaFirmaId) : undefined,
             cargoId: selectedCargosIds && selectedCargosIds.length > 0 ? undefined : (data.cargoId ? Number(data.cargoId) : undefined),
             cargosIds: selectedCargosIds && selectedCargosIds.length > 0 ? selectedCargosIds : undefined,
             usuarioId: undefined
@@ -50,10 +54,7 @@ export const SignatureConfig = ({ firmas, onChange, positions }: SignatureConfig
         const firma = firmas[index];
         setEditingIndex(index);
 
-        setValue('etiqueta', firma.etiqueta || '');
-        setValue('pagina', firma.pagina);
-        setValue('coordX', firma.coordX);
-        setValue('coordY', firma.coordY);
+        setValue('plantillaFirmaId', firma.plantillaFirmaId);
         setValue('cargoId', firma.cargoId);
         setValue('cargosIds', firma.cargosIds || []);
 
@@ -84,6 +85,13 @@ export const SignatureConfig = ({ firmas, onChange, positions }: SignatureConfig
         return 'Cualquiera';
     };
 
+    const getTemplateFirmaDisplay = (firma: StepSignature) => {
+        if (!firma.plantillaFirmaId) return 'Sin zona asignada';
+        const zone = templateFirmas.find(z => z.id === firma.plantillaFirmaId);
+        if (!zone) return `Zona #${firma.plantillaFirmaId}`;
+        return `Pág ${zone.pagina} (${zone.coordX}, ${zone.coordY})${zone.etiqueta ? ` - ${zone.etiqueta}` : ''}`;
+    };
+
 
     return (
         <div className="border rounded-lg p-4 bg-gray-50 space-y-4">
@@ -106,22 +114,11 @@ export const SignatureConfig = ({ firmas, onChange, positions }: SignatureConfig
             <div className="space-y-2">
                 {firmas.map((firma, idx) => (
                     <div key={idx} className={`flex items-center gap-2 p-2 rounded border text-sm ${editingIndex === idx ? 'bg-blue-50 border-blue-300 ring-1 ring-blue-300' : 'bg-white border-gray-200'}`}>
-                        <div className="flex-1 grid grid-cols-5 gap-2 items-center">
-                            <span>
-                                <span className="font-medium">Pág:</span> {firma.pagina}
+                        <div className="flex-1 grid grid-cols-2 gap-2 items-center">
+                            <span className="truncate" title={getTemplateFirmaDisplay(firma)}>
+                                {getTemplateFirmaDisplay(firma)}
                             </span>
-                            <span>
-                                <span className="font-medium">X:</span> {firma.coordX}
-                            </span>
-                            <span>
-                                <span className="font-medium">Y:</span> {firma.coordY}
-                            </span>
-                            {firma.etiqueta && (
-                                <span className="col-span-2 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded truncate" title="Smart Tag">
-                                    🏷️ {firma.etiqueta}
-                                </span>
-                            )}
-                            <span className="truncate col-span-2">
+                            <span className="truncate" title={getCargoDisplay(firma)}>
                                 {getCargoDisplay(firma)}
                             </span>
                         </div>
@@ -152,23 +149,28 @@ export const SignatureConfig = ({ firmas, onChange, positions }: SignatureConfig
                     <h5 className="text-xs font-bold uppercase text-blue-600 flex justify-between items-center">
                         {editingIndex !== null ? 'Editar Zona' : 'Nueva Zona'}
                     </h5>
-                    <div className="space-y-3">
-                        <div>
-                            <Input
-                                label="Etiqueta PDF (Smart Tag)"
-                                {...register('etiqueta')}
-                                placeholder="Ej. FIRMA_GERENTE"
-                            />
-                            <p className="text-xs text-gray-500 mt-1">Etiqueta en el PDF para ubicar la firma automáticamente</p>
-                        </div>
 
-                        <Input
-                            label="Página"
-                            type="number"
-                            {...register('pagina', { required: true, min: 1 })}
-                            placeholder="1"
-                        />
-                    </div>
+                    {templateFirmas.length > 0 ? (
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Zona de Firma (de plantilla)</label>
+                            <select
+                                {...register('plantillaFirmaId', { required: true })}
+                                className="w-full border rounded px-2 py-1.5 text-sm"
+                            >
+                                <option value="">Seleccione una zona...</option>
+                                {templateFirmas.map(z => (
+                                    <option key={z.id} value={z.id}>
+                                        Pág {z.pagina} ({z.coordX}, {z.coordY}){z.etiqueta ? ` - ${z.etiqueta}` : ''}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    ) : (
+                        <div className="bg-yellow-50 border border-yellow-200 rounded p-2 text-sm text-yellow-700">
+                            No hay zonas de firma configuradas en la plantilla. Configure las zonas en la gestión de plantillas.
+                        </div>
+                    )}
+
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Cargos Permitidos (Opcional)</label>
                         <p className="text-xs text-gray-500 mb-2">Seleccione uno o más cargos. Si el usuario tiene alguno de estos cargos, podrá firmar en este espacio.</p>
@@ -201,6 +203,7 @@ export const SignatureConfig = ({ firmas, onChange, positions }: SignatureConfig
                         />
                         <p className="text-xs text-gray-400 mt-1">Deja vacío para que cualquier usuario pueda firmar.</p>
                     </div>
+
                     <div className="flex justify-end gap-2 pt-2">
                         <Button type="button" size="sm" variant="ghost" onClick={handleCancel}>Cancelar</Button>
                         <Button type="button" size="sm" variant="brand" onClick={handleSubmit(onSubmit)}>

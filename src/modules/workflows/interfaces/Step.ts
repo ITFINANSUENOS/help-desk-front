@@ -31,18 +31,18 @@ export interface Step {
     usuarios?: StepSpecificUser[];
 }
 
+/**
+ * Step signature assignment - links a user/cargo to a template signature zone
+ */
 export interface StepSignature {
     id?: number;
     pasoId?: number;
+    plantillaFirmaId?: number; // Reference to PlantillaFirma (signature zone coordinates)
     usuarioId?: number;
     usuario?: { id: number; nombre: string; apellido: string };
     cargoId?: number;
     cargosIds?: number[];
     cargo?: { id: number; nombre: string };
-    coordX: number;
-    coordY: number;
-    pagina: number;
-    etiqueta?: string;
 }
 
 export interface StepSpecificUser {

@@ -5,15 +5,15 @@ import { FormModal } from '../../../shared/components/FormModal';
 import { Input } from '../../../shared/components/Input';
 import { Select } from '../../../shared/components/Select';
 import type { Step, CreateStepDto, StepSignature } from '../interfaces/Step';
-import type { StepTemplateField } from '../interfaces/TemplateField';
+import type { TemplateField, TemplateSignature } from '../interfaces/TemplateField';
 import { stepService } from '../services/step.service';
 import { positionService } from '../../../shared/services/catalog.service';
 import type { Position } from '../../../shared/interfaces/Catalog';
 import { templateService } from '../../templates/services/template.service';
-import type { TemplateField } from '../../templates/interfaces/TemplateField';
 import { toast } from 'sonner';
 import { SignatureConfig } from './SignatureConfig';
 import { TemplateFieldsConfig } from './TemplateFieldsConfig';
+import { TemplateSignatureManager } from './TemplateSignatureManager';
 import { SpecificAssignmentConfig } from './SpecificAssignmentConfig';
 import { Icon } from '../../../shared/components/Icon';
 
@@ -31,6 +31,9 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
     const [positions, setPositions] = useState<Position[]>([]);
     const [templateFields, setTemplateFields] = useState<TemplateField[]>([]);
     const [pdfFile, setPdfFile] = useState<File | null>(null);
+    const [templates, setTemplates] = useState<any[]>([]);
+    const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(null);
+    const [templateFirmas, setTemplateFirmas] = useState<TemplateSignature[]>([]);
 
 
 
@@ -114,12 +117,48 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
         templateService.getAllFields().then(setTemplateFields).catch(console.error);
     };
 
+    const loadTemplatesForFirmas = async () => {
+        try {
+            const data = await templateService.getTemplates(flujoId);
+            setTemplates(data || []);
+            if (data && data.length > 0 && !selectedTemplateId) {
+                setSelectedTemplateId(data[0].id);
+            }
+        } catch (error) {
+            console.error('Error loading templates:', error);
+        }
+    };
+
+    const loadTemplateFirmas = async (flujoPlantillaId: number) => {
+        try {
+            const firmas = await templateService.getTemplateSignatures(flujoPlantillaId);
+            setTemplateFirmas(firmas || []);
+        } catch (error) {
+            console.error('Error loading template firmas:', error);
+            setTemplateFirmas([]);
+        }
+    };
+
     const isPool = watch('esPool');
     useEffect(() => {
         if (isPool) {
             setValue('cargoAsignadoId', undefined);
         }
     }, [isPool, setValue]);
+
+    const requiereFirma = watch('requiereFirma');
+    useEffect(() => {
+        if (requiereFirma) {
+            loadTemplatesForFirmas();
+        }
+    }, [requiereFirma]);
+
+    // Load firmas when selected template changes
+    useEffect(() => {
+        if (selectedTemplateId) {
+            loadTemplateFirmas(selectedTemplateId);
+        }
+    }, [selectedTemplateId]);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
@@ -260,7 +299,7 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
                         render={({ field }) => (
                             <Select
                                 {...field}
-                                options={Array.isArray(templateFields) ? templateFields.map(f => ({ value: f.id, label: `${f.etiqueta} (${f.codigo})` })) : []}
+                                options={Array.isArray(templateFields) ? templateFields.filter(f => f.id != null).map(f => ({ value: f.id as number, label: `${f.etiqueta || f.codigo}` })) : []}
                                 onChange={(val) => field.onChange(val)}
                                 placeholder="-- Seleccionar Campo --"
                             />
@@ -356,7 +395,7 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
                     </div>
 
                     {!!watch('requiereFirma') && (
-                        <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200 space-y-4">
                             <div className="mb-4">
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                     Base PDF para Firmas
@@ -382,20 +421,54 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
                                 </div>
                             </div>
 
-                            <SignatureConfig
-                                firmas={(watch('firmas') || []) as unknown as StepSignature[]}
-                                onChange={(newFirmas) => setValue('firmas', newFirmas)}
-                                positions={positions}
-                            />
+                            {/* Template Selection for Signature Zones */}
+                            {templates.length > 0 && (
+                                <div className="border-t border-gray-200 pt-4">
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Plantilla para Zonas de Firma
+                                    </label>
+                                    <select
+                                        className="w-full border rounded px-2 py-1.5 text-sm mb-3"
+                                        value={selectedTemplateId || ''}
+                                        onChange={async (e) => {
+                                            const templateId = Number(e.target.value);
+                                            setSelectedTemplateId(templateId);
+                                            if (templateId) {
+                                                await loadTemplateFirmas(templateId);
+                                            }
+                                        }}
+                                    >
+                                        {templates.map((t) => (
+                                            <option key={t.id} value={t.id}>
+                                                {t.empresa?.nombre || `Plantilla #${t.id}`}
+                                            </option>
+                                        ))}
+                                    </select>
+
+                                    {selectedTemplateId && (
+                                        <TemplateSignatureManager
+                                            flujoPlantillaId={selectedTemplateId}
+                                            onZonasChange={() => loadTemplateFirmas(selectedTemplateId)}
+                                        />
+                                    )}
+                                </div>
+                            )}
+
+                            {templates.length === 0 && (
+                                <div className="bg-yellow-50 border border-yellow-200 rounded p-3 text-sm text-yellow-700">
+                                    No hay plantillas configuradas para este flujo. Configure las plantillas en la gestión de flujos primero.
+                                </div>
+                            )}
                         </div>
                     )}
 
                     {!!watch('requiereCamposPlantilla') && (
                         <div className="mt-4">
                             <TemplateFieldsConfig
-                                campos={(watch('campos') || []) as unknown as StepTemplateField[]}
-                                onChange={(newCampos) => setValue('campos', newCampos)}
+                                campos={(watch('campos') || []) as any}
+                                onChange={(newCampos) => setValue('campos', newCampos as any)}
                                 flujoId={Number(flujoId)}
+                                templateFields={templateFields}
                             />
                         </div>
                     )}

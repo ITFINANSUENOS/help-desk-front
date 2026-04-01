@@ -1,9 +1,10 @@
 import { api } from "../../../core/api/api";
-import type { TemplateField } from '../interfaces/TemplateField';
+import type { TemplateField, TemplateSignature } from '../../workflows/interfaces/TemplateField';
 
-export interface TemplateFieldFilter {
+export interface TemplateFilter {
     search?: string;
     limit?: number;
+    page?: number;
     flujoId?: number;
 }
 
@@ -11,7 +12,7 @@ export interface TemplateFieldFilter {
 class TemplateService {
     private readonly baseUrl = '/templates';
 
-    async getAllFields(filter: TemplateFieldFilter = {}): Promise<TemplateField[]> {
+    async getAllFields(filter: TemplateFilter = {}): Promise<TemplateField[]> {
         const params = new URLSearchParams();
         if (filter.search) params.append('search', filter.search);
         if (filter.limit) params.append('limit', filter.limit.toString());
@@ -44,6 +45,69 @@ class TemplateService {
 
     async deleteTemplate(id: number): Promise<void> {
         await api.delete(`${this.baseUrl}/${id}`);
+    }
+
+    // ==================== Template Signature Zones (PlantillaFirma) ====================
+
+    async getTemplateSignatures(flujoPlantillaId: number): Promise<TemplateSignature[]> {
+        const response = await api.get<TemplateSignature[]>(`${this.baseUrl}/${flujoPlantillaId}/firmas`);
+        return response.data;
+    }
+
+    async createTemplateSignature(
+        flujoPlantillaId: number,
+        data: { coordX: number; coordY: number; pagina?: number; etiqueta?: string }
+    ): Promise<TemplateSignature> {
+        const response = await api.post<TemplateSignature>(`${this.baseUrl}/${flujoPlantillaId}/firmas`, data);
+        return response.data;
+    }
+
+    async updateTemplateSignature(
+        firmaId: number,
+        data: { coordX?: number; coordY?: number; pagina?: number; etiqueta?: string }
+    ): Promise<TemplateSignature> {
+        const response = await api.put<TemplateSignature>(`${this.baseUrl}/firmas/${firmaId}`, data);
+        return response.data;
+    }
+
+    async deleteTemplateSignature(firmaId: number): Promise<void> {
+        await api.delete(`${this.baseUrl}/firmas/${firmaId}`);
+    }
+
+    // ==================== Template Fields (PlantillaCampo) ====================
+
+    async getTemplateFields(flujoPlantillaId: number): Promise<TemplateField[]> {
+        const response = await api.get<TemplateField[]>(`${this.baseUrl}/${flujoPlantillaId}/campos`);
+        return response.data;
+    }
+
+    async createTemplateField(
+        flujoPlantillaId: number,
+        data: {
+            campoNombre: string;
+            campoCodigo: string;
+            campoTipo?: string;
+            coordX: number;
+            coordY: number;
+            etiqueta?: string;
+            pagina?: number;
+            fontSize?: number;
+        }
+    ): Promise<TemplateField> {
+        const response = await api.post<TemplateField>(`${this.baseUrl}/${flujoPlantillaId}/campos`, data);
+        return response.data;
+    }
+
+    async updateTemplateField(
+        campoId: number,
+        data: Partial<TemplateField>
+    ): Promise<TemplateField> {
+        const response = await api.put<TemplateField>(`${this.baseUrl}/campos/${campoId}`, data);
+        return response.data;
+    }
+
+    async deleteTemplateField(campoId: number): Promise<void> {
+        await api.delete(`${this.baseUrl}/campos/${campoId}`);
     }
 }
 

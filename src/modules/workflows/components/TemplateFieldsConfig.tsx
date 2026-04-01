@@ -1,12 +1,8 @@
-import { useState, useEffect } from 'react';
-import { useForm, useWatch, Controller, type Control, type UseFormSetValue } from 'react-hook-form';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { Button } from '../../../shared/components/Button';
-import { Input } from '../../../shared/components/Input';
-import { Select } from '../../../shared/components/Select';
-import type { StepTemplateField } from '../interfaces/TemplateField';
+import type { StepTemplateField, TemplateField } from '../interfaces/TemplateField';
 import { FIELD_TYPES } from '../interfaces/TemplateField';
-import { excelDataService } from '../../imports/services/excel-data.service';
-import type { ExcelData } from '../../imports/interfaces/ExcelData';
 import { toast } from 'sonner';
 import { Icon } from '../../../shared/components/Icon';
 
@@ -14,122 +10,26 @@ interface TemplateFieldsConfigProps {
     campos: StepTemplateField[];
     onChange: (campos: StepTemplateField[]) => void;
     flujoId: number;
+    /** Available template fields from the selected template */
+    templateFields?: TemplateField[];
 }
 
-const ExcelQueryConfig = ({ control, flujoId, setValue }: { control: Control<StepTemplateField>, flujoId: number, setValue: UseFormSetValue<StepTemplateField> }) => {
-    const [excelFiles, setExcelFiles] = useState<ExcelData[]>([]);
-    const [columns, setColumns] = useState<string[]>([]);
-    const [loadingFiles, setLoadingFiles] = useState(false);
-    const [loadingCols, setLoadingCols] = useState(false);
-
-    const campoQuery = useWatch({ control, name: 'campoQuery' }) || '';
-
-    // Parse current query
-    const isExcel = campoQuery.startsWith('EXCEL:');
-    const parts = isExcel ? campoQuery.split(':') : [];
-    const currentFileId = parts[1] ? Number(parts[1]) : '';
-    const currentCol = parts[2] || '';
-
-    useEffect(() => {
-        const fetchFiles = async () => {
-            if (!flujoId) return;
-            setLoadingFiles(true);
-            try {
-                const data = await excelDataService.getByFlow(flujoId);
-                setExcelFiles(data);
-            } catch (err) {
-                console.error(err);
-                toast.error('Error cargando archivos Excel');
-            } finally {
-                setLoadingFiles(false);
-            }
-        };
-        fetchFiles();
-    }, [flujoId]);
-
-    useEffect(() => {
-        const fetchColumns = async () => {
-            if (!currentFileId) {
-                setColumns([]);
-                return;
-            }
-            setLoadingCols(true);
-            try {
-                const data = await excelDataService.getColumns(Number(currentFileId));
-                setColumns(data);
-            } catch (err) {
-                console.error(err);
-            } finally {
-                setLoadingCols(false);
-            }
-        };
-        fetchColumns();
-    }, [currentFileId]);
-
-    const handleFileChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const fileId = e.target.value;
-        if (fileId) {
-            // Reset col, set file
-            setValue('campoQuery', `EXCEL:${fileId}:`);
-        } else {
-            setValue('campoQuery', '');
-        }
-    };
-
-    const handleColChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const col = e.target.value;
-        if (currentFileId) {
-            setValue('campoQuery', `EXCEL:${currentFileId}:${col}`);
-        }
-    };
-
-    return (
-        <div className="space-y-2 p-3 bg-gray-50 rounded border border-gray-200">
-            <label className="text-xs font-semibold text-gray-700 block">Configuración Excel</label>
-            <Select
-                value={currentFileId}
-                onChange={(val) => {
-                    const e = { target: { value: val ? String(val) : '' } } as React.ChangeEvent<HTMLSelectElement>;
-                    handleFileChange(e);
-                }}
-                disabled={loadingFiles}
-                placeholder="-- Seleccionar Archivo --"
-                options={excelFiles.map(f => ({ value: f.id, label: f.nombreArchivo }))}
-            />
-
-            <Select
-                value={currentCol}
-                onChange={(val) => {
-                    const e = { target: { value: val ? String(val) : '' } } as React.ChangeEvent<HTMLSelectElement>;
-                    handleColChange(e);
-                }}
-                disabled={!currentFileId || loadingCols}
-                placeholder="-- Seleccionar Columna --"
-                options={columns.map(c => ({ value: c, label: c }))}
-            />
-            {isExcel && <p className="text-xs text-gray-400 font-mono mt-1">{campoQuery}</p>}
-        </div>
-    );
-};
-
-export const TemplateFieldsConfig = ({ campos, onChange, flujoId }: TemplateFieldsConfigProps) => {
+/**
+ * Template fields configuration for a step.
+ * Now references TemplateField zones (coordinates configured at template level).
+ */
+export const TemplateFieldsConfig = ({ campos, onChange, templateFields = [] }: TemplateFieldsConfigProps) => {
     const [isAdding, setIsAdding] = useState(false);
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
-    const { register, handleSubmit, reset, setValue, control } = useForm<StepTemplateField>();
 
-    // Filter only active campos (estado = 1)
-    const activeCampos = campos.filter(campo => campo.estado === 1 || campo.estado === undefined);
+    const { register, handleSubmit, reset, setValue, watch } = useForm<StepTemplateField>();
 
-    const handleAdd = (data: StepTemplateField) => {
+    const watchedPlantillaCampoId = watch('plantillaCampoId');
+
+    const onSubmit = (data: StepTemplateField) => {
         const newCampo: StepTemplateField = {
             ...data,
-            coordX: Number(data.coordX) || 0,
-            coordY: Number(data.coordY) || 0,
-            pagina: Number(data.pagina),
-            fontSize: Number(data.fontSize) || 10,
-            campoTrigger: data.campoTrigger ? 1 : 0,
-            mostrarDiasTranscurridos: !!data.mostrarDiasTranscurridos,
-            estado: 1, // Always set as active
+            plantillaCampoId: data.plantillaCampoId ? Number(data.plantillaCampoId) : undefined,
         };
 
         if (editingIndex !== null) {
@@ -137,8 +37,10 @@ export const TemplateFieldsConfig = ({ campos, onChange, flujoId }: TemplateFiel
             updated[editingIndex] = newCampo;
             onChange(updated);
             setEditingIndex(null);
+            toast.success('Campo actualizado');
         } else {
             onChange([...campos, newCampo]);
+            toast.success('Campo agregado');
         }
 
         reset();
@@ -146,43 +48,47 @@ export const TemplateFieldsConfig = ({ campos, onChange, flujoId }: TemplateFiel
     };
 
     const handleEdit = (index: number) => {
-        const campo = activeCampos[index];
-        reset(campo);
-        const actualIndex = campos.findIndex(c => c === campo);
-        setEditingIndex(actualIndex);
+        const campo = campos[index];
+        setEditingIndex(index);
+        setValue('plantillaCampoId', campo.plantillaCampoId);
+        setValue('nombre', campo.nombre);
+        setValue('codigo', campo.codigo);
+        setValue('tipo', campo.tipo);
         setIsAdding(true);
     };
 
     const handleDelete = (index: number) => {
-        const campo = activeCampos[index];
-        const actualIndex = campos.findIndex(c => c === campo);
+        if (editingIndex === index) {
+            setIsAdding(false);
+            setEditingIndex(null);
+            reset();
+        }
         const updated = [...campos];
-        updated[actualIndex] = { ...updated[actualIndex], estado: 0 };
+        updated.splice(index, 1);
         onChange(updated);
+        toast.success('Campo eliminado');
     };
 
     const handleCancel = () => {
-        reset();
         setIsAdding(false);
         setEditingIndex(null);
+        reset();
     };
 
-    const watchedCampoQuery = useWatch({ control, name: 'campoQuery' }) || '';
-    const sourceType = watchedCampoQuery.startsWith('EXCEL:') ? 'EXCEL' :
-        (watchedCampoQuery === 'PRESET_FECHA_ACTUAL' ? 'PRESET_FECHA_ACTUAL' :
-            (watchedCampoQuery.length > 0 ? 'CUSTOM' : ''));
-
-    const handleSourceTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const val = e.target.value;
-        if (val === 'CUSTOM') {
-            setValue('campoQuery', ''); // Clear to let user type
-        } else if (val === 'EXCEL') {
-            setValue('campoQuery', 'EXCEL:'); // Init excel mode
-        } else if (val === 'PRESET_FECHA_ACTUAL') {
-            setValue('campoQuery', 'PRESET_FECHA_ACTUAL');
-        } else {
-            setValue('campoQuery', '');
+    const handleTemplateFieldSelect = (plantillaCampoId: number) => {
+        const templateField = templateFields.find(tf => tf.id === plantillaCampoId);
+        if (templateField) {
+            setValue('nombre', templateField.nombre);
+            setValue('codigo', templateField.codigo);
+            setValue('tipo', templateField.tipo);
         }
+    };
+
+    const getTemplateFieldDisplay = (campo: StepTemplateField) => {
+        if (!campo.plantillaCampoId) return 'Sin campo asignado';
+        const field = templateFields.find(tf => tf.id === campo.plantillaCampoId);
+        if (!field) return `Campo #${campo.plantillaCampoId}`;
+        return `${field.nombre} (${field.codigo}) - Pág ${field.pagina}`;
     };
 
     return (
@@ -197,26 +103,36 @@ export const TemplateFieldsConfig = ({ campos, onChange, flujoId }: TemplateFiel
                 )}
             </div>
 
+            {campos.length === 0 && !isAdding && (
+                <p className="text-sm text-gray-500 italic text-center py-4">
+                    No hay campos de plantilla configurados.
+                </p>
+            )}
+
             {/* Lista de campos existentes */}
-            {activeCampos.length > 0 && (
+            {campos.length > 0 && (
                 <div className="space-y-2 mb-4">
-                    {activeCampos.map((campo, index) => (
-                        <div key={index} className="flex items-center justify-between bg-white p-3 rounded border border-gray-200">
-                            <div className="flex-1">
-                                <p className="font-medium text-sm text-gray-900">{campo.nombre}</p>
-                                <p className="text-xs text-gray-500">
-                                    Código: {campo.codigo} | Tipo: {campo.tipo} | Pág: {campo.pagina}
-                                    {campo.etiqueta ? <span className="ml-2 text-blue-600 bg-blue-50 px-1 rounded">🏷️ {campo.etiqueta}</span> : ` | X: ${campo.coordX}, Y: ${campo.coordY}`}
+                    {campos.map((campo, index) => (
+                        <div
+                            key={index}
+                            className={`flex items-center justify-between bg-white p-3 rounded border ${
+                                editingIndex === index ? 'border-blue-300 bg-blue-50' : 'border-gray-200'
+                            }`}
+                        >
+                            <div className="flex-1 min-w-0">
+                                <p className="font-medium text-sm text-gray-900 truncate">
+                                    {campo.nombre || getTemplateFieldDisplay(campo)}
                                 </p>
-                                {campo.campoQuery && (
-                                    <p className="text-xs text-gray-400 mt-1 font-mono">{campo.campoQuery}</p>
-                                )}
+                                <p className="text-xs text-gray-500 truncate">
+                                    Código: {campo.codigo || 'N/A'} | Tipo: {campo.tipo || 'N/A'}
+                                </p>
                             </div>
-                            <div className="flex gap-2">
+                            <div className="flex gap-2 ml-2">
                                 <button
                                     type="button"
                                     onClick={() => handleEdit(index)}
                                     className="text-gray-400 hover:text-brand-blue"
+                                    title="Editar"
                                 >
                                     <Icon name="edit" className="text-[20px]" />
                                 </button>
@@ -224,6 +140,7 @@ export const TemplateFieldsConfig = ({ campos, onChange, flujoId }: TemplateFiel
                                     type="button"
                                     onClick={() => handleDelete(index)}
                                     className="text-gray-400 hover:text-red-600"
+                                    title="Eliminar"
                                 >
                                     <Icon name="delete" className="text-[20px]" />
                                 </button>
@@ -235,128 +152,88 @@ export const TemplateFieldsConfig = ({ campos, onChange, flujoId }: TemplateFiel
 
             {/* Formulario para agregar/editar */}
             {isAdding && (
-                <div className="bg-white p-4 rounded border border-gray-300 space-y-3">
-                    <div className="grid grid-cols-2 gap-3">
-                        <Input
-                            label="Nombre"
-                            {...register('nombre', { required: true })}
-                            placeholder="Ej. Cédula"
-                        />
-                        <Input
-                            label="Código"
-                            {...register('codigo', { required: true })}
-                            placeholder="Ej. cedula"
-                        />
-                    </div>
+                <div className="bg-white p-4 rounded border border-blue-200 space-y-3 shadow-md">
+                    <h5 className="text-xs font-bold uppercase text-blue-600 flex justify-between items-center">
+                        {editingIndex !== null ? 'Editar Campo' : 'Nuevo Campo'}
+                    </h5>
+
+                    {templateFields.length > 0 ? (
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Campo de Plantilla
+                            </label>
+                            <select
+                                {...register('plantillaCampoId', { required: true })}
+                                onChange={(e) => {
+                                    const val = Number(e.target.value);
+                                    setValue('plantillaCampoId', val);
+                                    handleTemplateFieldSelect(val);
+                                }}
+                                className="w-full border rounded px-2 py-1.5 text-sm"
+                                value={watchedPlantillaCampoId || ''}
+                            >
+                                <option value="">Seleccione un campo...</option>
+                                {templateFields.map(tf => (
+                                    <option key={tf.id} value={tf.id}>
+                                        {tf.nombre} ({tf.codigo}) - Pág {tf.pagina}
+                                    </option>
+                                ))}
+                            </select>
+                            <p className="text-xs text-gray-500 mt-1">
+                                Seleccione un campo configurado en la plantilla PDF
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="bg-yellow-50 border border-yellow-200 rounded p-2 text-sm text-yellow-700">
+                            No hay campos de plantilla disponibles. Configure los campos en la gestión de plantillas.
+                        </div>
+                    )}
 
                     <div className="grid grid-cols-2 gap-3">
-                        <div className="space-y-1">
-                            <label className="text-sm font-semibold text-gray-700">Tipo</label>
-                            <Controller
-                                name="tipo"
-                                control={control}
-                                rules={{ required: true }}
-                                render={({ field }) => (
-                                    <Select
-                                        {...field}
-                                        options={FIELD_TYPES.map(type => ({ value: type.value, label: type.label }))}
-                                        onChange={(val) => field.onChange(val)}
-                                        placeholder="Seleccionar..."
-                                    />
-                                )}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+                            <input
+                                {...register('nombre')}
+                                className="w-full border rounded px-2 py-1.5 text-sm"
+                                placeholder="Ej. Cédula"
                             />
                         </div>
-                        <Input
-                            label="Página"
-                            type="number"
-                            {...register('pagina', { required: true })}
-                            placeholder="1"
-                        />
-                    </div>
-
-                    <div className="space-y-1">
-                        <label className="text-sm font-semibold text-gray-700">Etiqueta PDF (Smart Tag)</label>
-                        <input
-                            {...register('etiqueta')}
-                            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                            placeholder="Ej. CAMPO_FECHA_1"
-                        />
-                        <p className="text-xs text-gray-500">Etiqueta en el PDF para ubicar el campo automáticamente</p>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3">
-                        <Input
-                            label="Font Size"
-                            type="number"
-                            {...register('fontSize')}
-                            placeholder="10"
-                        />
-                    </div>
-
-                    {/* Source Config */}
-                    <div className="space-y-2 border-t pt-2 mt-2">
-                        <label className="text-sm font-semibold text-gray-700">Fuente de Datos</label>
-                        <Select
-                            value={sourceType}
-                            onChange={(val) => {
-                                const e = { target: { value: val ? String(val) : '' } } as React.ChangeEvent<HTMLSelectElement>;
-                                handleSourceTypeChange(e);
-                            }}
-                            options={[
-                                { value: '', label: 'Ninguna' },
-                                { value: 'CUSTOM', label: 'Consulta Manual / SQL' },
-                                { value: 'EXCEL', label: 'Datos Excel' },
-                                { value: 'PRESET_FECHA_ACTUAL', label: 'Fecha Actual' }
-                            ]}
-                        />
-
-                        {/* Render specific config based on source */}
-                        {sourceType === 'CUSTOM' && (
-                            <div className="space-y-1">
-                                <label className="text-xs font-semibold text-gray-700">Query SQL / Valor</label>
-                                <textarea
-                                    {...register('campoQuery')}
-                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-mono"
-                                    rows={2}
-                                    placeholder="SELECT ip FROM..."
-                                />
-                            </div>
-                        )}
-
-                        {sourceType === 'EXCEL' && (
-                            <ExcelQueryConfig
-                                control={control}
-                                flujoId={flujoId}
-                                setValue={setValue}
-                            />
-                        )}
-                    </div>
-
-                    <div className="flex gap-4 pt-2">
-                        <label className="flex items-center gap-2 cursor-pointer">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Código</label>
                             <input
-                                type="checkbox"
-                                {...register('campoTrigger')}
-                                className="rounded text-brand-teal focus:ring-brand-teal"
+                                {...register('codigo')}
+                                className="w-full border rounded px-2 py-1.5 text-sm"
+                                placeholder="Ej. cedula"
                             />
-                            <span className="text-sm text-gray-700">Campo Trigger</span>
-                        </label>
-                        <label className="flex items-center gap-2 cursor-pointer">
-                            <input
-                                type="checkbox"
-                                {...register('mostrarDiasTranscurridos')}
-                                className="rounded text-brand-teal focus:ring-brand-teal"
-                            />
-                            <span className="text-sm text-gray-700">Mostrar Días Transcurridos</span>
-                        </label>
+                        </div>
                     </div>
 
-                    <div className="flex gap-2 pt-2">
-                        <Button type="button" size="sm" variant="brand" onClick={handleSubmit(handleAdd)}>
-                            {editingIndex !== null ? 'Actualizar' : 'Agregar'}
-                        </Button>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+                        <select
+                            {...register('tipo')}
+                            className="w-full border rounded px-2 py-1.5 text-sm"
+                        >
+                            {FIELD_TYPES.map(type => (
+                                <option key={type.value} value={type.value}>
+                                    {type.label}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="flex justify-end gap-2 pt-2">
                         <Button type="button" size="sm" variant="ghost" onClick={handleCancel}>
                             Cancelar
+                        </Button>
+                        <Button
+                            type="button"
+                            size="sm"
+                            variant="brand"
+                            onClick={handleSubmit(onSubmit)}
+                            disabled={!watchedPlantillaCampoId}
+                        >
+                            {editingIndex !== null ? 'Actualizar' : 'Agregar'}
                         </Button>
                     </div>
                 </div>
@@ -364,4 +241,3 @@ export const TemplateFieldsConfig = ({ campos, onChange, flujoId }: TemplateFiel
         </div>
     );
 };
-
