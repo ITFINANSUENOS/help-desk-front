@@ -525,12 +525,32 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
                                 </select>
                             </div>
 
-                            {selectedTemplateFieldsId && templateFieldsForConfig.length > 0 && (
+                            {selectedTemplateFieldsId && (
                                 <TemplateFieldsConfig
                                     campos={(watch('campos') || []) as any}
                                     onChange={(newCampos) => setValue('campos', newCampos as any)}
                                     flujoId={Number(flujoId)}
                                     templateFields={templateFieldsForConfig}
+                                    flujoPlantillaId={selectedTemplateFieldsId}
+                                    onCreateTemplateField={async (data) => {
+                                        await templateService.createTemplateField(selectedTemplateFieldsId, {
+                                            campoNombre: data.campoNombre,
+                                            campoCodigo: data.campoCodigo,
+                                            campoTipo: data.campoTipo,
+                                            coordX: 100,
+                                            coordY: 100,
+                                            pagina: 1,
+                                            fontSize: 10,
+                                        });
+                                        // Refresh template fields after creation
+                                        const fields = await loadTemplateFieldsForConfig(selectedTemplateFieldsId);
+                                        setValue('campos', fields.map((f: any) => ({
+                                            plantillaCampoId: f.id,
+                                            nombre: f.nombre,
+                                            codigo: f.codigo,
+                                            tipo: f.tipo,
+                                        })) as any);
+                                    }}
                                 />
                             )}
                         </div>

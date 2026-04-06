@@ -12,15 +12,23 @@ interface TemplateFieldsConfigProps {
     flujoId: number;
     /** Available template fields from the selected template */
     templateFields?: TemplateField[];
+    /** ID of the selected template (for creating new template fields) */
+    flujoPlantillaId?: number;
+    /** Callback to create a new template field */
+    onCreateTemplateField?: (data: { campoNombre: string; campoCodigo: string; campoTipo?: string }) => Promise<void>;
 }
 
 /**
  * Template fields configuration for a step.
  * Now references TemplateField zones (coordinates configured at template level).
  */
-export const TemplateFieldsConfig = ({ campos, onChange, templateFields = [] }: TemplateFieldsConfigProps) => {
+export const TemplateFieldsConfig = ({ campos, onChange, templateFields = [], flujoPlantillaId, onCreateTemplateField }: TemplateFieldsConfigProps) => {
     const [isAdding, setIsAdding] = useState(false);
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
+    const [newFieldName, setNewFieldName] = useState('');
+    const [newFieldCode, setNewFieldCode] = useState('');
+    const [newFieldTipo, setNewFieldTipo] = useState('text');
+    const [isSaving, setIsSaving] = useState(false);
 
     const { register, handleSubmit, reset, setValue, watch } = useForm<StepTemplateField>();
 
@@ -184,8 +192,62 @@ export const TemplateFieldsConfig = ({ campos, onChange, templateFields = [] }: 
                             </p>
                         </div>
                     ) : (
-                        <div className="bg-yellow-50 border border-yellow-200 rounded p-2 text-sm text-yellow-700">
-                            No hay campos de plantilla disponibles. Configure los campos en la gestión de plantillas.
+                        <div className="space-y-3">
+                            <div className="bg-yellow-50 border border-yellow-200 rounded p-2 text-sm text-yellow-700">
+                                No hay campos de plantilla disponibles para esta empresa.
+                            </div>
+                            {flujoPlantillaId && onCreateTemplateField && (
+                                <div className="border border-dashed border-yellow-300 rounded p-3 bg-yellow-50/50">
+                                    <p className="text-xs text-yellow-700 mb-2 font-medium">¿Desea crear un campo de plantilla?</p>
+                                    <div className="grid grid-cols-3 gap-2 mb-2">
+                                        <input
+                                            type="text"
+                                            placeholder="Nombre"
+                                            value={newFieldName}
+                                            onChange={(e) => setNewFieldName(e.target.value)}
+                                            className="border rounded px-2 py-1 text-sm"
+                                        />
+                                        <input
+                                            type="text"
+                                            placeholder="Código"
+                                            value={newFieldCode}
+                                            onChange={(e) => setNewFieldCode(e.target.value)}
+                                            className="border rounded px-2 py-1 text-sm"
+                                        />
+                                        <select
+                                            value={newFieldTipo}
+                                            onChange={(e) => setNewFieldTipo(e.target.value)}
+                                            className="border rounded px-2 py-1 text-sm"
+                                        >
+                                            {FIELD_TYPES.map(type => (
+                                                <option key={type.value} value={type.value}>{type.label}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <Button
+                                        size="sm"
+                                        variant="brand"
+                                        disabled={isSaving || !newFieldName || !newFieldCode}
+                                        onClick={async () => {
+                                            setIsSaving(true);
+                                            try {
+                                                await onCreateTemplateField({
+                                                    campoNombre: newFieldName,
+                                                    campoCodigo: newFieldCode,
+                                                    campoTipo: newFieldTipo,
+                                                });
+                                                setNewFieldName('');
+                                                setNewFieldCode('');
+                                                setNewFieldTipo('text');
+                                            } finally {
+                                                setIsSaving(false);
+                                            }
+                                        }}
+                                    >
+                                        {isSaving ? 'Creando...' : 'Crear Campo'}
+                                    </Button>
+                                </div>
+                            )}
                         </div>
                     )}
 
