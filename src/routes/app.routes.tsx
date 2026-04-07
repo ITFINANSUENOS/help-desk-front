@@ -3,6 +3,8 @@ import { Navigate, type RouteObject } from 'react-router-dom';
 import { AuthGuard } from '../modules/auth/guards/AuthGuard';
 import { PageLoader } from '../shared/components/PageLoader';
 import { MainLayout } from '../core/layout/MainLayout';
+import PriceListsAdminPage from '../modules/price-lists/pages/PriceListsAdminPage';
+import PriceListsPage from '../modules/price-lists/pages/PriceListsPage';
 
 // Lazy load pages
 const LoginPage = lazy(() => import('../modules/auth/pages/LoginPage'));
@@ -30,10 +32,6 @@ const WorkflowStepsPage = lazy(() => import('../modules/workflows/pages/Workflow
 const MappingRulesPage = lazy(() => import('../modules/mapping-rules/pages/MappingRulesPage'));
 const NotificationsPage = lazy(() => import('../modules/notifications/pages/NotificationsPage'));
 const ReportsPage = lazy(() => import('../modules/reports/pages/ReportsPage'));
-const FlowOpenTicketsPage = lazy(() => import('../modules/reports/pages/FlowOpenTicketsPage'));
-const PriceListsPage = lazy(() => import('../modules/price-lists/pages/PriceListsPage'));
-const PriceListsAdminPage = lazy(() => import('../modules/price-lists/pages/PriceListsAdminPage'));
-
 const MainDashboardPage = lazy(() => import('../modules/reports/pages/MainDashboard'));
 const RankingUsuariosPage = lazy(() => import('../modules/reports/pages/RankingUsuarios'));
 const RegionalesPage = lazy(() => import('../modules/reports/pages/Regionales'));
