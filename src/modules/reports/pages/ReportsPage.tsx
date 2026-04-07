@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { usePermissions } from '../../../shared/hooks/usePermissions';
 import { useLayout } from '../../../core/layout/context/LayoutContext';
 import { Icon } from '../../../shared/components/Icon';
@@ -13,9 +13,10 @@ export default function ReportsPage() {
     const [exportingPerformance, setExportingPerformance] = useState(false);
     const [exportingDashboard, setExportingDashboard] = useState(false);
 
-    useState(() => {
+    // Set page title
+    useEffect(() => {
         setTitle('Reportes');
-    });
+    }, [setTitle]);
 
     const handleExportPerformance = async () => {
         try {
