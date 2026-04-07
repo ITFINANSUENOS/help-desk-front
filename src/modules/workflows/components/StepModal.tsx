@@ -473,6 +473,7 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
                                         <TemplateSignatureManager
                                             flujoPlantillaId={selectedTemplateId}
                                             onZonasChange={() => loadTemplateFirmas(selectedTemplateId)}
+                                            pdfUrl={`/public/documents/template/${templates.find(t => t.id === selectedTemplateId)?.nombrePlantilla}`}
                                         />
                                     )}
                                 </div>

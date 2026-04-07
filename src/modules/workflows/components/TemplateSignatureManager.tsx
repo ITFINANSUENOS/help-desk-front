@@ -7,10 +7,13 @@ import { positionService } from '../../../shared/services/catalog.service';
 import type { Position } from '../../../shared/interfaces/Catalog';
 import { toast } from 'sonner';
 import { Icon } from '../../../shared/components/Icon';
+import { PdfCoordinateSelector, type CoordinateData, type ExistingZone } from './PdfCoordinateSelector';
 
 interface TemplateSignatureManagerProps {
     flujoPlantillaId: number;
     onZonasChange?: () => void;
+    /** URL base for PDF document */
+    pdfUrl?: string;
 }
 
 interface FormData {
@@ -21,13 +24,14 @@ interface FormData {
     cargosIds: number[];
 }
 
-export const TemplateSignatureManager = ({ flujoPlantillaId, onZonasChange }: TemplateSignatureManagerProps) => {
+export const TemplateSignatureManager = ({ flujoPlantillaId, onZonasChange, pdfUrl }: TemplateSignatureManagerProps) => {
     const [firmas, setFirmas] = useState<TemplateSignature[]>([]);
     const [positions, setPositions] = useState<Position[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [editingId, setEditingId] = useState<number | null>(null);
     const [isAdding, setIsAdding] = useState(false);
+    const [showCoordinateSelector, setShowCoordinateSelector] = useState(false);
 
     const { register, handleSubmit, reset, setValue, control } = useForm<FormData>();
 
@@ -281,6 +285,18 @@ export const TemplateSignatureManager = ({ flujoPlantillaId, onZonasChange }: Te
                                     </div>
                                 </div>
 
+                                {/* Botón para seleccionar coordenadas visualmente */}
+                                {pdfUrl && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowCoordinateSelector(true)}
+                                        className="flex items-center justify-center gap-2 w-full py-2 px-3 bg-green-50 hover:bg-green-100 border border-green-300 rounded-lg text-sm font-medium text-green-700 transition-colors"
+                                    >
+                                        <Icon name="view" className="text-lg" />
+                                        Seleccionar posición en PDF
+                                    </button>
+                                )}
+
                                 {/* Cargos que pueden firmar */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -361,6 +377,29 @@ export const TemplateSignatureManager = ({ flujoPlantillaId, onZonasChange }: Te
                         </div>
                     )}
                 </div>
+            )}
+
+            {/* Modal de selección visual de coordenadas */}
+            {showCoordinateSelector && pdfUrl && (
+                <PdfCoordinateSelector
+                    isOpen={showCoordinateSelector}
+                    onClose={() => setShowCoordinateSelector(false)}
+                    pdfUrl={pdfUrl}
+                    existingZones={firmas.map((f): ExistingZone => ({
+                        id: f.id || 0,
+                        coordX: f.coordX,
+                        coordY: f.coordY,
+                        pagina: f.pagina,
+                        etiqueta: f.etiqueta,
+                    }))}
+                    onCoordinateSelect={(coords: CoordinateData) => {
+                        setValue('coordX', coords.coordX);
+                        setValue('coordY', coords.coordY);
+                        setValue('pagina', coords.pagina);
+                        setShowCoordinateSelector(false);
+                    }}
+                    zoneType="signature"
+                />
             )}
         </div>
     );
