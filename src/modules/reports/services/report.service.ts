@@ -59,6 +59,10 @@ class ReportService {
         return response.data;
     }
 
+    async exportFlowUsage(): Promise<void> {
+        await this.downloadFile('/workflows/reporte/uso/export', `Reporte_Flujos_En_Uso_${new Date().toISOString().split('T')[0]}.xlsx`);
+    }
+
     async getRegionales(): Promise<Regional[]> {
         const response = await api.get<Regional[]>('/tickets/regionals');
         return response.data;
@@ -66,6 +70,10 @@ class ReportService {
 
     async exportFlowOpenTickets(flujoId: number): Promise<void> {
         await this.downloadFile(`/tickets/export/flow-open?flujoId=${flujoId}`, `Reporte_Flujo_Abiertos_${new Date().toISOString().split('T')[0]}.xlsx`);
+    }
+
+    async exportDashboard(): Promise<void> {
+        await this.downloadFile('/reports/dashboard/export', `Dashboard_Completo_${new Date().toISOString().split('T')[0]}.xlsx`);
     }
 
     private async downloadFile(url: string, filename: string): Promise<void> {
