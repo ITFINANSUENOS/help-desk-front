@@ -11,6 +11,7 @@ import { Icon } from '../../../shared/components/Icon';
 import { useLayout } from '../../../core/layout/context/LayoutContext';
 import { formatHoras, formatPct, formatNumero } from '../utils/formatters';
 import { getHexClasificacion, getColorErroresGraves } from '../utils/colores';
+import type { CategoriaStats, SubcategoriaStats } from '../types/dashboard.types';
 
 /** Tooltip personalizado para el BarChart de categorías primarias */
 const CategoriaTooltip = ({
@@ -148,7 +149,7 @@ export default function Categorias() {
                                             </td>
                                         </tr>
                                     ) : (
-                                        data.map((cat) => {
+                                        data.map((cat: CategoriaStats) => {
                                             const isExpanded = expandedCategories.has(cat.categoria);
                                             const hasSubcategories = cat.subcategorias && cat.subcategorias.length > 0;
 
@@ -208,7 +209,7 @@ export default function Categorias() {
                                                     </tr>
 
                                                     {/* FILAS HIJO (Subcategorías) */}
-                                                    {isExpanded && hasSubcategories && cat.subcategorias.map((sub, idx) => {
+                                                    {isExpanded && hasSubcategories && cat.subcategorias.map((sub: SubcategoriaStats, idx: number) => {
                                                         const colorErrGraves = getColorErroresGraves(sub.pct_errores_graves);
 
                                                         return (

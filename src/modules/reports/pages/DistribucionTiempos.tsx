@@ -7,6 +7,7 @@ import { EmptyState } from '../../../shared/components/EmptyState';
 import { Icon } from '../../../shared/components/Icon';
 import { useLayout } from '../../../core/layout/context/LayoutContext';
 import { formatNumero, formatPct } from '../utils/formatters';
+import type { RangoTiempo } from '../types/dashboard.types';
 
 export default function DistribucionTiempos() {
     const { data, isLoading, isError, refetch } = useDistribucion();
@@ -25,7 +26,7 @@ export default function DistribucionTiempos() {
         const total = data.estadisticas.total_registros;
 
         // Find the most frequent range (moda)
-        const moda = data.rangos.reduce((prev, current) => (prev.cantidad > current.cantidad) ? prev : current);
+        const moda = data.rangos.reduce((prev: RangoTiempo, current: RangoTiempo) => (prev.cantidad > current.cantidad) ? prev : current);
 
         const pctFrecuente = total > 0
             ? (moda.cantidad / total) * 100
@@ -36,16 +37,16 @@ export default function DistribucionTiempos() {
 
         // 2. Diagnóstico Rápido: calcular % de tickets que superan las 72h (3 días)
         const ticketsLentos = data.rangos
-            .filter(r => r.orden >= 5) // "1-3 días" es orden 5, usaremos >= 6 para > 3 días, pero el usuario dijo 11.4% (orden 6 y 7 sumados).
-            // Ajuste: El backend devuelve orden 6 para "3-7 días" y 7 para "+7 días". 
+            .filter((r: RangoTiempo) => r.orden >= 5) // "1-3 días" es orden 5, usaremos >= 6 para > 3 días, pero el usuario dijo 11.4% (orden 6 y 7 sumados).
+            // Ajuste: El backend devuelve orden 6 para "3-7 días" y 7 para "+7 días".
             // Sumaremos cantidad de orden 6 y 7.
-            .filter(r => r.orden >= 6)
-            .reduce((sum, r) => sum + r.cantidad, 0);
+            .filter((r: RangoTiempo) => r.orden >= 6)
+            .reduce((sum: number, r: RangoTiempo) => sum + r.cantidad, 0);
 
         const pctLentos = total > 0 ? (ticketsLentos / total) * 100 : 0;
 
         // Casos críticos (> 7 días -> orden 7)
-        const ticketsCriticos = data.rangos.find(r => r.orden === 7)?.cantidad || 0;
+        const ticketsCriticos = data.rangos.find((r: RangoTiempo) => r.orden === 7)?.cantidad || 0;
         const pctCriticos = total > 0 ? (ticketsCriticos / total) * 100 : 0;
 
         return {
@@ -231,7 +232,7 @@ export default function DistribucionTiempos() {
                                             </td>
                                         </tr>
                                     ) : (
-                                        data.rangos.map((row, idx) => (
+                                        data.rangos.map((row: RangoTiempo, idx: number) => (
                                             <tr key={idx} className="hover:bg-gray-50 transition-colors">
                                                 <td className="py-3 px-4 font-medium text-gray-700 whitespace-nowrap">
                                                     {row.rango_horas}

@@ -13,6 +13,7 @@ import {
     formatPct,
     formatNumero,
 } from '../utils/formatters';
+import type { DetallePaso } from '../types/dashboard.types';
 import {
     getClasificacionCumplimiento,
     getClasificacionErrores,
@@ -299,8 +300,8 @@ export default function DetalleUsuario() {
                                 ) : (
                                     detalle.detalle_por_paso
                                         .slice()
-                                        .sort((a, b) => b.veces_asignado - a.veces_asignado)
-                                        .map((paso, idx) => {
+                                        .sort((a: DetallePaso, b: DetallePaso) => b.veces_asignado - a.veces_asignado)
+                                        .map((paso: DetallePaso, idx: number) => {
                                             const clasSla = getClasificacionCumplimiento(
                                                 paso.pct_cumplimiento,
                                             );
