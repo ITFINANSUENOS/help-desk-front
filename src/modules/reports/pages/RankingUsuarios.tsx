@@ -4,6 +4,7 @@ import { useRanking } from '../hooks/useDashboard';
 import { ScoreBadge } from '../components/ui/ScoreBadge';
 import { ClasificacionDot } from '../components/ui/ClasificacionDot';
 import { FiltroRegional } from '../components/ui/FiltroRegional';
+import { FiltroFecha, useDateFilter } from '../components/ui/FiltroFecha';
 import { LoadingSkeleton } from '../components/ui/LoadingSkeleton';
 import { EmptyState } from '../../../shared/components/EmptyState';
 import { formatHoras, formatNumero, formatPct } from '../utils/formatters';
@@ -20,6 +21,7 @@ export default function RankingUsuarios() {
     const [search, setSearch] = useState('');
     const [limit, setLimit] = useState(50);
     const [page, setPage] = useState(1);
+    const { dateRange, setDateRange } = useDateFilter();
     const { exportar, loading: exportLoading } = useExport();
     const { setTitle } = useLayout();
 
@@ -27,7 +29,7 @@ export default function RankingUsuarios() {
         setTitle('Dashboard Analytics');
     }, [setTitle]);
 
-    const { data: rankingData, isLoading, isError, refetch } = useRanking(limit, page);
+    const { data: rankingData, isLoading, isError, refetch } = useRanking(limit, page, dateRange);
 
     // Lista única de regionales extraida de los propios datos del ranking
     const listRegionales = useMemo(() => {
@@ -123,7 +125,8 @@ export default function RankingUsuarios() {
                             />
                         </div>
 
-                        {/* Filas por página */}
+                        {/* Filtro de fechas */}
+                        <FiltroFecha value={dateRange} onChange={setDateRange} />
                         <select
                             value={limit}
                             onChange={handleLimitChange}

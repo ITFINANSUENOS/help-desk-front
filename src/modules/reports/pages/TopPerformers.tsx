@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTopPerformers } from '../hooks/useDashboard';
 import { ScoreBadge } from '../components/ui/ScoreBadge';
 import { ClasificacionDot } from '../components/ui/ClasificacionDot';
+import { FiltroFecha, useDateFilter } from '../components/ui/FiltroFecha';
 import { LoadingSkeleton } from '../components/ui/LoadingSkeleton';
 import { EmptyState } from '../../../shared/components/EmptyState';
 import { formatHoras, formatPct, formatNumero } from '../utils/formatters';
@@ -53,13 +54,14 @@ function PodiumCell({ position, isTop }: { position: number; isTop: boolean }) {
 export default function TopPerformers() {
     const navigate = useNavigate();
     const [type, setType] = useState<'top' | 'bottom'>('top');
+    const { dateRange, setDateRange } = useDateFilter();
     const { setTitle } = useLayout();
 
     useEffect(() => {
         setTitle('Dashboard Analytics');
     }, [setTitle]);
 
-    const { data, isLoading, isError, refetch } = useTopPerformers(type, 10);
+    const { data, isLoading, isError, refetch } = useTopPerformers(type, 10, dateRange);
 
     if (isError) {
         return (
@@ -122,6 +124,7 @@ export default function TopPerformers() {
                             APOYO
                         </button>
                     </div>
+                    <FiltroFecha value={dateRange} onChange={setDateRange} />
                 </div>
             </div>
 

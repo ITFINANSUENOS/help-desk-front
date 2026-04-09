@@ -1,5 +1,6 @@
 import { useEffect, useMemo } from 'react';
 import { useDistribucion } from '../hooks/useDashboard';
+import { FiltroFecha, useDateFilter } from '../components/ui/FiltroFecha';
 import { KPICard } from '../components/ui/KPICard';
 import { HistogramaTiempos } from '../components/charts/HistogramaTiempos';
 import { LoadingSkeleton } from '../components/ui/LoadingSkeleton';
@@ -10,7 +11,8 @@ import { formatNumero, formatPct } from '../utils/formatters';
 import type { RangoTiempo } from '../types/dashboard.types';
 
 export default function DistribucionTiempos() {
-    const { data, isLoading, isError, refetch } = useDistribucion();
+    const { dateRange, setDateRange } = useDateFilter();
+    const { data, isLoading, isError, refetch } = useDistribucion(dateRange);
     const { setTitle } = useLayout();
 
     useEffect(() => {
@@ -95,6 +97,7 @@ export default function DistribucionTiempos() {
                         </p>
                     </div>
                 </div>
+                <FiltroFecha value={dateRange} onChange={setDateRange} />
             </div>
             {/* ── Contenido ────────────────────────────────────────────── */}
             <div className="flex flex-col gap-6 px-6 pt-2 pb-16 lg:px-8">

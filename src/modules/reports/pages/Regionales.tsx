@@ -4,6 +4,7 @@ import {
     ResponsiveContainer, Cell, ReferenceLine
 } from 'recharts';
 import { useRegionales } from '../hooks/useDashboard';
+import { FiltroFecha, useDateFilter } from '../components/ui/FiltroFecha';
 import { KPICard } from '../components/ui/KPICard';
 import { ClasificacionDot } from '../components/ui/ClasificacionDot';
 import { LoadingSkeleton } from '../components/ui/LoadingSkeleton';
@@ -39,7 +40,8 @@ const RegionalTooltip = ({
 };
 
 export default function Regionales() {
-    const { data, isLoading, isError, refetch } = useRegionales();
+    const { dateRange, setDateRange } = useDateFilter();
+    const { data, isLoading, isError, refetch } = useRegionales(dateRange);
     const { setTitle } = useLayout();
 
     useEffect(() => {
@@ -86,6 +88,7 @@ export default function Regionales() {
                         </p>
                     </div>
                 </div>
+                <FiltroFecha value={dateRange} onChange={setDateRange} />
             </div>
 
             {/* ── Área de scroll ───────────────────────────────────────── */}

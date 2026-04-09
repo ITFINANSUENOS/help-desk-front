@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNovedades } from '../hooks/useDashboard';
 import { PieNovedades } from '../components/charts/PieNovedades';
 import { ClasificacionDot } from '../components/ui/ClasificacionDot';
+import { FiltroFecha, useDateFilter } from '../components/ui/FiltroFecha';
 import { LoadingSkeleton } from '../components/ui/LoadingSkeleton';
 import { EmptyState } from '../../../shared/components/EmptyState';
 import { Icon } from '../../../shared/components/Icon';
@@ -277,7 +278,8 @@ function TablaUsuarios({ data, filtro }: { data: UsuarioNovedad[]; filtro: Filtr
 
 // ─── Página principal ─────────────────────────────────────────────────────────
 export default function Novedades() {
-    const { data, isLoading, isError, refetch } = useNovedades();
+    const { dateRange, setDateRange } = useDateFilter();
+    const { data, isLoading, isError, refetch } = useNovedades(dateRange);
     const { setTitle } = useLayout();
     const [filtro, setFiltro] = useState<FiltroNovedad>('todos');
 
@@ -316,6 +318,7 @@ export default function Novedades() {
                         </p>
                     </div>
                 </div>
+                <FiltroFecha value={dateRange} onChange={setDateRange} />
             </div>
 
             {/* ── Área de scroll ───────────────────────────────────────── */}

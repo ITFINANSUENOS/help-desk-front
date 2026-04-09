@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useMapaCalor, useRegionales } from '../hooks/useDashboard';
 import { FiltroRegional } from '../components/ui/FiltroRegional';
+import { FiltroFecha, useDateFilter } from '../components/ui/FiltroFecha';
 import { ScoreBadge } from '../components/ui/ScoreBadge';
 import { LoadingSkeleton } from '../components/ui/LoadingSkeleton';
 import { EmptyState } from '../../../shared/components/EmptyState';
@@ -23,9 +24,10 @@ function celda(clasificacion: 'verde' | 'amarillo' | 'rojo') {
 
 export default function MapaCalor() {
     const [selectedRegional, setSelectedRegional] = useState<string | undefined>();
+    const { dateRange, setDateRange } = useDateFilter();
 
-    const { data, isLoading, isError, refetch } = useMapaCalor(selectedRegional);
-    const { data: regionalesData } = useRegionales();
+    const { data, isLoading, isError, refetch } = useMapaCalor(selectedRegional, dateRange);
+    const { data: regionalesData } = useRegionales(dateRange);
     const { setTitle } = useLayout();
 
     useEffect(() => {
@@ -85,13 +87,16 @@ export default function MapaCalor() {
                 </div>
 
                 {/* Filtro de regional alineado a la derecha */}
-                <div className="w-full sm:w-56 shrink-0">
-                    <FiltroRegional
-                        value={selectedRegional}
-                        onChange={setSelectedRegional}
-                        regionales={listRegionales}
-                        placeholder="Todas las regionales"
-                    />
+                <div className="flex flex-wrap items-center gap-3">
+                    <FiltroFecha value={dateRange} onChange={setDateRange} />
+                    <div className="w-full sm:w-56 shrink-0">
+                        <FiltroRegional
+                            value={selectedRegional}
+                            onChange={setSelectedRegional}
+                            regionales={listRegionales}
+                            placeholder="Todas las regionales"
+                        />
+                    </div>
                 </div>
             </div>
 

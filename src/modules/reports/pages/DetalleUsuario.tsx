@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDetalleUsuario } from '../hooks/useDashboard';
+import { FiltroFecha, useDateFilter } from '../components/ui/FiltroFecha';
 import { Icon } from '../../../shared/components/Icon';
 import { useLayout } from '../../../core/layout/context/LayoutContext';
 import { useEffect } from 'react';
@@ -106,6 +107,7 @@ export default function DetalleUsuario() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const { setTitle } = useLayout();
+    const { dateRange, setDateRange } = useDateFilter();
 
     const userId = Number(id);
 
@@ -118,7 +120,7 @@ export default function DetalleUsuario() {
         isLoading: loadingDetalle,
         isError: errorDetalle,
         refetch: refetchDetalle,
-    } = useDetalleUsuario(userId);
+    } = useDetalleUsuario(userId, dateRange);
 
     // ── Error state ──────────────────────────────────────────────────────
     if (errorDetalle) {
@@ -179,6 +181,11 @@ export default function DetalleUsuario() {
                         {loadingDetalle ? '…' : (detalle?.usuario_nombre ?? 'Usuario')}
                     </span>
                 </nav>
+            </div>
+
+            {/* ── Filtro de fechas ───────────────────────────────────── */}
+            <div className="mb-4 flex justify-end">
+                <FiltroFecha value={dateRange} onChange={setDateRange} />
             </div>
 
             {/* ── Row 1: Profile card + Score gauge ───────────────────── */}

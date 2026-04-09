@@ -4,6 +4,7 @@ import { KPICard } from '../components/ui/KPICard';
 import { LoadingSkeleton } from '../components/ui/LoadingSkeleton';
 import { EmptyState } from '../../../shared/components/EmptyState';
 import { FiltroRegional } from '../components/ui/FiltroRegional';
+import { FiltroFecha, useDateFilter } from '../components/ui/FiltroFecha';
 import { ClasificacionDot } from '../components/ui/ClasificacionDot';
 import { getClasificacionCumplimiento, getClasificacionErrores } from '../utils/colores';
 import { formatHoras, formatNumero, formatPct, formatFecha } from '../utils/formatters';
@@ -21,13 +22,14 @@ export default function MainDashboard() {
     // Hooks parameters: The API doesn't support regional filter for KPIs yet,
     // but we add the visual filter according to the specification.
     const [selectedRegional, setSelectedRegional] = useState<string | undefined>();
+    const { dateRange, setDateRange } = useDateFilter();
 
     // Fetch data
     // useKpis recibe selectedRegional: cuando cambia, React Query re-fetcha automáticamente
     // porque regional forma parte de la queryKey.
-    const { data: kpis, isLoading: loadingKpis, isError: errorKpis, refetch: refetchKpis } = useKpis(selectedRegional);
+    const { data: kpis, isLoading: loadingKpis, isError: errorKpis, refetch: refetchKpis } = useKpis(selectedRegional, dateRange);
     // useRegionales no se filtra: necesitamos todos los valores para el dropdown.
-    const { data: regionalesData, isLoading: loadingRegionales, isError: errorRegionales, refetch: refetchRegionales } = useRegionales();
+    const { data: regionalesData, isLoading: loadingRegionales, isError: errorRegionales, refetch: refetchRegionales } = useRegionales(dateRange);
 
     // Derived states
     const isLoading = loadingKpis || loadingRegionales;
@@ -80,13 +82,16 @@ export default function MainDashboard() {
                     <h2 className="text-2xl font-bold text-gray-900 leading-tight">Dashboard Principal</h2>
                     <p className="text-sm text-gray-500 mt-0.5">Métricas globales y estado general del sistema.</p>
                 </div>
-                <div className="w-full md:w-80 shrink-0">
-                    <FiltroRegional
-                        value={selectedRegional}
-                        onChange={handleRegionalChange}
-                        regionales={listRegionales}
-                        placeholder="Todas las regionales"
-                    />
+                <div className="flex flex-wrap items-center gap-3">
+                    <FiltroFecha value={dateRange} onChange={setDateRange} />
+                    <div className="w-full md:w-80 shrink-0">
+                        <FiltroRegional
+                            value={selectedRegional}
+                            onChange={handleRegionalChange}
+                            regionales={listRegionales}
+                            placeholder="Todas las regionales"
+                        />
+                    </div>
                 </div>
             </div>
 

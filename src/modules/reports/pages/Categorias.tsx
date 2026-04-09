@@ -4,6 +4,7 @@ import {
     ResponsiveContainer, Cell, CartesianGrid
 } from 'recharts';
 import { useCategorias } from '../hooks/useDashboard';
+import { FiltroFecha, useDateFilter } from '../components/ui/FiltroFecha';
 import { ClasificacionDot } from '../components/ui/ClasificacionDot';
 import { LoadingSkeleton } from '../components/ui/LoadingSkeleton';
 import { EmptyState } from '../../../shared/components/EmptyState';
@@ -47,7 +48,8 @@ const truncate = (str: string, max = 28) =>
     str.length > max ? str.slice(0, max) + '…' : str;
 
 export default function Categorias() {
-    const { data, isLoading, isError, refetch } = useCategorias();
+    const { dateRange, setDateRange } = useDateFilter();
+    const { data, isLoading, isError, refetch } = useCategorias(dateRange);
     const { setTitle } = useLayout();
 
     // Set para manejar las categorías expandidas
@@ -114,6 +116,7 @@ export default function Categorias() {
                         </p>
                     </div>
                 </div>
+                <FiltroFecha value={dateRange} onChange={setDateRange} />
             </div>
 
             {/* ── Contenido ────────────────────────────────────────────── */}

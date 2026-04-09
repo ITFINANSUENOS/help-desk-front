@@ -6,6 +6,7 @@ import { EmptyState } from '../../../shared/components/EmptyState';
 import { Icon } from '../../../shared/components/Icon';
 import { useLayout } from '../../../core/layout/context/LayoutContext';
 import { formatHoras, formatPct } from '../utils/formatters';
+import { FiltroFecha, useDateFilter } from '../components/ui/FiltroFecha';
 
 const LIMIT_OPTIONS = [10, 20, 30, 50] as const;
 
@@ -34,7 +35,8 @@ const SeveridadBadge = ({ severidad }: { severidad: 'critico' | 'moderado' | 'no
 
 export default function CuellosBottleneck() {
     const [limit, setLimit] = useState<typeof LIMIT_OPTIONS[number]>(20);
-    const { data, isLoading, isError, refetch } = useCuellos(limit);
+    const { dateRange, setDateRange } = useDateFilter();
+    const { data, isLoading, isError, refetch } = useCuellos(limit, dateRange);
     const { setTitle } = useLayout();
 
     useEffect(() => {
@@ -88,6 +90,7 @@ export default function CuellosBottleneck() {
                         ))}
                     </select>
                 </div>
+                <FiltroFecha value={dateRange} onChange={setDateRange} />
             </div>
 
             {/* Scrollable Content */}
