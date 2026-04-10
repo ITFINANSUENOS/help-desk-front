@@ -28,20 +28,20 @@ export const FiltroFecha = ({ value, onChange, className }: FiltroFechaProps) =>
     const hasValue = value.dateFrom || value.dateTo;
 
     return (
-        <div className={`flex items-center gap-2 ${className || ''}`}>
+        <div className={`flex flex-col sm:flex-row items-start sm:items-center gap-2 ${className || ''}`}>
             <input
                 type="date"
                 value={value.dateFrom || ''}
                 onChange={handleDateFromChange}
-                className="rounded-lg border border-gray-200 bg-slate-50 px-3 py-2 text-sm text-[#121617] focus:border-brand-teal focus:outline-none focus:ring-1 focus:ring-brand-teal h-10"
+                className="w-full sm:w-36 rounded-lg border border-gray-200 bg-slate-50 px-3 py-2 text-sm text-[#121617] focus:border-brand-teal focus:outline-none focus:ring-1 focus:ring-brand-teal h-10"
                 placeholder="Desde"
             />
-            <span className="text-gray-400 text-sm">—</span>
+            <span className="text-gray-400 text-sm mx-1 hidden sm:block">—</span>
             <input
                 type="date"
                 value={value.dateTo || ''}
                 onChange={handleDateToChange}
-                className="rounded-lg border border-gray-200 bg-slate-50 px-3 py-2 text-sm text-[#121617] focus:border-brand-teal focus:outline-none focus:ring-1 focus:ring-brand-teal h-10"
+                className="w-full sm:w-36 rounded-lg border border-gray-200 bg-slate-50 px-3 py-2 text-sm text-[#121617] focus:border-brand-teal focus:outline-none focus:ring-1 focus:ring-brand-teal h-10"
                 placeholder="Hasta"
             />
             {hasValue && (

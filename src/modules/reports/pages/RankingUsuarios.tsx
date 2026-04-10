@@ -5,6 +5,7 @@ import { ScoreBadge } from '../components/ui/ScoreBadge';
 import { ClasificacionDot } from '../components/ui/ClasificacionDot';
 import { FiltroRegional } from '../components/ui/FiltroRegional';
 import { FiltroFecha, useDateFilter } from '../components/ui/FiltroFecha';
+import { FiltroFilas } from '../components/ui/FiltroFilas';
 import { LoadingSkeleton } from '../components/ui/LoadingSkeleton';
 import { EmptyState } from '../../../shared/components/EmptyState';
 import { formatHoras, formatNumero, formatPct } from '../utils/formatters';
@@ -12,8 +13,6 @@ import { Icon } from '../../../shared/components/Icon';
 import { useLayout } from '../../../core/layout/context/LayoutContext';
 import { useExport } from '../hooks/useExport';
 import { useEffect } from 'react';
-
-const PAGE_SIZE_OPTIONS = [10, 25, 50] as const;
 
 export default function RankingUsuarios() {
     const navigate = useNavigate();
@@ -49,11 +48,6 @@ export default function RankingUsuarios() {
 
     const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         setSearch(e.target.value);
-    }, []);
-
-    const handleLimitChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-        setLimit(Number(e.target.value));
-        setPage(1);
     }, []);
 
     if (isError) {
@@ -99,7 +93,7 @@ export default function RankingUsuarios() {
 
                 {/* Filtros Container */}
                 <div className="flex flex-col sm:flex-row gap-3 items-center justify-between mt-2">
-                    <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                    <div className="flex flex-wrap gap-3 items-end w-full">
                         {/* Filtro regional */}
                         <div className="w-full sm:w-56">
                             <FiltroRegional
@@ -111,7 +105,7 @@ export default function RankingUsuarios() {
                         </div>
 
                         {/* Búsqueda por nombre */}
-                        <div className="relative w-full sm:w-64">
+                        <div className="relative flex-1 sm:flex-none sm:w-64 min-w-[160px]">
                             <Icon
                                 name="search"
                                 className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg"
@@ -127,15 +121,9 @@ export default function RankingUsuarios() {
 
                         {/* Filtro de fechas */}
                         <FiltroFecha value={dateRange} onChange={setDateRange} />
-                        <select
-                            value={limit}
-                            onChange={handleLimitChange}
-                            className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#43BBCA] bg-white shadow-sm"
-                        >
-                            {PAGE_SIZE_OPTIONS.map(opt => (
-                                <option key={opt} value={opt}>{opt} filas</option>
-                            ))}
-                        </select>
+
+                        {/* Selector de filas */}
+                        <FiltroFilas value={limit} onChange={val => { setLimit(val); setPage(1); }} />
                     </div>
 
                     {/* Botón exportar (Mobile) */}
