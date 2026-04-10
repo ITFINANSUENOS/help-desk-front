@@ -40,6 +40,12 @@ export const dashboardApi = {
     getDetalleUsuario: (id: number, dateRange?: DateRange) =>
         axios.get<DetalleUsuario>(`${BASE}/usuario/${id}/detalle`, { params: buildDateParams(dateRange) }).then(r => r.data),
 
+    getTicketsPorUsuario: (id: number, dateRange?: DateRange, limit = 50, page = 1, paso?: string) =>
+        axios.get<{ data: Array<{ id: number; titulo: string; estado: string; fechaCreacion: string; categoria: string; subcategoria: string; asignadoNombre: string; estadoTiempo: string; paso?: string }>; total: number; page: number; limit: number; totalPages: number }>(
+            `${BASE}/usuario/${id}/tickets`,
+            { params: { ...buildDateParams(dateRange), limit, page, ...(paso ? { paso } : {}) } }
+        ).then(r => r.data),
+
     getTopPerformers: (typeParam: 'top' | 'bottom' = 'top', limitParam = 10, dateRange?: DateRange) =>
         axios.get<UsuarioRanking[]>(`${BASE}/top-performers`, { params: { type: typeParam, limit: limitParam, ...buildDateParams(dateRange) } }).then(r => r.data),
 

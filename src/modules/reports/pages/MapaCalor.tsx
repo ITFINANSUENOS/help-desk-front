@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useMapaCalor, useRegionales } from '../hooks/useDashboard';
 import { FiltroRegional } from '../components/ui/FiltroRegional';
 import { FiltroFecha, useDateFilter } from '../components/ui/FiltroFecha';
@@ -23,6 +24,7 @@ function celda(clasificacion: 'verde' | 'amarillo' | 'rojo') {
 }
 
 export default function MapaCalor() {
+    const navigate = useNavigate();
     const [selectedRegional, setSelectedRegional] = useState<string | undefined>();
     const { dateRange, setDateRange } = useDateFilter();
 
@@ -170,7 +172,14 @@ export default function MapaCalor() {
                                                 return (
                                                     <tr
                                                         key={`${regional}-${u.usuario_id}-${idx}`}
-                                                        className="border-b border-gray-100 hover:brightness-95 transition-all"
+                                                        onClick={() => {
+                                                            const params = new URLSearchParams();
+                                                            if (dateRange.dateFrom) params.set('dateFrom', dateRange.dateFrom);
+                                                            if (dateRange.dateTo) params.set('dateTo', dateRange.dateTo);
+                                                            const query = params.toString();
+                                                            navigate(`/reports/dashboard/usuario/${u.usuario_id}${query ? `?${query}` : ''}`);
+                                                        }}
+                                                        className="border-b border-gray-100 hover:brightness-95 transition-all cursor-pointer"
                                                     >
                                                         {/* Ranking */}
                                                         <td className="py-2.5 px-4 text-xs text-gray-400 font-semibold">

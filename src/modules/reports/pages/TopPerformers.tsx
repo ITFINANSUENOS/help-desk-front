@@ -200,11 +200,13 @@ export default function TopPerformers() {
                                             return (
                                                 <tr
                                                     key={row.usuario_id}
-                                                    onClick={() =>
-                                                        navigate(
-                                                            `/reports/dashboard/usuario/${row.usuario_id}`
-                                                        )
-                                                    }
+                                                    onClick={() => {
+                                                        const params = new URLSearchParams();
+                                                        if (dateRange.dateFrom) params.set('dateFrom', dateRange.dateFrom);
+                                                        if (dateRange.dateTo) params.set('dateTo', dateRange.dateTo);
+                                                        const query = params.toString();
+                                                        navigate(`/reports/dashboard/usuario/${row.usuario_id}${query ? `?${query}` : ''}`);
+                                                    }}
                                                     className={`cursor-pointer hover:bg-blue-50 transition-colors ${rowBg}`}
                                                 >
                                                     {/* Position */}

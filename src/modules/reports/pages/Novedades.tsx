@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useNovedades } from '../hooks/useDashboard';
 import { PieNovedades } from '../components/charts/PieNovedades';
 import { ClasificacionDot } from '../components/ui/ClasificacionDot';
@@ -179,7 +180,7 @@ function CantidadBadge({ cantidad, pct, tipo }: { cantidad: number; pct: number;
 }
 
 // ─── Tabla de usuarios dinámica ───────────────────────────────────────────────
-function TablaUsuarios({ data, filtro }: { data: UsuarioNovedad[]; filtro: FiltroNovedad }) {
+function TablaUsuarios({ data, filtro, navigate }: { data: UsuarioNovedad[]; filtro: FiltroNovedad; navigate: ReturnType<typeof useNavigate> }) {
     const filtroConf = FILTROS[filtro];
 
     // Respetar el orden que envía el backend; solo filtrar filas con datos en el tipo seleccionado
@@ -230,7 +231,14 @@ function TablaUsuarios({ data, filtro }: { data: UsuarioNovedad[]; filtro: Filtr
                         filtradas.map((row, idx) => (
                             <tr
                                 key={`${row.usuario_id}-${idx}`}
-                                className={`hover:bg-blue-50 transition-colors ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/60'}`}
+                                onClick={() => {
+                                    const params = new URLSearchParams();
+                                    if (dateRange.dateFrom) params.set('dateFrom', dateRange.dateFrom);
+                                    if (dateRange.dateTo) params.set('dateTo', dateRange.dateTo);
+                                    const query = params.toString();
+                                    navigate(`/reports/dashboard/usuario/${row.usuario_id}${query ? `?${query}` : ''}`);
+                                }}
+                                className={`cursor-pointer hover:bg-blue-50 transition-colors ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/60'}`}
                             >
                                 <td className="py-3 px-4 text-sm font-semibold text-gray-900">{row.usuario_nombre}</td>
                                 <td className="py-3 px-4 text-sm text-gray-600">{row.regional}</td>
@@ -278,6 +286,7 @@ function TablaUsuarios({ data, filtro }: { data: UsuarioNovedad[]; filtro: Filtr
 
 // ─── Página principal ─────────────────────────────────────────────────────────
 export default function Novedades() {
+    const navigate = useNavigate();
     const { dateRange, setDateRange } = useDateFilter();
     const { data, isLoading, isError, refetch } = useNovedades(dateRange);
     const { setTitle } = useLayout();
@@ -379,7 +388,7 @@ export default function Novedades() {
                                 </div>
 
                                 {usuarios.length > 0 ? (
-                                    <TablaUsuarios data={usuarios} filtro={filtro} />
+                                    <TablaUsuarios data={usuarios} filtro={filtro} navigate={navigate} />
                                 ) : (
                                     <div className="flex items-center justify-center h-40 text-gray-400 text-sm">
                                         Sin usuarios con novedades registradas.

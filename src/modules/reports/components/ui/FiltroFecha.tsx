@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 export interface DateRange {
     dateFrom?: string;
@@ -57,8 +58,29 @@ export const FiltroFecha = ({ value, onChange, className }: FiltroFechaProps) =>
     );
 };
 
-// Hook para compartir el estado del filtro de fechas
+// Hook para compartir el estado del filtro de fechas (sincronizado con URL)
 export const useDateFilter = () => {
-    const [dateRange, setDateRange] = useState<DateRange>({});
+    const [searchParams, setSearchParams] = useSearchParams();
+
+    const dateFrom = searchParams.get('dateFrom') || undefined;
+    const dateTo = searchParams.get('dateTo') || undefined;
+
+    const dateRange: DateRange = { dateFrom, dateTo };
+
+    const setDateRange = (range: DateRange) => {
+        const newParams = new URLSearchParams(searchParams);
+        if (range.dateFrom) {
+            newParams.set('dateFrom', range.dateFrom);
+        } else {
+            newParams.delete('dateFrom');
+        }
+        if (range.dateTo) {
+            newParams.set('dateTo', range.dateTo);
+        } else {
+            newParams.delete('dateTo');
+        }
+        setSearchParams(newParams, { replace: true });
+    };
+
     return { dateRange, setDateRange };
 };

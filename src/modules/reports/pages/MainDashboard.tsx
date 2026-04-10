@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useKpis, useRegionales } from '../hooks/useDashboard';
 import { KPICard } from '../components/ui/KPICard';
 import { LoadingSkeleton } from '../components/ui/LoadingSkeleton';
@@ -13,6 +14,7 @@ import { useLayout } from '../../../core/layout/context/LayoutContext';
 import { useEffect } from 'react';
 
 export default function MainDashboard() {
+    const navigate = useNavigate();
     const { setTitle } = useLayout();
 
     useEffect(() => {
@@ -166,7 +168,11 @@ export default function MainDashboard() {
                                         </thead>
                                         <tbody className="divide-y divide-gray-50">
                                             {top5Regionales.length > 0 ? top5Regionales.map(reg => (
-                                                <tr key={reg.regional} className="hover:bg-gray-50/50 transition-colors">
+                                                <tr
+                                                    key={reg.regional}
+                                                    onClick={() => navigate(`/tickets?regional=${encodeURIComponent(reg.regional)}&dateFrom=${dateRange.dateFrom || ''}&dateTo=${dateRange.dateTo || ''}`)}
+                                                    className="hover:bg-blue-50 cursor-pointer transition-colors"
+                                                >
                                                     <td className="py-3 px-4 font-medium text-gray-900">{reg.regional}</td>
                                                     <td className="py-3 px-4 text-right text-gray-600">{formatNumero(reg.total_tickets)}</td>
                                                     <td className="py-3 px-4">
