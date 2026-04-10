@@ -221,3 +221,40 @@ export interface Novedades {
     distribucion_tipos: TipoNovedad[];
     usuarios_con_mas_novedades: UsuarioNovedad[];
 }
+
+// ─── Tickets por Usuario (Detalle) ─────────────────────────────────
+export interface AsignacionDetalle {
+    id: number;
+    usuarioId: number;
+    usuarioNombre: string;
+    pasoId: number;
+    pasoNombre: string;
+    fechaAsignacion: string;
+    fechaCompletado: string | null;
+    duracionHoras: number;
+    slaLimiteHoras: number;
+    estadoTiempo: 'A Tiempo' | 'Atrasado' | null;
+    estadoTiempoPaso: string | null;
+}
+
+export interface TicketDetalleItem {
+    id: number;
+    titulo: string;
+    estado: string;
+    fechaCreacion: string;
+    categoria: string;
+    subcategoria: string;
+    pasoActual: string;
+    nombreCreador: string;
+    esCreadoPorUsuario: boolean;
+    esAsignadoAUsuario: boolean;
+    historial: AsignacionDetalle[];
+}
+
+export interface TicketsDetalleResponse {
+    data: TicketDetalleItem[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+}

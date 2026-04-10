@@ -43,6 +43,7 @@ const TopPerformersPage = lazy(() => import('../modules/reports/pages/TopPerform
 const NovedadesPage = lazy(() => import('../modules/reports/pages/Novedades'));
 const DetalleUsuarioPage = lazy(() => import('../modules/reports/pages/DetalleUsuario'));
 const FlowOpenTicketsPage = lazy(() => import('../modules/reports/pages/FlowOpenTicketsPage'));
+const TicketsUsuarioPage = lazy(() => import('../modules/reports/pages/TicketsUsuarioPage'));
 
 export const appRoutes: RouteObject[] = [
     {
@@ -344,6 +345,14 @@ export const appRoutes: RouteObject[] = [
                         element: (
                             <Suspense fallback={<PageLoader />}>
                                 <DetalleUsuarioPage />
+                            </Suspense>
+                        )
+                    },
+                    {
+                        path: '/reports/dashboard/tickets-usuario',
+                        element: (
+                            <Suspense fallback={<PageLoader />}>
+                                <TicketsUsuarioPage />
                             </Suspense>
                         )
                     },

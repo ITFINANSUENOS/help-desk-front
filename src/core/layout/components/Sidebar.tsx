@@ -129,6 +129,7 @@ export function Sidebar({ isCollapsed, toggleCollapse, isMobileOpen, closeMobile
                 { to: '/reports/dashboard/distribucion', icon: 'timeline', label: 'Distribución Tiempos' },
                 { to: '/reports/dashboard/top-performers', icon: 'emoji_events', label: 'Top Performers' },
                 { to: '/reports/dashboard/novedades', icon: 'bug_report', label: 'Novedades' },
+                { to: '/reports/dashboard/tickets-usuario', icon: 'people', label: 'Tickets por Usuario' },
             ],
         },
         { to: "/settings", icon: "settings", label: "Settings" }

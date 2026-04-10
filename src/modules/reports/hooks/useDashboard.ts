@@ -13,6 +13,7 @@ export const DASHBOARD_KEYS = {
     distribucion: (dateRange?: DateRange) => ['dashboard', 'distribucion', dateRange?.dateFrom ?? 'no-from', dateRange?.dateTo ?? 'no-to'],
     detalle: (id: number, dateRange?: DateRange) => ['dashboard', 'usuario', id, 'detalle', dateRange?.dateFrom ?? 'no-from', dateRange?.dateTo ?? 'no-to'],
     ticketsUsuario: (id: number, dateRange?: DateRange) => ['dashboard', 'usuario', id, 'tickets', dateRange?.dateFrom ?? 'no-from', dateRange?.dateTo ?? 'no-to'],
+    ticketsDetalleUsuario: (id: number, dateRange?: DateRange) => ['dashboard', 'usuario', id, 'tickets-detalle', dateRange?.dateFrom ?? 'no-from', dateRange?.dateTo ?? 'no-to'],
     topPerf: (type: string, limit: number, dateRange?: DateRange) => ['dashboard', 'top-performers', type, limit, dateRange?.dateFrom ?? 'no-from', dateRange?.dateTo ?? 'no-to'],
     novedades: (dateRange?: DateRange) => ['dashboard', 'novedades', dateRange?.dateFrom ?? 'no-from', dateRange?.dateTo ?? 'no-to'],
 };
@@ -78,6 +79,13 @@ export const useTicketsPorUsuario = (id: number, dateRange?: DateRange, limit = 
     useQuery({
         queryKey: [...DASHBOARD_KEYS.ticketsUsuario(id, dateRange), paso ?? 'all'],
         queryFn: () => dashboardApi.getTicketsPorUsuario(id, dateRange, limit, page, paso),
+        enabled: !!(id && dateRange?.dateFrom && dateRange?.dateTo),
+    });
+
+export const useTicketsDetallePorUsuario = (id: number | undefined, dateRange?: DateRange, limit = 50, page = 1, tipo?: 'creados' | 'asignados') =>
+    useQuery({
+        queryKey: [...DASHBOARD_KEYS.ticketsDetalleUsuario(id ?? 0, dateRange), tipo ?? 'todos'],
+        queryFn: () => dashboardApi.getTicketsDetallePorUsuario(id!, dateRange, limit, page, tipo),
         enabled: !!(id && dateRange?.dateFrom && dateRange?.dateTo),
     });
 
