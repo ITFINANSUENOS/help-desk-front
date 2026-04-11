@@ -75,8 +75,32 @@ class ReportService {
         if (fechaFin) params.append('fechaFin', fechaFin);
         if (estado) params.append('estado', estado);
         if (regionalId) params.append('regionalId', String(regionalId));
-        
+
         await this.downloadFile(`/tickets/export/flow-open?${params.toString()}`, `Reporte_Flujo_${new Date().toISOString().split('T')[0]}.xlsx`);
+    }
+
+    async getTicketReport(dateFrom?: string, dateTo?: string, status?: string): Promise<any> {
+        const params = new URLSearchParams();
+        if (dateFrom) params.append('dateFrom', dateFrom);
+        if (dateTo) params.append('dateTo', dateTo);
+        if (status) params.append('status', status);
+
+        const queryString = params.toString();
+        const url = queryString ? `/tickets/report?${queryString}` : '/tickets/report';
+        const response = await api.get<any>(url);
+        return response.data;
+    }
+
+    async exportTicketReport(dateFrom?: string, dateTo?: string, status?: string): Promise<void> {
+        const params = new URLSearchParams();
+        if (dateFrom) params.append('dateFrom', dateFrom);
+        if (dateTo) params.append('dateTo', dateTo);
+        if (status) params.append('status', status);
+
+        const queryString = params.toString();
+        const url = queryString ? `/tickets/export/report?${queryString}` : '/tickets/export/report';
+        const filename = `Reporte_Tickets_${dateFrom || ''}_${dateTo || ''}.xlsx`.replace(/ /g, '_');
+        await this.downloadFile(url, filename);
     }
 
     private async downloadFile(url: string, filename: string): Promise<void> {

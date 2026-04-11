@@ -10,8 +10,8 @@ export default function ReportsPage() {
     const [exporting, setExporting] = useState(false);
     const [exportingFlujos, setExportingFlujos] = useState(false);
     const [exportingComments, setExportingComments] = useState(false);
+    const [exportingTickets, setExportingTickets] = useState(false);
 
-    // Set page title
     useState(() => {
         setTitle('Reportes');
     });
@@ -46,6 +46,17 @@ export default function ReportsPage() {
             console.error('Error exporting comments report', error);
         } finally {
             setExportingComments(false);
+        }
+    };
+
+    const handleExportTicketsReport = async () => {
+        try {
+            setExportingTickets(true);
+            await reportService.exportTicketReport();
+        } catch (error) {
+            console.error('Error exporting tickets report', error);
+        } finally {
+            setExportingTickets(false);
         }
     };
 
@@ -158,6 +169,44 @@ export default function ReportsPage() {
                                 className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-brand-teal px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-brand-teal/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-teal disabled:opacity-50"
                             >
                                 {exportingComments ? (
+                                    <>
+                                        <Icon name="sync" className="h-5 w-5 animate-spin" />
+                                        <span>Generando...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Icon name="download" className="h-5 w-5" />
+                                        <span>Descargar Excel</span>
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* Tickets Report Card */}
+                {can('read', 'Report') && (
+                    <div className="flex flex-col rounded-xl border border-gray-100 bg-white p-6 shadow-sm transition-all hover:border-brand-blue/30 hover:shadow-md">
+                        <div className="flex items-start justify-between">
+                            <div>
+                                <p className="text-sm font-medium text-gray-500">Tickets</p>
+                                <p className="mt-2 text-xl font-bold text-gray-800">Reporte General</p>
+                                <p className="mt-2 text-xs text-gray-400 line-clamp-2">
+                                    Exporta a Excel todos los tickets del sistema con estado actual, paso, asignado, creador y más.
+                                </p>
+                            </div>
+                            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-orange-50 text-orange-600">
+                                <Icon name="list_alt" className="text-2xl" style={{ fontVariationSettings: '"FILL" 1' }} />
+                            </div>
+                        </div>
+
+                        <div className="mt-6">
+                            <button
+                                onClick={handleExportTicketsReport}
+                                disabled={exportingTickets}
+                                className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-brand-teal px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-brand-teal/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-teal disabled:opacity-50"
+                            >
+                                {exportingTickets ? (
                                     <>
                                         <Icon name="sync" className="h-5 w-5 animate-spin" />
                                         <span>Generando...</span>
