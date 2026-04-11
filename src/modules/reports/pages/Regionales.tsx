@@ -13,6 +13,7 @@ import { Icon } from '../../../shared/components/Icon';
 import { useLayout } from '../../../core/layout/context/LayoutContext';
 import { formatHoras, formatNumero, formatPct } from '../utils/formatters';
 import { getHexClasificacion } from '../utils/colores';
+import { ReportHeader } from '../components/ui/ReportHeader';
 
 /** Tooltip personalizado para el BarChart de regionales */
 const RegionalTooltip = ({
@@ -74,22 +75,13 @@ export default function Regionales() {
 
     return (
         <div className="flex h-full flex-col bg-gray-50/50">
-
-            {/* ── Sticky Header ────────────────────────────────────────── */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-6 py-5 lg:px-8 border-b border-gray-100 bg-white/60 backdrop-blur-xl z-20 shrink-0 sticky top-0">
-                <div className="flex items-center gap-4">
-                    <div className="flex items-center justify-center p-3 bg-red-50 rounded-xl text-red-600 shadow-sm border border-red-100">
-                        <Icon name="map" className="text-2xl" />
-                    </div>
-                    <div>
-                        <h2 className="text-xl font-bold text-gray-900 leading-tight">Análisis por Regional</h2>
-                        <p className="text-sm text-gray-500 mt-0.5">
-                            Comparativa de desempeño entre regionales activas.
-                        </p>
-                    </div>
-                </div>
+            <ReportHeader
+                title="Análisis por Regional"
+                subtitle="Comparativa de desempeño entre regionales activas."
+                icon={<Icon name="map" className="text-2xl" />}
+            >
                 <FiltroFecha value={dateRange} onChange={setDateRange} />
-            </div>
+            </ReportHeader>
 
             {/* ── Área de scroll ───────────────────────────────────────── */}
             <div className="flex-1 overflow-y-auto px-6 py-6 lg:px-8 flex flex-col gap-6">

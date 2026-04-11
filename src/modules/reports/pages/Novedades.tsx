@@ -10,6 +10,7 @@ import { Icon } from '../../../shared/components/Icon';
 import { useLayout } from '../../../core/layout/context/LayoutContext';
 import { formatPct, formatNumero } from '../utils/formatters';
 import type { UsuarioNovedad, TipoNovedad } from '../types/dashboard.types';
+import { ReportHeader } from '../components/ui/ReportHeader';
 
 // ─── Tipos de filtro disponibles ──────────────────────────────────────────────
 type FiltroNovedad = 'todos' | 'graves' | 'error_proceso' | 'cierre_forzoso' | 'leves' | 'error_informativo' | 'novedad_asignada' | 'novedad_resuelta';
@@ -180,7 +181,7 @@ function CantidadBadge({ cantidad, pct, tipo }: { cantidad: number; pct: number;
 }
 
 // ─── Tabla de usuarios dinámica ───────────────────────────────────────────────
-function TablaUsuarios({ data, filtro, navigate }: { data: UsuarioNovedad[]; filtro: FiltroNovedad; navigate: ReturnType<typeof useNavigate> }) {
+function TablaUsuarios({ data, filtro, navigate, dateRange }: { data: UsuarioNovedad[]; filtro: FiltroNovedad; navigate: ReturnType<typeof useNavigate>; dateRange: { dateFrom?: string; dateTo?: string } }) {
     const filtroConf = FILTROS[filtro];
 
     // Respetar el orden que envía el backend; solo filtrar filas con datos en el tipo seleccionado
@@ -313,22 +314,13 @@ export default function Novedades() {
 
     return (
         <div className="flex h-full flex-col bg-gray-50/50">
-
-            {/* ── Sticky Header ────────────────────────────────────────── */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-6 py-5 lg:px-8 border-b border-gray-100 bg-white/60 backdrop-blur-xl z-20 shrink-0 sticky top-0">
-                <div className="flex items-center gap-4">
-                    <div className="flex items-center justify-center p-3 bg-red-50 rounded-xl text-red-600 shadow-sm border border-red-100">
-                        <Icon name="bug_report" className="text-2xl" />
-                    </div>
-                    <div>
-                        <h2 className="text-xl font-bold text-gray-900 leading-tight">Análisis de Novedades</h2>
-                        <p className="text-sm text-gray-500 mt-0.5">
-                            Distribución de errores e incidencias reportadas por los usuarios.
-                        </p>
-                    </div>
-                </div>
+            <ReportHeader
+                title="Análisis de Novedades"
+                subtitle="Distribución de errores e incidencias reportadas por los usuarios."
+                icon={<Icon name="bug_report" className="text-2xl" />}
+            >
                 <FiltroFecha value={dateRange} onChange={setDateRange} />
-            </div>
+            </ReportHeader>
 
             {/* ── Área de scroll ───────────────────────────────────────── */}
             <div className="flex-1 overflow-y-auto px-6 py-6 lg:px-8 flex flex-col gap-6">
@@ -388,7 +380,7 @@ export default function Novedades() {
                                 </div>
 
                                 {usuarios.length > 0 ? (
-                                    <TablaUsuarios data={usuarios} filtro={filtro} navigate={navigate} />
+                                    <TablaUsuarios data={usuarios} filtro={filtro} navigate={navigate} dateRange={dateRange} />
                                 ) : (
                                     <div className="flex items-center justify-center h-40 text-gray-400 text-sm">
                                         Sin usuarios con novedades registradas.

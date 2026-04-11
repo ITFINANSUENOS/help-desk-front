@@ -19,6 +19,7 @@ import {
     getClasificacionCumplimiento,
     getClasificacionErrores,
 } from '../utils/colores';
+import { ReportHeader } from '../components/ui/ReportHeader';
 
 // ─── ScoreGauge ──────────────────────────────────────────────────────────
 /**
@@ -183,42 +184,21 @@ export default function DetalleUsuario() {
 
     return (
         <div className="flex-1 flex flex-col p-4 md:p-6 lg:p-8 overflow-y-auto min-h-0">
-
-            {/* ── Breadcrumb + Back button ─────────────────────────────── */}
-            <div className="mb-6 flex items-center gap-3">
-                <button
-                    onClick={() => navigate(-1)}
-                    className="flex items-center gap-1.5 text-sm font-semibold text-gray-500 hover:text-[#2B378A] transition-colors"
-                >
-                    <Icon name="arrow_back" className="text-[1.1rem]" />
-                    Volver
-                </button>
-                <span className="text-gray-300">/</span>
-                <nav className="text-sm text-gray-400 flex items-center gap-1">
+            <ReportHeader
+                title="Detalle de Usuario"
+                icon={<Icon name="person" className="text-2xl" />}
+                actions={
                     <button
-                        onClick={() => navigate('/reports/dashboard')}
-                        className="hover:text-[#2B378A] transition-colors"
+                        onClick={() => navigate(-1)}
+                        className="flex items-center gap-1.5 text-sm font-semibold text-gray-500 hover:text-[#2B378A] transition-colors"
                     >
-                        Dashboard
+                        <Icon name="arrow_back" className="text-[1.1rem]" />
+                        Volver
                     </button>
-                    <span className="mx-1">&rsaquo;</span>
-                    <button
-                        onClick={() => navigate('/reports/dashboard/ranking')}
-                        className="hover:text-[#2B378A] transition-colors"
-                    >
-                        Ranking
-                    </button>
-                    <span className="mx-1">&rsaquo;</span>
-                    <span className="font-medium text-gray-700">
-                        {loadingDetalle ? '…' : (detalle?.usuario_nombre ?? 'Sin datos en el período')}
-                    </span>
-                </nav>
-            </div>
-
-            {/* ── Filtro de fechas ───────────────────────────────────── */}
-            <div className="mb-4 flex justify-end">
+                }
+            >
                 <FiltroFecha value={dateRange} onChange={setDateRange} />
-            </div>
+            </ReportHeader>
 
             {/* ── Row 1: Profile card + Score gauge ───────────────────── */}
             <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">

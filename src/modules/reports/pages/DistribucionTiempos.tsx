@@ -9,6 +9,7 @@ import { Icon } from '../../../shared/components/Icon';
 import { useLayout } from '../../../core/layout/context/LayoutContext';
 import { formatNumero, formatPct } from '../utils/formatters';
 import type { RangoTiempo } from '../types/dashboard.types';
+import { ReportHeader } from '../components/ui/ReportHeader';
 
 export default function DistribucionTiempos() {
     const { dateRange, setDateRange } = useDateFilter();
@@ -83,22 +84,13 @@ export default function DistribucionTiempos() {
 
     return (
         <div className="flex h-full flex-col bg-gray-50/50">
-
-            {/* ── Sticky Header ────────────────────────────────────────── */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-6 py-5 lg:px-8 border-b border-gray-100 bg-white/60 backdrop-blur-xl z-20 shrink-0 sticky top-0">
-                <div className="flex items-center gap-4">
-                    <div className="flex items-center justify-center p-3 bg-red-50 rounded-xl text-red-600 shadow-sm border border-red-100">
-                        <Icon name="hourglass_empty" className="text-2xl" />
-                    </div>
-                    <div>
-                        <h2 className="text-xl font-bold text-gray-900 leading-tight">Distribución de Tiempos</h2>
-                        <p className="text-sm text-gray-500 mt-0.5">
-                            Análisis estadístico de la duración en la resolución de los tickets.
-                        </p>
-                    </div>
-                </div>
+            <ReportHeader
+                title="Distribución de Tiempos"
+                subtitle="Análisis estadístico de la duración en la resolución de los tickets."
+                icon={<Icon name="hourglass_empty" className="text-2xl" />}
+            >
                 <FiltroFecha value={dateRange} onChange={setDateRange} />
-            </div>
+            </ReportHeader>
             {/* ── Contenido ────────────────────────────────────────────── */}
             <div className="flex flex-col gap-6 px-6 pt-2 pb-16 lg:px-8">
 

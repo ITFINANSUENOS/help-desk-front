@@ -13,6 +13,7 @@ import { Icon } from '../../../shared/components/Icon';
 import { useLayout } from '../../../core/layout/context/LayoutContext';
 import { useExport } from '../hooks/useExport';
 import { useEffect } from 'react';
+import { ReportHeader } from '../components/ui/ReportHeader';
 
 export default function RankingUsuarios() {
     const navigate = useNavigate();
@@ -65,78 +66,45 @@ export default function RankingUsuarios() {
 
     return (
         <div className="flex h-full flex-col bg-gray-50/50">
-            {/* Sticky Header */}
-            <div className="flex flex-col gap-4 px-6 py-5 lg:px-8 border-b border-gray-100 bg-white/60 backdrop-blur-xl z-20 shrink-0 sticky top-0">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <div className="flex items-center justify-center p-3 bg-blue-50 rounded-xl text-blue-600 shadow-sm border border-blue-100">
-                            <Icon name="emoji_events" className="text-2xl" />
-                        </div>
-                        <div>
-                            <h2 className="text-xl font-bold text-gray-900 leading-tight">Ranking de Usuarios</h2>
-                            <p className="text-sm text-gray-500 mt-0.5">Desempeño individual por tickets gestionados y cumplimiento SLA.</p>
-                        </div>
-                    </div>
-
-                    {/* Botón exportar (Desktop) */}
-                    <div className="hidden sm:block">
-                        <button
-                            onClick={() => exportar('xlsx', 'ranking')}
-                            disabled={exportLoading}
-                            className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-[#2B378A] text-white rounded-lg hover:bg-[#23468C] transition-colors disabled:opacity-50"
-                        >
-                            <Icon name="download" className="text-[1.1rem]" />
-                            {exportLoading ? 'Exportando...' : 'Exportar Excel'}
-                        </button>
-                    </div>
-                </div>
-
-                {/* Filtros Container */}
-                <div className="flex flex-col sm:flex-row gap-3 items-center justify-between mt-2">
-                    <div className="flex flex-wrap gap-3 items-end w-full">
-                        {/* Filtro regional */}
-                        <div className="w-full sm:w-56">
-                            <FiltroRegional
-                                value={selectedRegional}
-                                onChange={setSelectedRegional}
-                                regionales={listRegionales}
-                                placeholder="Todas las regionales"
-                            />
-                        </div>
-
-                        {/* Búsqueda por nombre */}
-                        <div className="relative flex-1 sm:flex-none sm:w-64 min-w-[160px]">
-                            <Icon
-                                name="search"
-                                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg"
-                            />
-                            <input
-                                type="text"
-                                value={search}
-                                onChange={handleSearchChange}
-                                placeholder="Buscar por nombre..."
-                                className="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#43BBCA] focus:border-transparent bg-white shadow-sm"
-                            />
-                        </div>
-
-                        {/* Filtro de fechas */}
-                        <FiltroFecha value={dateRange} onChange={setDateRange} />
-
-                        {/* Selector de filas */}
-                        <FiltroFilas value={limit} onChange={val => { setLimit(val); setPage(1); }} />
-                    </div>
-
-                    {/* Botón exportar (Mobile) */}
+            <ReportHeader
+                title="Ranking de Usuarios"
+                subtitle="Desempeño individual por tickets gestionados y cumplimiento SLA."
+                icon={<Icon name="emoji_events" className="text-2xl" />}
+                actions={
                     <button
                         onClick={() => exportar('xlsx', 'ranking')}
                         disabled={exportLoading}
-                        className="sm:hidden w-full flex justify-center items-center gap-2 px-4 py-2 text-sm font-medium bg-[#2B378A] text-white rounded-lg hover:bg-[#23468C] transition-colors disabled:opacity-50"
+                        className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-[#2B378A] text-white rounded-lg hover:bg-[#23468C] transition-colors disabled:opacity-50"
                     >
                         <Icon name="download" className="text-[1.1rem]" />
                         {exportLoading ? 'Exportando...' : 'Exportar Excel'}
                     </button>
+                }
+            >
+                <div className="w-full sm:w-56">
+                    <FiltroRegional
+                        value={selectedRegional}
+                        onChange={setSelectedRegional}
+                        regionales={listRegionales}
+                        placeholder="Todas las regionales"
+                    />
                 </div>
-            </div>
+                <div className="relative flex-1 sm:flex-none sm:w-64 min-w-[160px]">
+                    <Icon
+                        name="search"
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg"
+                    />
+                    <input
+                        type="text"
+                        value={search}
+                        onChange={handleSearchChange}
+                        placeholder="Buscar por nombre..."
+                        className="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#43BBCA] focus:border-transparent bg-white shadow-sm"
+                    />
+                </div>
+                <FiltroFecha value={dateRange} onChange={setDateRange} />
+                <FiltroFilas value={limit} onChange={val => { setLimit(val); setPage(1); }} />
+            </ReportHeader>
 
             {/* Scrollable Content */}
             <div className="flex-1 px-6 py-6 lg:px-8 max-w-[1600px] w-full mx-auto overflow-y-auto">

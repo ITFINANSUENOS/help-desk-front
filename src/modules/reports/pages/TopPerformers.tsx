@@ -10,6 +10,7 @@ import { formatHoras, formatPct, formatNumero } from '../utils/formatters';
 import { Icon } from '../../../shared/components/Icon';
 import { useLayout } from '../../../core/layout/context/LayoutContext';
 import { useEffect } from 'react';
+import { ReportHeader } from '../components/ui/ReportHeader';
 
 /** Renders the position cell for the top-performers table.
  * Positions 1-3 get coloured medal icons; rest show a plain number. */
@@ -80,28 +81,15 @@ export default function TopPerformers() {
 
     return (
         <div className="flex h-full flex-col bg-gray-50/50">
-            {/* ── Sticky Header ────────────────────────────────────────── */}
-            <div className="flex flex-col gap-4 px-6 py-5 lg:px-8 border-b border-gray-100 bg-white/60 backdrop-blur-xl z-20 shrink-0 sticky top-0">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="flex items-center gap-4">
-                        <div className="flex items-center justify-center p-3 bg-blue-50 rounded-xl text-blue-600 shadow-sm border border-blue-100">
-                            {isTop
-                                ? <Icon name="emoji_events" className="text-2xl" />
-                                : <Icon name="warning" className="text-2xl" />}
-                        </div>
-                        <div>
-                            <h2 className="text-xl font-bold text-gray-900 leading-tight">
-                                {isTop ? 'Top Performers' : 'Usuarios que Necesitan Apoyo'}
-                            </h2>
-                            <p className="text-sm text-gray-500 mt-0.5">
-                                {isTop
-                                    ? 'Los 10 usuarios con mejor desempeño global.'
-                                    : 'Los 10 usuarios con menor desempeño (mínimo 10 tickets gestionados).'}
-                            </p>
-                        </div>
-                    </div>
-
-                    {/* ── Toggle ───────────────────────────────────────────────── */}
+            <ReportHeader
+                title={isTop ? 'Top Performers' : 'Usuarios que Necesitan Apoyo'}
+                subtitle={isTop
+                    ? 'Los 10 usuarios con mejor desempeño global.'
+                    : 'Los 10 usuarios con menor desempeño (mínimo 10 tickets gestionados).'}
+                icon={isTop
+                    ? <Icon name="emoji_events" className="text-2xl" />
+                    : <Icon name="warning" className="text-2xl" />}
+                actions={
                     <div className="flex gap-2">
                         <button
                             onClick={() => setType('top')}
@@ -124,9 +112,10 @@ export default function TopPerformers() {
                             APOYO
                         </button>
                     </div>
-                    <FiltroFecha value={dateRange} onChange={setDateRange} />
-                </div>
-            </div>
+                }
+            >
+                <FiltroFecha value={dateRange} onChange={setDateRange} />
+            </ReportHeader>
 
             {/* Scrollable Content */}
             <div className="flex-1 px-6 py-6 lg:px-8 max-w-[1600px] w-full mx-auto overflow-y-auto">

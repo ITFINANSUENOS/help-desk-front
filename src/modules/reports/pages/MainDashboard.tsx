@@ -12,6 +12,7 @@ import { formatHoras, formatNumero, formatPct, formatFecha } from '../utils/form
 import { Icon } from '../../../shared/components/Icon';
 import { useLayout } from '../../../core/layout/context/LayoutContext';
 import { useEffect } from 'react';
+import { ReportHeader } from '../components/ui/ReportHeader';
 
 export default function MainDashboard() {
     const navigate = useNavigate();
@@ -78,24 +79,21 @@ export default function MainDashboard() {
 
     return (
         <div className="flex h-full flex-col overflow-hidden bg-gray-50/5">
-            {/* Header: Title and Filter (Sticky) */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 px-4 py-5 md:px-6 lg:px-8 border-b border-gray-100 bg-white/80 backdrop-blur-md z-10 shrink-0 sticky top-0">
-                <div>
-                    <h2 className="text-2xl font-bold text-gray-900 leading-tight">Dashboard Principal</h2>
-                    <p className="text-sm text-gray-500 mt-0.5">Métricas globales y estado general del sistema.</p>
+            <ReportHeader
+                title="Dashboard Principal"
+                subtitle="Métricas globales y estado general del sistema."
+                icon={<Icon name="dashboard" className="text-2xl" />}
+            >
+                <FiltroFecha value={dateRange} onChange={setDateRange} />
+                <div className="w-full md:w-80 shrink-0">
+                    <FiltroRegional
+                        value={selectedRegional}
+                        onChange={handleRegionalChange}
+                        regionales={listRegionales}
+                        placeholder="Todas las regionales"
+                    />
                 </div>
-                <div className="flex flex-wrap items-center gap-3">
-                    <FiltroFecha value={dateRange} onChange={setDateRange} />
-                    <div className="w-full md:w-80 shrink-0">
-                        <FiltroRegional
-                            value={selectedRegional}
-                            onChange={handleRegionalChange}
-                            regionales={listRegionales}
-                            placeholder="Todas las regionales"
-                        />
-                    </div>
-                </div>
-            </div>
+            </ReportHeader>
 
             <div className="flex-1 overflow-y-auto px-4 py-6 md:p-6 lg:p-8 max-w-[1600px] w-full mx-auto">
                 {/* Loading state rendering full skeleton layout */}
