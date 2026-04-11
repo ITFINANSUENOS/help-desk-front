@@ -12,6 +12,7 @@ export default function ReportsPage() {
     const [exportingTickets, setExportingTickets] = useState(false);
     const [exportingPerformance, setExportingPerformance] = useState(false);
     const [exportingDashboard, setExportingDashboard] = useState(false);
+    const [exportingTickets, setExportingTickets] = useState(false);
 
     // Set page title
     useEffect(() => {
