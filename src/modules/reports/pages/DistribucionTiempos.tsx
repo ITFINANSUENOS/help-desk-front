@@ -83,7 +83,7 @@ export default function DistribucionTiempos() {
     }
 
     return (
-        <div className="flex h-full flex-col bg-gray-50/50">
+        <div className="flex min-h-full flex-col bg-gray-50/50">
             <ReportHeader
                 title="Distribución de Tiempos"
                 subtitle="Análisis estadístico de la duración en la resolución de los tickets."

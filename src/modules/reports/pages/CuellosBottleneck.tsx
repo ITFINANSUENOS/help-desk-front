@@ -63,7 +63,7 @@ export default function CuellosBottleneck() {
         : [];
 
     return (
-        <div className="flex h-full flex-col bg-gray-50/50">
+        <div className="flex min-h-full flex-col bg-gray-50/50">
             <ReportHeader
                 title="Cuellos de Botella"
                 subtitle="Pasos del flujo con mayor duración promedio y tasa de atrasos."
@@ -111,7 +111,7 @@ export default function CuellosBottleneck() {
 
                         {/* Sección Inferior — Tabla */}
                         <div className="bg-white rounded-xl shadow-sm border border-gray-100 flex flex-col">
-                            <div className="overflow-x-auto overflow-y-auto flex-1">
+                            <div className="overflow-x-auto flex-1">
                                 <table className="w-full text-left border-collapse text-sm">
                                     <thead className="sticky top-0 z-10">
                                         <tr className="border-b border-gray-200 bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wider backdrop-blur-sm bg-opacity-95">

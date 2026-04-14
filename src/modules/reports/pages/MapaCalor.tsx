@@ -73,7 +73,7 @@ export default function MapaCalor() {
     }
 
     return (
-        <div className="flex h-full flex-col bg-gray-50/50">
+        <div className="flex min-h-full flex-col bg-gray-50/50">
             <ReportHeader
                 title="Mapa de Calor"
                 subtitle="Visualización de rendimiento individual por usuario y regional."

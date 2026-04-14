@@ -10,7 +10,7 @@ interface ReportHeaderProps {
 
 export function ReportHeader({ title, subtitle, icon, actions, children }: ReportHeaderProps) {
     return (
-        <div className="flex flex-col gap-4 px-6 py-5 lg:px-8 border-b border-gray-100 bg-white/60 backdrop-blur-xl z-20 shrink-0 sticky top-0">
+        <div className="flex flex-col gap-4 px-6 py-5 lg:px-8 border-b border-gray-100 bg-white/60 backdrop-blur-xl z-20 shrink-0">
             {/* Title Row */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">

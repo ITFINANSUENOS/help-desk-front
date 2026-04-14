@@ -297,7 +297,7 @@ export default function DetalleUsuario() {
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
-                            <thead className="sticky top-0 z-10">
+                            <thead>
                                 <tr className="bg-[#2B378A] text-white text-xs font-semibold uppercase tracking-wider">
                                     <th className="py-3 px-4">Paso de Flujo</th>
                                     <th className="py-3 px-4 text-right">Veces Asignado</th>

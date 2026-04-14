@@ -313,7 +313,7 @@ export default function Novedades() {
     const usuarios = data?.usuarios_con_mas_novedades ?? [];
 
     return (
-        <div className="flex h-full flex-col bg-gray-50/50">
+        <div className="flex min-h-full flex-col bg-gray-50/50">
             <ReportHeader
                 title="Análisis de Novedades"
                 subtitle="Distribución de errores e incidencias reportadas por los usuarios."
@@ -322,8 +322,8 @@ export default function Novedades() {
                 <FiltroFecha value={dateRange} onChange={setDateRange} />
             </ReportHeader>
 
-            {/* ── Área de scroll ───────────────────────────────────────── */}
-            <div className="flex-1 overflow-y-auto px-6 py-6 lg:px-8 flex flex-col gap-6">
+            {/* ── Content ───────────────────────────────────────── */}
+            <div className="flex-1 px-6 py-6 lg:px-8 flex flex-col gap-6">
 
                 {isLoading ? (
                     <div className="flex flex-col gap-6">

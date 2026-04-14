@@ -141,7 +141,7 @@ export default function TicketsUsuarioPage() {
     };
 
     return (
-        <div className="flex h-full flex-col bg-gray-50/50">
+        <div className="flex min-h-full flex-col bg-gray-50/50">
             <ReportHeader
                 title="Tickets por Usuario"
                 icon={<Icon name="list_alt" className="text-2xl" />}
@@ -178,8 +178,8 @@ export default function TicketsUsuarioPage() {
                 />
             </ReportHeader>
 
-            {/* Scrollable Content */}
-            <div className="flex-1 px-6 py-6 lg:px-8 max-w-[1600px] w-full mx-auto overflow-y-auto">
+            {/* Content */}
+            <div className="flex-1 px-6 py-6 lg:px-8 max-w-[1600px] w-full mx-auto">
 
                 {/* Filtro por tipo: creados / asignados */}
                 <div className="mb-4 flex items-center gap-1 bg-gray-100 rounded-lg p-1 w-fit">
@@ -238,7 +238,7 @@ export default function TicketsUsuarioPage() {
                     ) : (
                         <div className="overflow-x-auto">
                             <table className="w-full text-left border-collapse">
-                                <thead className="sticky top-0 z-10">
+                                <thead>
                                     <tr className="bg-[#2B378A] text-white text-xs font-semibold uppercase tracking-wider">
                                         <th className="py-3 px-4 w-10"></th>
                                         <th className="py-3 px-4">Ticket</th>
