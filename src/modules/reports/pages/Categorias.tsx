@@ -102,7 +102,7 @@ export default function Categorias() {
     }
 
     return (
-        <div className="flex h-full flex-col bg-gray-50/50">
+        <div className="flex min-h-full flex-col bg-gray-50/50">
             <ReportHeader
                 title="Análisis por Categoría"
                 subtitle="Desglose de rendimiento por módulo y sus procesos específicos."

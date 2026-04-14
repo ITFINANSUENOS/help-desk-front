@@ -80,7 +80,7 @@ export default function TopPerformers() {
     const isTop = type === 'top';
 
     return (
-        <div className="flex h-full flex-col bg-gray-50/50">
+        <div className="flex min-h-full flex-col bg-gray-50/50">
             <ReportHeader
                 title={isTop ? 'Top Performers' : 'Usuarios que Necesitan Apoyo'}
                 subtitle={isTop
@@ -117,8 +117,8 @@ export default function TopPerformers() {
                 <FiltroFecha value={dateRange} onChange={setDateRange} />
             </ReportHeader>
 
-            {/* Scrollable Content */}
-            <div className="flex-1 px-6 py-6 lg:px-8 max-w-[1600px] w-full mx-auto overflow-y-auto">
+            {/* Content */}
+            <div className="flex-1 px-6 py-6 lg:px-8 max-w-[1600px] w-full mx-auto">
 
                 {/* ── Info banner for score system ───────────────────────────── */}
                 <div className="mb-5 flex items-start gap-2 rounded-lg bg-blue-50/80 border border-blue-100 px-4 py-3 text-sm text-blue-900">

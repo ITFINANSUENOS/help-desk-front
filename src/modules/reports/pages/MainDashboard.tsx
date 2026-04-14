@@ -78,7 +78,7 @@ export default function MainDashboard() {
     }
 
     return (
-        <div className="flex h-full flex-col overflow-hidden bg-gray-50/5">
+        <div className="flex min-h-full flex-col bg-gray-50/5">
             <ReportHeader
                 title="Dashboard Principal"
                 subtitle="Métricas globales y estado general del sistema."
@@ -95,7 +95,7 @@ export default function MainDashboard() {
                 </div>
             </ReportHeader>
 
-            <div className="flex-1 overflow-y-auto px-4 py-6 md:p-6 lg:p-8 max-w-[1600px] w-full mx-auto">
+            <div className="flex-1 px-4 py-6 md:p-6 lg:p-8 max-w-[1600px] w-full mx-auto">
                 {/* Loading state rendering full skeleton layout */}
                 {isLoading && (
                     <div className="space-y-6">
