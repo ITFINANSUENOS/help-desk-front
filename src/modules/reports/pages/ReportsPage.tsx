@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { usePermissions } from '../../../shared/hooks/usePermissions';
 import { useLayout } from '../../../core/layout/context/LayoutContext';
 import { Icon } from '../../../shared/components/Icon';
@@ -8,6 +9,7 @@ import type { PasosEstadoNullItem } from '../services/report.service';
 export default function ReportsPage() {
     const { can } = usePermissions();
     const { setTitle } = useLayout();
+    const navigate = useNavigate();
     const [exportingFlujos, setExportingFlujos] = useState(false);
     const [exportingComments, setExportingComments] = useState(false);
     const [exportingTickets, setExportingTickets] = useState(false);
@@ -404,8 +406,14 @@ export default function ReportsPage() {
                                         <tbody className="bg-white divide-y divide-gray-200">
                                             {pasosNullData.map((item) => (
                                                 <tr key={`${item.ticket_id}-${item.historial_id}`} className="hover:bg-red-50/50">
-                                                    <td className="px-4 py-3 text-sm font-medium text-brand-blue">
-                                                        #{item.ticket_id} - {item.titulo_ticket?.substring(0, 40)}{item.titulo_ticket && item.titulo_ticket.length > 40 ? '...' : ''}
+                                                    <td className="px-4 py-3 text-sm">
+                                                        <button
+                                                            onClick={() => navigate(`/tickets/${item.ticket_id}`)}
+                                                            className="font-medium text-brand-blue hover:text-brand-blue/80 hover:underline"
+                                                        >
+                                                            #{item.ticket_id}
+                                                        </button>
+                                                        <span className="text-gray-400 ml-1">- {item.titulo_ticket?.substring(0, 40)}{item.titulo_ticket && item.titulo_ticket.length > 40 ? '...' : ''}</span>
                                                     </td>
                                                     <td className="px-4 py-3 text-sm text-gray-600">
                                                         {item.numero_paso}
