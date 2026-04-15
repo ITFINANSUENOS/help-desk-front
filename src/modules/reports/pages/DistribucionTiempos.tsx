@@ -1,5 +1,5 @@
-import { useEffect, useMemo } from 'react';
-import { useDistribucion } from '../hooks/useDashboard';
+import { useEffect, useMemo, useState } from 'react';
+import { useDistribucion, useTicketsPorRango, usePasosDeTicket } from '../hooks/useDashboard';
 import { FiltroFecha, useDateFilter } from '../components/ui/FiltroFecha';
 import { KPICard } from '../components/ui/KPICard';
 import { HistogramaTiempos } from '../components/charts/HistogramaTiempos';
@@ -7,7 +7,7 @@ import { LoadingSkeleton } from '../components/ui/LoadingSkeleton';
 import { EmptyState } from '../../../shared/components/EmptyState';
 import { Icon } from '../../../shared/components/Icon';
 import { useLayout } from '../../../core/layout/context/LayoutContext';
-import { formatNumero, formatPct } from '../utils/formatters';
+import { formatNumero, formatPct, formatFecha } from '../utils/formatters';
 import type { RangoTiempo } from '../types/dashboard.types';
 import { ReportHeader } from '../components/ui/ReportHeader';
 
@@ -15,6 +15,23 @@ export default function DistribucionTiempos() {
     const { dateRange, setDateRange } = useDateFilter();
     const { data, isLoading, isError, refetch } = useDistribucion(dateRange);
     const { setTitle } = useLayout();
+
+    const [selectedRango, setSelectedRango] = useState<{rango: string; orden: number} | null>(null);
+    const [rangoPage, setRangoPage] = useState(1);
+    const [expandedTicket, setExpandedTicket] = useState<number | null>(null);
+
+    const { data: rangoTicketsData, isLoading: loadingRangoTickets } = useTicketsPorRango(
+        selectedRango?.rango ?? undefined,
+        selectedRango?.orden,
+        dateRange,
+        20,
+        rangoPage
+    );
+
+    const { data: pasosData, isLoading: loadingPasos } = usePasosDeTicket(
+        expandedTicket ?? undefined,
+        dateRange
+    );
 
     useEffect(() => {
         setTitle('Dashboard Analytics');
@@ -227,22 +244,29 @@ export default function DistribucionTiempos() {
                                             </td>
                                         </tr>
                                     ) : (
-                                        data.rangos.map((row: RangoTiempo, idx: number) => (
-                                            <tr key={idx} className="hover:bg-gray-50 transition-colors">
-                                                <td className="py-3 px-4 font-medium text-gray-700 whitespace-nowrap">
-                                                    {row.rango_horas}
-                                                </td>
-                                                <td className="py-3 px-4 text-right text-gray-900 font-semibold">
-                                                    {formatNumero(row.cantidad)}
-                                                </td>
-                                                <td className="py-3 px-4 text-right text-gray-600">
-                                                    {formatPct(row.pct_total)}
-                                                </td>
-                                                <td className="py-3 px-4 text-right text-indigo-600 font-medium hidden lg:table-cell">
-                                                    {formatPct(row.pct_acumulado)}
-                                                </td>
-                                            </tr>
-                                        ))
+                                        data.rangos.map((row: RangoTiempo, idx: number) => {
+                                            const isSelected = selectedRango?.rango === row.rango_horas;
+                                            return (
+                                                <tr
+                                                    key={idx}
+                                                    onClick={() => setSelectedRango(prev => (prev?.rango === row.rango_horas) ? null : { rango: row.rango_horas, orden: row.orden })}
+                                                    className={`hover:bg-gray-50 cursor-pointer transition-colors ${isSelected ? 'bg-blue-50' : ''}`}
+                                                >
+                                                    <td className="py-3 px-4 font-medium text-gray-700 whitespace-nowrap">
+                                                        {row.rango_horas}
+                                                    </td>
+                                                    <td className="py-3 px-4 text-right text-gray-900 font-semibold">
+                                                        {formatNumero(row.cantidad)}
+                                                    </td>
+                                                    <td className="py-3 px-4 text-right text-gray-600">
+                                                        {formatPct(row.pct_total)}
+                                                    </td>
+                                                    <td className="py-3 px-4 text-right text-indigo-600 font-medium hidden lg:table-cell">
+                                                        {formatPct(row.pct_acumulado)}
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })
                                     )}
                                 </tbody>
                             </table>
@@ -255,6 +279,169 @@ export default function DistribucionTiempos() {
                         )}
                     </div>
                 </div>
+
+                {/* ── Tickets del Rango seleccionado ─────────────────── */}
+                {selectedRango && (
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <div className="p-1.5 bg-teal-50 rounded-lg text-brand-teal">
+                                    <Icon name="confirmation_number" className="text-[1.1rem]" />
+                                </div>
+                                <h3 className="text-base font-semibold text-gray-900">
+                                    Tickets del rango: {selectedRango.rango}
+                                </h3>
+                                {loadingRangoTickets && <span className="text-sm text-gray-400">(Cargando...)</span>}
+                            </div>
+                            <button
+                                onClick={() => setSelectedRango(null)}
+                                className="text-gray-400 hover:text-gray-600 transition-colors"
+                            >
+                                <Icon name="close" className="text-lg" />
+                            </button>
+                        </div>
+
+                        {loadingRangoTickets ? (
+                            <div className="p-6"><LoadingSkeleton rows={5} /></div>
+                        ) : rangoTicketsData?.data && rangoTicketsData.data.length > 0 ? (
+                            <>
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left border-collapse">
+                                        <thead>
+                                            <tr className="bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500">
+                                                <th className="py-3 px-4">Ticket</th>
+                                                <th className="py-3 px-4">Título</th>
+                                                <th className="py-3 px-4">Estado</th>
+                                                <th className="py-3 px-4">Categoría</th>
+                                                <th className="py-3 px-4 text-center">Veces</th>
+                                                <th className="py-3 px-4 text-right">T. Primera</th>
+                                                <th className="py-3 px-4 text-right">Fecha</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-100">
+                                            {rangoTicketsData.data.map((ticket) => (
+                                                <>
+                                                    <tr
+                                                        key={ticket.id}
+                                                        onClick={() => setExpandedTicket(prev => prev === ticket.id ? null : ticket.id)}
+                                                        className={`hover:bg-blue-50 cursor-pointer transition-colors ${expandedTicket === ticket.id ? 'bg-blue-50' : ''}`}
+                                                    >
+                                                        <td className="py-3 px-4 text-brand-teal font-medium hover:underline">
+                                                            #{ticket.id}
+                                                        </td>
+                                                        <td className="py-3 px-4 text-gray-800 max-w-xs truncate">
+                                                            {ticket.titulo}
+                                                        </td>
+                                                        <td className="py-3 px-4">
+                                                            <span className={`px-2 py-1 rounded text-xs font-medium ${
+                                                                ticket.estado === 'Cerrado' ? 'bg-green-100 text-green-700' :
+                                                                ticket.estado === 'Pausado' ? 'bg-yellow-100 text-yellow-700' :
+                                                                'bg-blue-100 text-blue-700'
+                                                            }`}>
+                                                                {ticket.estado}
+                                                            </span>
+                                                        </td>
+                                                        <td className="py-3 px-4 text-sm text-gray-600">
+                                                            {[ticket.categoria, ticket.subcategoria].filter(Boolean).join(' / ')}
+                                                        </td>
+                                                        <td className="py-3 px-4 text-center">
+                                                            <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${
+                                                                ticket.veces_asignado > 1 ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-600'
+                                                            }`}>
+                                                                {ticket.veces_asignado}
+                                                            </span>
+                                                        </td>
+                                                        <td className="py-3 px-4 text-right text-gray-700 font-medium">
+                                                            {ticket.duracion_horas < 1
+                                                                ? `${Math.round(ticket.duracion_horas * 60)}m`
+                                                                : `${ticket.duracion_horas.toFixed(1)}h`}
+                                                        </td>
+                                                        <td className="py-3 px-4 text-right text-gray-500 text-sm">
+                                                            {formatFecha(ticket.fechaCreacion)}
+                                                        </td>
+                                                    </tr>
+                                                    {expandedTicket === ticket.id && (
+                                                        <tr key={`${ticket.id}-steps`}>
+                                                            <td colSpan={7} className="p-0 bg-gray-50 border-t border-dashed border-gray-300">
+                                                                <div className="px-6 py-3">
+                                                                    <p className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wider">
+                                                                        Pasos del ticket #{ticket.id}
+                                                                        {loadingPasos && <span className="ml-2 text-gray-400 font-normal">(Cargando...)</span>}
+                                                                    </p>
+                                                                    <div className="space-y-1">
+                                                                        {pasosData && pasosData.length > 0 ? (
+                                                                            pasosData.map((paso, idx) => (
+                                                                                <div key={idx} className="flex items-center gap-2 text-xs text-gray-600 bg-white rounded px-3 py-2 border border-gray-100">
+                                                                                    <span className={`w-4 h-4 flex items-center justify-center rounded-full text-[10px] font-bold ${idx === 0 ? 'bg-teal-100 text-teal-700' : 'bg-gray-200 text-gray-600'}`}>
+                                                                                        {idx + 1}
+                                                                                    </span>
+                                                                                    <span className="font-medium">{paso.asignadoNombre}</span>
+                                                                                    <span className="text-gray-400">•</span>
+                                                                                    <span className="text-gray-500">{paso.paso}</span>
+                                                                                    <span className="ml-auto text-right">
+                                                                                        <span className="text-gray-400 text-[10px]">
+                                                                                            {paso.duracion_horas < 1
+                                                                                                ? `${Math.round(paso.duracion_horas * 60)}m`
+                                                                                                : `${paso.duracion_horas.toFixed(1)}h`}
+                                                                                        </span>
+                                                                                        <span className={`ml-2 px-1.5 py-0.5 rounded text-[10px] font-medium ${
+                                                                                            paso.estadoTiempo === 'A Tiempo' ? 'bg-green-100 text-green-700' :
+                                                                                            paso.estadoTiempo === 'Vencido' ? 'bg-red-100 text-red-700' :
+                                                                                            paso.estadoTiempo === 'Pendiente' ? 'bg-yellow-100 text-yellow-700' :
+                                                                                            'bg-gray-100 text-gray-600'
+                                                                                        }`}>
+                                                                                            {paso.estadoTiempo}
+                                                                                        </span>
+                                                                                    </span>
+                                                                                </div>
+                                                                            ))
+                                                                        ) : (
+                                                                            <p className="text-xs text-gray-400 italic">No se encontraron pasos para este ticket.</p>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    )}
+                                                </>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {rangoTicketsData.totalPages > 1 && (
+                                    <div className="px-6 py-3 border-t border-gray-100 flex items-center justify-between">
+                                        <span className="text-xs text-gray-500">
+                                            Mostrando {rangoTicketsData.data.length} de {rangoTicketsData.total} tickets
+                                        </span>
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={() => setRangoPage(p => Math.max(1, p - 1))}
+                                                disabled={rangoPage === 1}
+                                                className="px-3 py-1 text-xs font-medium text-gray-700 bg-gray-100 rounded hover:bg-gray-200 disabled:opacity-50 transition-colors"
+                                            >
+                                                Anterior
+                                            </button>
+                                            <span className="px-3 py-1 text-xs text-gray-600">
+                                                {rangoPage} / {rangoTicketsData.totalPages}
+                                            </span>
+                                            <button
+                                                onClick={() => setRangoPage(p => Math.min(rangoTicketsData.totalPages, p + 1))}
+                                                disabled={rangoPage === rangoTicketsData.totalPages}
+                                                className="px-3 py-1 text-xs font-medium text-gray-700 bg-gray-100 rounded hover:bg-gray-200 disabled:opacity-50 transition-colors"
+                                            >
+                                                Siguiente
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </>
+                        ) : (
+                            <div className="p-8 text-center text-gray-500 text-sm">
+                                No hay tickets para este rango en el período seleccionado.
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
         </div>
     );
