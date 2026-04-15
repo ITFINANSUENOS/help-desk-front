@@ -34,6 +34,33 @@ interface FlowOpenTicketsData {
     };
 }
 
+export interface PasosEstadoNullItem {
+    ticket_id: number;
+    titulo_ticket: string;
+    categoria: string;
+    subcategoria: string;
+    historial_id: number;
+    numero_paso: number;
+    paso_nombre: string;
+    usuario_id: number;
+    usuario_nombre: string;
+    regional: string;
+    fecha_asignacion: string;
+    next_fecha_asig: string;
+    next_usuario_nombre: string;
+    next_paso_nombre: string;
+    estado_ticket_actual: string;
+    estado_tiempo_paso: string | null;
+}
+
+interface PasosEstadoNullResponse {
+    data: PasosEstadoNullItem[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+}
+
 class ReportService {
     async exportPerformance(): Promise<void> {
         await this.downloadFile('/tickets/export/performance', `Reporte_Desempeno_${new Date().toISOString().split('T')[0]}.xlsx`);
@@ -70,6 +97,17 @@ class ReportService {
 
     async exportDashboard(): Promise<void> {
         await this.downloadFile('/reports/dashboard/export', `Dashboard_Completo_${new Date().toISOString().split('T')[0]}.xlsx`);
+    }
+
+    async getPasosConEstadoNull(dateFrom?: string, dateTo?: string, limit: number = 100, page: number = 1): Promise<PasosEstadoNullResponse> {
+        const params = new URLSearchParams();
+        if (dateFrom) params.append('dateFrom', dateFrom);
+        if (dateTo) params.append('dateTo', dateTo);
+        params.append('limit', String(limit));
+        params.append('page', String(page));
+
+        const response = await api.get<PasosEstadoNullResponse>(`/reports/dashboard/pasos-estado-null?${params.toString()}`);
+        return response.data;
     }
     async exportFlowOpenTickets(flujoId: number, fechaInicio?: string, fechaFin?: string, estado?: string, regionalId?: number): Promise<void> {
         const params = new URLSearchParams();

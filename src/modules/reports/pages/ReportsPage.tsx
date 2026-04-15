@@ -3,6 +3,7 @@ import { usePermissions } from '../../../shared/hooks/usePermissions';
 import { useLayout } from '../../../core/layout/context/LayoutContext';
 import { Icon } from '../../../shared/components/Icon';
 import { reportService } from '../services/report.service';
+import type { PasosEstadoNullItem } from '../services/report.service';
 
 export default function ReportsPage() {
     const { can } = usePermissions();
@@ -13,6 +14,13 @@ export default function ReportsPage() {
     const [exportingPerformance, setExportingPerformance] = useState(false);
     const [exportingDashboard, setExportingDashboard] = useState(false);
     const [exportingTickets, setExportingTickets] = useState(false);
+
+    // Pasos con estado null (Admin only)
+    const [showPasosNullModal, setShowPasosNullModal] = useState(false);
+    const [pasosNullData, setPasosNullData] = useState<PasosEstadoNullItem[]>([]);
+    const [pasosNullTotal, setPasosNullTotal] = useState(0);
+    const [pasosNullPage, setPasosNullPage] = useState(1);
+    const [pasosNullLoading, setPasosNullLoading] = useState(false);
 
     // Set page title
     useEffect(() => {
@@ -71,6 +79,34 @@ export default function ReportsPage() {
             console.error('Error exporting tickets report', error);
         } finally {
             setExportingTickets(false);
+        }
+    };
+
+    const handleOpenPasosNull = async () => {
+        setShowPasosNullModal(true);
+        setPasosNullLoading(true);
+        try {
+            const result = await reportService.getPasosConEstadoNull();
+            setPasosNullData(result.data);
+            setPasosNullTotal(result.total);
+        } catch (error) {
+            console.error('Error loading pasos null report', error);
+        } finally {
+            setPasosNullLoading(false);
+        }
+    };
+
+    const handlePasosNullPageChange = async (newPage: number) => {
+        setPasosNullPage(newPage);
+        setPasosNullLoading(true);
+        try {
+            const result = await reportService.getPasosConEstadoNull(undefined, undefined, 100, newPage);
+            setPasosNullData(result.data);
+            setPasosNullTotal(result.total);
+        } catch (error) {
+            console.error('Error loading pasos null page', error);
+        } finally {
+            setPasosNullLoading(false);
         }
     };
 
@@ -273,6 +309,34 @@ export default function ReportsPage() {
                         </div>
                     </div>
                 )}
+
+                {/* Pasos con Estado NULL - Admin Only */}
+                {can('view:all', 'Report') && (
+                    <div className="flex flex-col rounded-xl border border-gray-100 bg-white p-6 shadow-sm transition-all hover:border-brand-red/30 hover:shadow-md">
+                        <div className="flex items-start justify-between">
+                            <div>
+                                <p className="text-sm font-medium text-gray-500">Admin - Diagnóstico</p>
+                                <p className="mt-2 text-xl font-bold text-gray-800">Pasos con Estado NULL</p>
+                                <p className="mt-2 text-xs text-gray-400 line-clamp-2">
+                                    Pasos en el historial que tienen estado_tiempo_paso NULL pero ya tienen un registro posterior. Requieren corrección.
+                                </p>
+                            </div>
+                            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-red-50 text-red-600">
+                                <Icon name="warning" className="text-2xl" style={{ fontVariationSettings: '"FILL" 1' }} />
+                            </div>
+                        </div>
+
+                        <div className="mt-6">
+                            <button
+                                onClick={handleOpenPasosNull}
+                                className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-brand-red px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-brand-red/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-red"
+                            >
+                                <Icon name="visibility" className="h-5 w-5" />
+                                <span>Ver Reporte</span>
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Si no tiene permisos */}
@@ -287,6 +351,121 @@ export default function ReportsPage() {
                                 No tienes permisos para visualizar o descargar los reportes disponibles.
                             </p>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal Pasos con Estado NULL */}
+            {showPasosNullModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+                    <div className="relative w-full max-w-6xl max-h-[90vh] bg-white rounded-xl shadow-2xl overflow-hidden flex flex-col">
+                        {/* Header */}
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-red-50">
+                            <div>
+                                <h3 className="text-lg font-bold text-gray-900">Pasos con Estado NULL</h3>
+                                <p className="text-sm text-gray-500">Registros que necesitan corrección ({pasosNullTotal} total)</p>
+                            </div>
+                            <button
+                                onClick={() => setShowPasosNullModal(false)}
+                                className="text-gray-400 hover:text-gray-600 transition-colors"
+                            >
+                                <Icon name="close" className="text-2xl" />
+                            </button>
+                        </div>
+
+                        {/* Content */}
+                        <div className="flex-1 overflow-auto p-6">
+                            {pasosNullLoading ? (
+                                <div className="flex items-center justify-center h-64">
+                                    <Icon name="sync" className="text-4xl text-gray-400 animate-spin" />
+                                </div>
+                            ) : pasosNullData.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center h-64 text-gray-500">
+                                    <Icon name="check_circle" className="text-5xl text-green-500 mb-4" />
+                                    <p className="text-lg font-medium">No hay registros con estado NULL</p>
+                                    <p className="text-sm">Todos los pasos tienen su estado de tiempo correctamente registrado.</p>
+                                </div>
+                            ) : (
+                                <div className="overflow-x-auto">
+                                    <table className="min-w-full divide-y divide-gray-200">
+                                        <thead className="bg-gray-50">
+                                            <tr>
+                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ticket</th>
+                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Paso #</th>
+                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Paso Actual</th>
+                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuario</th>
+                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Regional</th>
+                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha Asignación</th>
+                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Siguiente Paso</th>
+                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Siguiente Usuario</th>
+                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoría</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="bg-white divide-y divide-gray-200">
+                                            {pasosNullData.map((item) => (
+                                                <tr key={`${item.ticket_id}-${item.historial_id}`} className="hover:bg-red-50/50">
+                                                    <td className="px-4 py-3 text-sm font-medium text-brand-blue">
+                                                        #{item.ticket_id} - {item.titulo_ticket?.substring(0, 40)}{item.titulo_ticket && item.titulo_ticket.length > 40 ? '...' : ''}
+                                                    </td>
+                                                    <td className="px-4 py-3 text-sm text-gray-600">
+                                                        {item.numero_paso}
+                                                    </td>
+                                                    <td className="px-4 py-3 text-sm text-gray-600">
+                                                        {item.paso_nombre}
+                                                    </td>
+                                                    <td className="px-4 py-3 text-sm text-gray-600">
+                                                        {item.usuario_nombre}
+                                                    </td>
+                                                    <td className="px-4 py-3 text-sm text-gray-600">
+                                                        {item.regional || 'N/A'}
+                                                    </td>
+                                                    <td className="px-4 py-3 text-sm text-gray-600">
+                                                        {item.fecha_asignacion ? new Date(item.fecha_asignacion).toLocaleString() : 'N/A'}
+                                                    </td>
+                                                    <td className="px-4 py-3 text-sm text-gray-600">
+                                                        {item.next_paso_nombre || 'N/A'}
+                                                    </td>
+                                                    <td className="px-4 py-3 text-sm text-gray-600">
+                                                        {item.next_usuario_nombre || 'N/A'}
+                                                    </td>
+                                                    <td className="px-4 py-3 text-sm text-gray-600">
+                                                        {item.categoria} / {item.subcategoria}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Pagination */}
+                        {!pasosNullLoading && pasosNullData.length > 0 && (
+                            <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 bg-gray-50">
+                                <p className="text-sm text-gray-500">
+                                    Mostrando {((pasosNullPage - 1) * 100) + 1} - {Math.min(pasosNullPage * 100, pasosNullTotal)} de {pasosNullTotal}
+                                </p>
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => handlePasosNullPageChange(pasosNullPage - 1)}
+                                        disabled={pasosNullPage === 1}
+                                        className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        Anterior
+                                    </button>
+                                    <span className="px-3 py-1 text-sm text-gray-700">
+                                        Página {pasosNullPage} de {Math.ceil(pasosNullTotal / 100)}
+                                    </span>
+                                    <button
+                                        onClick={() => handlePasosNullPageChange(pasosNullPage + 1)}
+                                        disabled={pasosNullPage >= Math.ceil(pasosNullTotal / 100)}
+                                        className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        Siguiente
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             )}
