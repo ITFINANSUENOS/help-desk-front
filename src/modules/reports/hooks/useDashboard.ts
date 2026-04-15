@@ -118,6 +118,38 @@ export const useTicketsPorRegional = (regional?: string, dateRange?: DateRange, 
     });
 };
 
+export const useTicketsPorCategoria = (categoria?: string, dateRange?: DateRange, limit = 50, page = 1) => {
+    const effectiveDateRange = dateRange?.dateFrom || dateRange?.dateTo
+        ? dateRange
+        : {
+            dateFrom: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            dateTo: new Date().toISOString().split('T')[0]
+        };
+
+    return useQuery({
+        queryKey: ['dashboard', 'categoria', categoria ?? '', effectiveDateRange.dateFrom, effectiveDateRange.dateTo, limit, page],
+        queryFn: () => dashboardApi.getTicketsPorCategoria(categoria!, effectiveDateRange, limit, page),
+        enabled: !!categoria,
+        staleTime: 0,
+    });
+};
+
+export const useTicketsPorSubcategoria = (subcategoria?: string, dateRange?: DateRange, limit = 50, page = 1) => {
+    const effectiveDateRange = dateRange?.dateFrom || dateRange?.dateTo
+        ? dateRange
+        : {
+            dateFrom: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            dateTo: new Date().toISOString().split('T')[0]
+        };
+
+    return useQuery({
+        queryKey: ['dashboard', 'subcategoria', subcategoria ?? '', effectiveDateRange.dateFrom, effectiveDateRange.dateTo, limit, page],
+        queryFn: () => dashboardApi.getTicketsPorSubcategoria(subcategoria!, effectiveDateRange, limit, page),
+        enabled: !!subcategoria,
+        staleTime: 0,
+    });
+};
+
 export const useTopPerformers = (type: 'top' | 'bottom' = 'top', limit = 10, dateRange?: DateRange) =>
     useQuery({
         queryKey: DASHBOARD_KEYS.topPerf(type, limit, dateRange),

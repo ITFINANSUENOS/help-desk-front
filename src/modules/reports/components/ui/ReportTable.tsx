@@ -1,6 +1,4 @@
 import type { ReactNode } from 'react';
-import { ScoreBadge } from './ScoreBadge';
-import { ClasificacionDot } from './ClasificacionDot';
 import { LoadingSkeleton } from './LoadingSkeleton';
 
 export interface Column<T> {

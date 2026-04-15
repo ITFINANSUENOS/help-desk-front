@@ -3,14 +3,15 @@ import {
     BarChart, Bar, XAxis, YAxis, Tooltip,
     ResponsiveContainer, Cell, CartesianGrid
 } from 'recharts';
-import { useCategorias } from '../hooks/useDashboard';
+import { useNavigate } from 'react-router-dom';
+import { useCategorias, useTicketsPorSubcategoria, useTicketsPorCategoria } from '../hooks/useDashboard';
 import { FiltroFecha, useDateFilter } from '../components/ui/FiltroFecha';
 import { ClasificacionDot } from '../components/ui/ClasificacionDot';
 import { LoadingSkeleton } from '../components/ui/LoadingSkeleton';
 import { EmptyState } from '../../../shared/components/EmptyState';
 import { Icon } from '../../../shared/components/Icon';
 import { useLayout } from '../../../core/layout/context/LayoutContext';
-import { formatHoras, formatPct, formatNumero } from '../utils/formatters';
+import { formatHoras, formatPct, formatNumero, formatFecha } from '../utils/formatters';
 import { getHexClasificacion, getColorErroresGraves } from '../utils/colores';
 import type { CategoriaStats, SubcategoriaStats } from '../types/dashboard.types';
 import { ReportHeader } from '../components/ui/ReportHeader';
@@ -52,9 +53,29 @@ export default function Categorias() {
     const { dateRange, setDateRange } = useDateFilter();
     const { data, isLoading, isError, refetch } = useCategorias(dateRange);
     const { setTitle } = useLayout();
+    const navigate = useNavigate();
 
     // Set para manejar las categorías expandidas
     const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+
+    // Drill-down: categoría/subcategoría seleccionada para ver sus tickets
+    const [selectedItemForTickets, setSelectedItemForTickets] = useState<{type: 'categoria' | 'subcategoria'; name: string} | null>(null);
+    const [categoriaPage, setCategoriaPage] = useState(1);
+    const [subcategoriaExpandedTickets, setSubcategoriaExpandedTickets] = useState<string | null>(null);
+
+    const { data: subcategoriaTicketsData, isLoading: loadingSubcategoriaTickets } = useTicketsPorSubcategoria(
+        subcategoriaExpandedTickets ?? undefined,
+        dateRange,
+        20,
+        categoriaPage
+    );
+
+    const { data: categoriaTicketsData, isLoading: loadingCategoriaTickets } = useTicketsPorCategoria(
+        selectedItemForTickets?.type === 'categoria' ? selectedItemForTickets.name : undefined,
+        dateRange,
+        20,
+        categoriaPage
+    );
 
     useEffect(() => {
         setTitle('Dashboard Analytics');
@@ -68,6 +89,13 @@ export default function Categorias() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [data]);
 
+    // Drill-down: click en categoría o subcategoría para ver tickets
+    const handleVerTickets = (type: 'categoria' | 'subcategoria', name: string) => {
+        setSelectedItemForTickets(prev => (prev?.type === type && prev?.name === name) ? null : { type, name });
+        setCategoriaPage(1);
+    };
+
+    // Toggle expand/collapse de subcategorías
     const toggleCategory = (categoria: string) => {
         setExpandedCategories(prev => {
             const newSet = new Set(prev);
@@ -123,15 +151,15 @@ export default function Categorias() {
                             <table className="w-full text-left border-collapse text-sm">
                                 <thead>
                                     <tr className="bg-[#2B378A] text-white text-xs font-semibold uppercase tracking-wider">
-                                        <th className="py-3.5 px-4 w-10"></th> {/* Expand icon space */}
+                                        <th className="py-3.5 px-4 w-10"></th>
                                         <th className="py-3.5 px-4">Categoría / Proceso</th>
                                         <th className="py-3.5 px-4 text-right">Tickets</th>
                                         <th className="py-3.5 px-4 text-right">T. Pasos</th>
-                                        <th className="py-3.5 px-4 text-right" title="Mayor valor = flujo más complejo">Pasos/Tk ℹ</th>
+                                        <th className="py-3.5 px-4 text-right" title="Mayor valor = flujo más complejo">Pasos/Tk</th>
                                         <th className="py-3.5 px-4 text-right">Dur. Prom</th>
                                         <th className="py-3.5 px-4 text-right">Dur. Máx</th>
                                         <th className="py-3.5 px-4 text-right">% SLA</th>
-                                        <th className="py-3.5 px-4 text-right">🔴 Err. Graves</th>
+                                        <th className="py-3.5 px-4 text-right">Err. Graves</th>
                                         <th className="py-3.5 px-4 text-right">% Novedad</th>
                                         <th className="py-3.5 px-4 text-center">Estado</th>
                                     </tr>
@@ -155,8 +183,11 @@ export default function Categorias() {
                                                 <React.Fragment key={cat.categoria}>
                                                     {/* FILA PADRE (Categoría) */}
                                                     <tr
-                                                        onClick={() => hasSubcategories && toggleCategory(cat.categoria)}
-                                                        className={`transition-colors ${hasSubcategories ? 'cursor-pointer hover:bg-slate-50' : ''} ${isExpanded ? 'bg-slate-50/70 border-b-0' : 'bg-white'}`}
+                                                        onClick={() => {
+                                                            if (hasSubcategories) toggleCategory(cat.categoria);
+                                                            handleVerTickets('categoria', cat.categoria);
+                                                        }}
+                                                        className={`transition-colors cursor-pointer hover:bg-slate-50 ${isExpanded ? 'bg-slate-50/70 border-b-0' : 'bg-white'}`}
                                                     >
                                                         <td className="py-3.5 px-4 text-center text-slate-400">
                                                             {hasSubcategories && (
@@ -206,50 +237,138 @@ export default function Categorias() {
                                                     {/* FILAS HIJO (Subcategorías) */}
                                                     {isExpanded && hasSubcategories && cat.subcategorias.map((sub: SubcategoriaStats, idx: number) => {
                                                         const colorErrGraves = getColorErroresGraves(sub.pct_errores_graves);
+                                                        const isSubSelected = subcategoriaExpandedTickets === sub.subcategoria;
+                                                        const isLoadingSubTickets = isSubSelected && loadingSubcategoriaTickets;
+                                                        const subTicketsData = isSubSelected ? subcategoriaTicketsData : null;
 
                                                         return (
-                                                            <tr
-                                                                key={`${cat.categoria}-${sub.subcategoria}`}
-                                                                className={`bg-[#FAFAFA] hover:bg-slate-50 transition-colors ${idx === cat.subcategorias.length - 1 ? 'border-b border-slate-200' : 'border-b border-dashed border-slate-200/60'}`}
-                                                            >
-                                                                <td className="py-2.5 px-4"></td>
-                                                                <td className="py-2.5 px-4 font-medium text-slate-600 flex items-center gap-2">
-                                                                    <span className="text-slate-300 font-mono">└</span>
-                                                                    <span title={sub.subcategoria}>{truncate(sub.subcategoria, 32)}</span>
-                                                                </td>
-                                                                <td className="py-2.5 px-4 text-right text-slate-600">
-                                                                    {formatNumero(sub.total_tickets)}
-                                                                </td>
-                                                                <td className="py-2.5 px-4 text-right text-slate-500">
-                                                                    {formatNumero(sub.total_pasos)}
-                                                                </td>
-                                                                <td className="py-2.5 px-4 text-right text-slate-500 tracking-tight">
-                                                                    {sub.pasos_por_ticket.toFixed(1)}
-                                                                </td>
-                                                                <td className="py-2.5 px-4 text-right text-slate-600">
-                                                                    {formatHoras(sub.duracion_promedio)}
-                                                                </td>
-                                                                <td className="py-2.5 px-4 text-right text-slate-500">
-                                                                    {formatHoras(sub.duracion_maxima)}
-                                                                </td>
-                                                                <td className="py-2.5 px-4 text-right text-slate-600">
-                                                                    {formatPct(sub.pct_cumplimiento)}
-                                                                </td>
-                                                                <td className={`py-2.5 px-4 text-right font-medium ${colorErrGraves === 'rojo' ? 'text-red-700 bg-red-50/50' :
-                                                                    colorErrGraves === 'amarillo' ? 'text-yellow-700 bg-yellow-50/50' :
-                                                                        'text-emerald-700 bg-emerald-50/50'
-                                                                    }`}>
-                                                                    {sub.pct_errores_graves > 0 ? formatPct(sub.pct_errores_graves) : '—'}
-                                                                </td>
-                                                                <td className="py-2.5 px-4 text-right text-slate-500">
-                                                                    {formatPct(sub.pct_con_novedad)}
-                                                                </td>
-                                                                <td className="py-2.5 px-4">
-                                                                    <div className="flex justify-center scale-90">
-                                                                        <ClasificacionDot clasificacion={sub.clasificacion} />
-                                                                    </div>
-                                                                </td>
-                                                            </tr>
+                                                            <React.Fragment key={`${cat.categoria}-${sub.subcategoria}`}>
+                                                                <tr
+                                                                    onClick={() => {
+                                                                        if (subcategoriaExpandedTickets === sub.subcategoria) {
+                                                                            setSubcategoriaExpandedTickets(null);
+                                                                        } else {
+                                                                            setSubcategoriaExpandedTickets(sub.subcategoria);
+                                                                            setSelectedItemForTickets(null);
+                                                                            setCategoriaPage(1);
+                                                                        }
+                                                                    }}
+                                                                    className={`bg-[#FAFAFA] hover:bg-slate-50 cursor-pointer transition-colors ${isSubSelected ? 'bg-blue-50' : ''} ${idx === cat.subcategorias.length - 1 ? 'border-b border-slate-200' : 'border-b border-dashed border-slate-200/60'}`}
+                                                                >
+                                                                    <td className="py-2.5 px-4"></td>
+                                                                    <td className="py-2.5 px-4 font-medium text-slate-600 flex items-center gap-2">
+                                                                        <span className="text-slate-300 font-mono">└</span>
+                                                                        <span title={sub.subcategoria}>{truncate(sub.subcategoria, 32)}</span>
+                                                                    </td>
+                                                                    <td className="py-2.5 px-4 text-right text-slate-600">
+                                                                        {formatNumero(sub.total_tickets)}
+                                                                    </td>
+                                                                    <td className="py-2.5 px-4 text-right text-slate-500">
+                                                                        {formatNumero(sub.total_pasos)}
+                                                                    </td>
+                                                                    <td className="py-2.5 px-4 text-right text-slate-500 tracking-tight">
+                                                                        {sub.pasos_por_ticket.toFixed(1)}
+                                                                    </td>
+                                                                    <td className="py-2.5 px-4 text-right text-slate-600">
+                                                                        {formatHoras(sub.duracion_promedio)}
+                                                                    </td>
+                                                                    <td className="py-2.5 px-4 text-right text-slate-500">
+                                                                        {formatHoras(sub.duracion_maxima)}
+                                                                    </td>
+                                                                    <td className="py-2.5 px-4 text-right text-slate-600">
+                                                                        {formatPct(sub.pct_cumplimiento)}
+                                                                    </td>
+                                                                    <td className={`py-2.5 px-4 text-right font-medium ${colorErrGraves === 'rojo' ? 'text-red-700 bg-red-50/50' :
+                                                                        colorErrGraves === 'amarillo' ? 'text-yellow-700 bg-yellow-50/50' :
+                                                                            'text-emerald-700 bg-emerald-50/50'
+                                                                        }`}>
+                                                                        {sub.pct_errores_graves > 0 ? formatPct(sub.pct_errores_graves) : '—'}
+                                                                    </td>
+                                                                    <td className="py-2.5 px-4 text-right text-slate-500">
+                                                                        {formatPct(sub.pct_con_novedad)}
+                                                                    </td>
+                                                                    <td className="py-2.5 px-4">
+                                                                        <div className="flex justify-center scale-90">
+                                                                            <ClasificacionDot clasificacion={sub.clasificacion} />
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+
+                                                                {/* Tickets de la subcategoría - inline expandable */}
+                                                                {isSubSelected && (
+                                                                    <tr key={`${cat.categoria}-${sub.subcategoria}-tickets`}>
+                                                                        <td colSpan={11} className="p-0">
+                                                                            <div className="px-4 py-3 bg-gray-50 border-t border-dashed border-slate-200">
+                                                                                <div className="flex items-center gap-2 mb-2">
+                                                                                    <Icon name="confirmation_number" className="text-brand-teal text-sm" />
+                                                                                    <span className="text-xs font-semibold text-gray-600">
+                                                                                        Tickets de "{sub.subcategoria}"
+                                                                                    </span>
+                                                                                </div>
+                                                                                {isLoadingSubTickets ? (
+                                                                                    <LoadingSkeleton rows={3} />
+                                                                                ) : subTicketsData?.data && subTicketsData.data.length > 0 ? (
+                                                                                    <div className="overflow-x-auto">
+                                                                                        <table className="w-full text-left border-collapse text-xs">
+                                                                                            <thead>
+                                                                                                <tr className="bg-gray-100 text-gray-500 uppercase tracking-wider">
+                                                                                                    <th className="py-2 px-3">Ticket</th>
+                                                                                                    <th className="py-2 px-3">Título</th>
+                                                                                                    <th className="py-2 px-3">Estado</th>
+                                                                                                    <th className="py-2 px-3 text-right">Fecha</th>
+                                                                                                </tr>
+                                                                                            </thead>
+                                                                                            <tbody className="divide-y divide-gray-200">
+                                                                                                {subTicketsData.data.map((ticket) => (
+                                                                                                    <tr
+                                                                                                        key={ticket.id}
+                                                                                                        onClick={() => navigate(`/tickets/${ticket.id}`)}
+                                                                                                        className="hover:bg-blue-50 cursor-pointer"
+                                                                                                    >
+                                                                                                        <td className="py-2 px-3 text-brand-teal font-medium">#{ticket.id}</td>
+                                                                                                        <td className="py-2 px-3 text-gray-700 max-w-[200px] truncate">{ticket.titulo}</td>
+                                                                                                        <td className="py-2 px-3">
+                                                                                                            <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                                                                                                                ticket.estado === 'Cerrado' ? 'bg-green-100 text-green-700' :
+                                                                                                                ticket.estado === 'Pausado' ? 'bg-yellow-100 text-yellow-700' :
+                                                                                                                'bg-blue-100 text-blue-700'
+                                                                                                            }`}>
+                                                                                                                {ticket.estado}
+                                                                                                            </span>
+                                                                                                        </td>
+                                                                                                        <td className="py-2 px-3 text-right text-gray-500">{formatFecha(ticket.fechaCreacion)}</td>
+                                                                                                    </tr>
+                                                                                                ))}
+                                                                                            </tbody>
+                                                                                        </table>
+                                                                                        {subTicketsData.totalPages > 1 && (
+                                                                                            <div className="flex gap-2 mt-2 justify-end">
+                                                                                                <button
+                                                                                                    onClick={(e) => { e.stopPropagation(); setCategoriaPage(p => Math.max(1, p - 1)); }}
+                                                                                                    disabled={categoriaPage === 1}
+                                                                                                    className="px-2 py-1 text-xs bg-gray-100 rounded hover:bg-gray-200 disabled:opacity-50"
+                                                                                                >
+                                                                                                    Anterior
+                                                                                                </button>
+                                                                                                <span className="text-xs text-gray-600 self-center">{categoriaPage}/{subTicketsData.totalPages}</span>
+                                                                                                <button
+                                                                                                    onClick={(e) => { e.stopPropagation(); setCategoriaPage(p => Math.min(subTicketsData.totalPages, p + 1)); }}
+                                                                                                    disabled={categoriaPage === subTicketsData.totalPages}
+                                                                                                    className="px-2 py-1 text-xs bg-gray-100 rounded hover:bg-gray-200 disabled:opacity-50"
+                                                                                                >
+                                                                                                    Siguiente
+                                                                                                </button>
+                                                                                            </div>
+                                                                                        )}
+                                                                                    </div>
+                                                                                ) : (
+                                                                                    <p className="text-xs text-gray-400 py-2">No hay tickets para esta subcategoría.</p>
+                                                                                )}
+                                                                            </div>
+                                                                        </td>
+                                                                    </tr>
+                                                                )}
+                                                            </React.Fragment>
                                                         );
                                                     })}
                                                 </React.Fragment>
@@ -261,6 +380,111 @@ export default function Categorias() {
                         </div>
                     )}
                 </div>
+
+                {/* ── Tickets de la Categoría (no subcategoría) ─────────────────── */}
+                {selectedItemForTickets && selectedItemForTickets.type === 'categoria' && (
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <div className="p-1.5 bg-teal-50 rounded-lg text-brand-teal">
+                                    <Icon name="confirmation_number" className="text-[1.1rem]" />
+                                </div>
+                                <h3 className="text-base font-semibold text-gray-900">
+                                    Tickets de Categoría: {selectedItemForTickets.name}
+                                </h3>
+                                {loadingCategoriaTickets && <span className="text-sm text-gray-400">(Cargando...)</span>}
+                            </div>
+                            <button
+                                onClick={() => setSelectedItemForTickets(null)}
+                                className="text-gray-400 hover:text-gray-600 transition-colors"
+                            >
+                                <Icon name="close" className="text-lg" />
+                            </button>
+                        </div>
+
+                        {loadingCategoriaTickets ? (
+                            <div className="p-6"><LoadingSkeleton rows={5} /></div>
+                        ) : categoriaTicketsData?.data && categoriaTicketsData.data.length > 0 ? (
+                            <>
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left border-collapse">
+                                        <thead>
+                                            <tr className="bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500">
+                                                <th className="py-3 px-4">Ticket</th>
+                                                <th className="py-3 px-4">Título</th>
+                                                <th className="py-3 px-4">Estado</th>
+                                                <th className="py-3 px-4">Categoría</th>
+                                                <th className="py-3 px-4 text-right">Fecha</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-100">
+                                            {categoriaTicketsData.data.map((ticket) => (
+                                                <tr
+                                                    key={ticket.id}
+                                                    onClick={() => navigate(`/tickets/${ticket.id}`)}
+                                                    className="hover:bg-blue-50 cursor-pointer transition-colors"
+                                                >
+                                                    <td className="py-3 px-4 text-brand-teal font-medium hover:underline">
+                                                        #{ticket.id}
+                                                    </td>
+                                                    <td className="py-3 px-4 text-gray-800 max-w-xs truncate">
+                                                        {ticket.titulo}
+                                                    </td>
+                                                    <td className="py-3 px-4">
+                                                        <span className={`px-2 py-1 rounded text-xs font-medium ${
+                                                            ticket.estado === 'Cerrado' ? 'bg-green-100 text-green-700' :
+                                                            ticket.estado === 'Pausado' ? 'bg-yellow-100 text-yellow-700' :
+                                                            'bg-blue-100 text-blue-700'
+                                                        }`}>
+                                                            {ticket.estado}
+                                                        </span>
+                                                    </td>
+                                                    <td className="py-3 px-4 text-sm text-gray-600">
+                                                        {[ticket.categoria, ticket.subcategoria].filter(Boolean).join(' / ')}
+                                                    </td>
+                                                    <td className="py-3 px-4 text-right text-gray-500 text-sm">
+                                                        {formatFecha(ticket.fechaCreacion)}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {/* Paginación simple */}
+                                {categoriaTicketsData.totalPages > 1 && (
+                                    <div className="px-6 py-3 border-t border-gray-100 flex items-center justify-between">
+                                        <span className="text-xs text-gray-500">
+                                            Mostrando {categoriaTicketsData.data.length} de {categoriaTicketsData.total} tickets
+                                        </span>
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={() => setCategoriaPage(p => Math.max(1, p - 1))}
+                                                disabled={categoriaPage === 1}
+                                                className="px-3 py-1 text-xs font-medium text-gray-700 bg-gray-100 rounded hover:bg-gray-200 disabled:opacity-50 transition-colors"
+                                            >
+                                                Anterior
+                                            </button>
+                                            <span className="px-3 py-1 text-xs text-gray-600">
+                                                {categoriaPage} / {categoriaTicketsData.totalPages}
+                                            </span>
+                                            <button
+                                                onClick={() => setCategoriaPage(p => Math.min(categoriaTicketsData.totalPages, p + 1))}
+                                                disabled={categoriaPage === categoriaTicketsData.totalPages}
+                                                className="px-3 py-1 text-xs font-medium text-gray-700 bg-gray-100 rounded hover:bg-gray-200 disabled:opacity-50 transition-colors"
+                                            >
+                                                Siguiente
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </>
+                        ) : (
+                            <div className="p-8 text-center text-gray-500 text-sm">
+                                No hay tickets para esta categoría en el período seleccionado.
+                            </div>
+                        )}
+                    </div>
+                )}
 
                 {/* BarChart horizontal: duración promedio por categoría principal */}
                 {!isLoading && chartData.length > 0 && (
