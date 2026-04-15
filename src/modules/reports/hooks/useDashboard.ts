@@ -14,6 +14,7 @@ export const DASHBOARD_KEYS = {
     detalle: (id: number, dateRange?: DateRange) => ['dashboard', 'usuario', id, 'detalle', dateRange?.dateFrom ?? 'no-from', dateRange?.dateTo ?? 'no-to'],
     ticketsUsuario: (id: number, dateRange?: DateRange) => ['dashboard', 'usuario', id, 'tickets', dateRange?.dateFrom ?? 'no-from', dateRange?.dateTo ?? 'no-to'],
     ticketsDetalleUsuario: (id: number, dateRange?: DateRange) => ['dashboard', 'usuario', id, 'tickets-detalle', dateRange?.dateFrom ?? 'no-from', dateRange?.dateTo ?? 'no-to'],
+    ticketsPorRegional: (regional: string, dateRange?: DateRange) => ['dashboard', 'regional', regional, 'tickets', dateRange?.dateFrom ?? 'no-from', dateRange?.dateTo ?? 'no-to'],
     topPerf: (type: string, limit: number, dateRange?: DateRange) => ['dashboard', 'top-performers', type, limit, dateRange?.dateFrom ?? 'no-from', dateRange?.dateTo ?? 'no-to'],
     novedades: (dateRange?: DateRange) => ['dashboard', 'novedades', dateRange?.dateFrom ?? 'no-from', dateRange?.dateTo ?? 'no-to'],
 };
@@ -33,12 +34,23 @@ export const useRanking = (limit = 50, page = 1, dateRange?: DateRange) =>
         enabled: !!(dateRange?.dateFrom && dateRange?.dateTo),
     });
 
-export const useRegionales = (dateRange?: DateRange) =>
-    useQuery({
-        queryKey: DASHBOARD_KEYS.regionales(dateRange),
-        queryFn: () => dashboardApi.getRegionales(dateRange),
-        enabled: !!(dateRange?.dateFrom && dateRange?.dateTo),
+export const useRegionales = (dateRange?: DateRange) => {
+    // Si no hay dateRange, usar últimos 30 días como fallback
+    const effectiveDateRange = dateRange?.dateFrom || dateRange?.dateTo
+        ? dateRange
+        : {
+            dateFrom: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            dateTo: new Date().toISOString().split('T')[0]
+        };
+
+    return useQuery({
+        queryKey: DASHBOARD_KEYS.regionales(effectiveDateRange),
+        queryFn: () => dashboardApi.getRegionales(effectiveDateRange),
+        staleTime: 0,
+        refetchOnWindowFocus: true,
+        refetchOnMount: true,
     });
+};
 
 export const useMapaCalor = (regional?: string, dateRange?: DateRange) =>
     useQuery({
@@ -88,6 +100,23 @@ export const useTicketsDetallePorUsuario = (id: number | undefined, dateRange?: 
         queryFn: () => dashboardApi.getTicketsDetallePorUsuario(id!, dateRange, limit, page, tipo),
         enabled: !!(id && dateRange?.dateFrom && dateRange?.dateTo),
     });
+
+export const useTicketsPorRegional = (regional?: string, dateRange?: DateRange, limit = 50, page = 1) => {
+    // Si no hay dateRange, usar últimos 30 días como fallback
+    const effectiveDateRange = dateRange?.dateFrom || dateRange?.dateTo
+        ? dateRange
+        : {
+            dateFrom: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            dateTo: new Date().toISOString().split('T')[0]
+        };
+
+    return useQuery({
+        queryKey: DASHBOARD_KEYS.ticketsPorRegional(regional ?? '', effectiveDateRange),
+        queryFn: () => dashboardApi.getTicketsPorRegional(regional!, effectiveDateRange, limit, page),
+        enabled: !!regional,
+        staleTime: 0,
+    });
+};
 
 export const useTopPerformers = (type: 'top' | 'bottom' = 'top', limit = 10, dateRange?: DateRange) =>
     useQuery({

@@ -1,10 +1,12 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRanking } from '../hooks/useDashboard';
-import { ReportTable, Column } from '../components/ui/ReportTable';
+import { ScoreBadge } from '../components/ui/ScoreBadge';
+import { ClasificacionDot } from '../components/ui/ClasificacionDot';
 import { FiltroRegional } from '../components/ui/FiltroRegional';
 import { FiltroFecha, useDateFilter } from '../components/ui/FiltroFecha';
 import { FiltroFilas } from '../components/ui/FiltroFilas';
+import { LoadingSkeleton } from '../components/ui/LoadingSkeleton';
 import { EmptyState } from '../../../shared/components/EmptyState';
 import { formatHoras, formatNumero, formatPct } from '../utils/formatters';
 import { Icon } from '../../../shared/components/Icon';
@@ -48,72 +50,6 @@ export default function RankingUsuarios() {
     const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         setSearch(e.target.value);
     }, []);
-
-    // Columnas para ReportTable
-    const columns: Column<typeof filteredData[0]>[] = [
-        {
-            header: '#',
-            accessor: 'ranking',
-            align: 'center',
-            render: (value) => <span className="text-sm font-bold text-gray-600">#{value}</span>,
-        },
-        {
-            header: 'Usuario',
-            accessor: 'usuario_nombre',
-            render: (value, row) => (
-                <>
-                    <span className="text-sm font-semibold text-gray-900">{String(value)}</span>
-                    {row.cargo && <p className="text-xs text-gray-400 mt-0.5">{String(row.cargo)}</p>}
-                </>
-            ),
-        },
-        { header: 'Regional', accessor: 'regional' },
-        { header: 'Rol', accessor: 'rol' },
-        {
-            header: 'Tickets',
-            accessor: 'tickets_gestionados',
-            align: 'right',
-            render: (value) => <span className="font-medium text-gray-700">{formatNumero(Number(value))}</span>,
-        },
-        {
-            header: '% SLA',
-            accessor: 'pct_cumplimiento_sla',
-            align: 'right',
-            render: (value) => formatPct(Number(value)),
-        },
-        {
-            header: '% Error',
-            accessor: 'pct_error_proceso',
-            align: 'right',
-            render: (value) => formatPct(Number(value)),
-        },
-        {
-            header: 'T. Prom',
-            accessor: 'tiempo_promedio',
-            align: 'right',
-            render: (value) => formatHoras(Number(value)),
-        },
-        {
-            header: 'Score',
-            accessor: 'score_total',
-            align: 'center',
-            render: (value) => <ScoreBadge score={Number(value)} />,
-        },
-        {
-            header: 'Estado',
-            accessor: 'clasificacion',
-            align: 'center',
-            render: (value) => <ClasificacionDot clasificacion={String(value)} />,
-        },
-    ];
-
-    const handleRowClick = useCallback((row: typeof filteredData[0]) => {
-        const params = new URLSearchParams();
-        if (dateRange.dateFrom) params.set('dateFrom', dateRange.dateFrom);
-        if (dateRange.dateTo) params.set('dateTo', dateRange.dateTo);
-        const query = params.toString();
-        navigate(`/reports/dashboard/usuario/${row.usuario_id}${query ? `?${query}` : ''}`);
-    }, [navigate, dateRange]);
 
     if (isError) {
         return (
@@ -182,14 +118,101 @@ export default function RankingUsuarios() {
                 </div>
 
                 {/* Tabla */}
-                <ReportTable
-                    data={filteredData}
-                    columns={columns}
-                    onRowClick={handleRowClick}
-                    isLoading={isLoading}
-                    emptyMessage="No hay usuarios que coincidan con los filtros aplicados."
-                    rowKey="usuario_id"
-                />
+                <div className="flex-1 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                    {isLoading ? (
+                        <div className="p-6">
+                            <LoadingSkeleton rows={8} />
+                        </div>
+                    ) : (
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left border-collapse">
+                                <thead>
+                                    <tr className="bg-[#2B378A] text-white text-xs font-semibold uppercase tracking-wider">
+                                        <th className="py-3 px-4 text-center">#</th>
+                                        <th className="py-3 px-4">Usuario</th>
+                                        <th className="py-3 px-4">Regional</th>
+                                        <th className="py-3 px-4">Rol</th>
+                                        <th className="py-3 px-4 text-right">Tickets</th>
+                                        <th className="py-3 px-4 text-right">% SLA</th>
+                                        <th className="py-3 px-4 text-right">% Error</th>
+                                        <th className="py-3 px-4 text-right">T. Prom</th>
+                                        <th className="py-3 px-4 text-center">Score</th>
+                                        <th className="py-3 px-4 text-center">Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-100">
+                                    {filteredData.length === 0 ? (
+                                        <tr>
+                                            <td colSpan={10} className="py-12 text-center text-gray-500 text-sm">
+                                                No hay usuarios que coincidan con los filtros aplicados.
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        filteredData.map((row, idx) => (
+                                            <tr
+                                                key={row.usuario_id}
+                                                onClick={() => {
+                                                    const params = new URLSearchParams();
+                                                    if (dateRange.dateFrom) params.set('dateFrom', dateRange.dateFrom);
+                                                    if (dateRange.dateTo) params.set('dateTo', dateRange.dateTo);
+                                                    const query = params.toString();
+                                                    navigate(`/reports/dashboard/usuario/${row.usuario_id}${query ? `?${query}` : ''}`);
+                                                }}
+                                                className={`cursor-pointer hover:bg-blue-50 transition-colors ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/60'}`}
+                                            >
+                                                {/* Posición */}
+                                                <td className="py-3 px-4 text-center">
+                                                    <span className="text-sm font-bold text-gray-600">
+                                                        #{row.ranking}
+                                                    </span>
+                                                </td>
+                                                {/* Nombre */}
+                                                <td className="py-3 px-4">
+                                                    <span className="text-sm font-semibold text-gray-900">
+                                                        {row.usuario_nombre}
+                                                    </span>
+                                                    {row.cargo && (
+                                                        <p className="text-xs text-gray-400 mt-0.5">{row.cargo}</p>
+                                                    )}
+                                                </td>
+                                                {/* Regional */}
+                                                <td className="py-3 px-4 text-sm text-gray-600">{row.regional}</td>
+                                                {/* Rol */}
+                                                <td className="py-3 px-4 text-sm text-gray-600">{row.rol}</td>
+                                                {/* Tickets */}
+                                                <td className="py-3 px-4 text-sm text-right font-medium text-gray-700">
+                                                    {formatNumero(row.tickets_gestionados)}
+                                                </td>
+                                                {/* % SLA */}
+                                                <td className="py-3 px-4 text-sm text-right text-gray-700">
+                                                    {formatPct(row.pct_cumplimiento_sla)}
+                                                </td>
+                                                {/* % Error */}
+                                                <td className="py-3 px-4 text-sm text-right text-gray-700">
+                                                    {formatPct(row.pct_error_proceso)}
+                                                </td>
+                                                {/* Tiempo promedio */}
+                                                <td className="py-3 px-4 text-sm text-right text-gray-700">
+                                                    {formatHoras(row.tiempo_promedio)}
+                                                </td>
+                                                {/* Score */}
+                                                <td className="py-3 px-4 text-center">
+                                                    <ScoreBadge score={row.score_total} />
+                                                </td>
+                                                {/* Estado */}
+                                                <td className="py-3 px-4">
+                                                    <div className="flex justify-center">
+                                                        <ClasificacionDot clasificacion={row.clasificacion} />
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </div>
 
                 {/* Footer: conteo */}
                 {!isLoading && rankingData && (
