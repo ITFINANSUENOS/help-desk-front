@@ -150,6 +150,38 @@ export const useTicketsPorSubcategoria = (subcategoria?: string, dateRange?: Dat
     });
 };
 
+export const useTicketsPorRango = (rango?: string, orden?: number, dateRange?: DateRange, limit = 50, page = 1) => {
+    const effectiveDateRange = dateRange?.dateFrom || dateRange?.dateTo
+        ? dateRange
+        : {
+            dateFrom: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            dateTo: new Date().toISOString().split('T')[0]
+        };
+
+    return useQuery({
+        queryKey: ['dashboard', 'rango', rango ?? '', orden ?? 0, effectiveDateRange.dateFrom, effectiveDateRange.dateTo, limit, page],
+        queryFn: () => dashboardApi.getTicketsPorRango(rango!, orden ?? 1, effectiveDateRange, limit, page),
+        enabled: !!rango,
+        staleTime: 0,
+    });
+};
+
+export const usePasosDeTicket = (ticketId?: number, dateRange?: DateRange) => {
+    const effectiveDateRange = dateRange?.dateFrom || dateRange?.dateTo
+        ? dateRange
+        : {
+            dateFrom: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            dateTo: new Date().toISOString().split('T')[0]
+        };
+
+    return useQuery({
+        queryKey: ['dashboard', 'ticket', ticketId ?? 0, 'pasos', effectiveDateRange.dateFrom, effectiveDateRange.dateTo],
+        queryFn: () => dashboardApi.getPasosDeTicket(ticketId!, effectiveDateRange),
+        enabled: !!ticketId,
+        staleTime: 0,
+    });
+};
+
 export const useTopPerformers = (type: 'top' | 'bottom' = 'top', limit = 10, dateRange?: DateRange) =>
     useQuery({
         queryKey: DASHBOARD_KEYS.topPerf(type, limit, dateRange),

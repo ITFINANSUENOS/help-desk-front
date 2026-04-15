@@ -38,6 +38,18 @@ export const dashboardApi = {
     getDistribucion: (dateRange?: DateRange) =>
         axios.get<DistribucionTiempos>(`${BASE}/distribucion-tiempos`, { params: buildDateParams(dateRange) }).then(r => r.data),
 
+    getTicketsPorRango: (rango: string, orden: number, dateRange?: DateRange, limit = 50, page = 1) =>
+        axios.get<{ data: Array<{ id: number; titulo: string; estado: string; fechaCreacion: string; categoria: string; subcategoria: string; asignadoNombre: string; estadoTiempo: string; paso?: string; duracion_horas: number; veces_asignado: number }>; total: number; page: number; limit: number; totalPages: number; rango: string }>(
+            `${BASE}/distribucion-tiempos/${encodeURIComponent(rango)}/tickets`,
+            { params: { orden, ...buildDateParams(dateRange), limit, page } }
+        ).then(r => r.data),
+
+    getPasosDeTicket: (ticketId: number, dateRange?: DateRange) =>
+        axios.get<Array<{ id: number; titulo: string; estado: string; fechaCreacion: string; categoria: string; subcategoria: string; asignadoNombre: string; estadoTiempo: string; paso: string; duracion_horas: number; fechaCompletado: string }>>(
+            `${BASE}/tickets/${ticketId}/pasos`,
+            { params: buildDateParams(dateRange) }
+        ).then(r => r.data),
+
     getDetalleUsuario: (id: number, dateRange?: DateRange) =>
         axios.get<DetalleUsuario>(`${BASE}/usuario/${id}/detalle`, { params: buildDateParams(dateRange) }).then(r => r.data),
 
