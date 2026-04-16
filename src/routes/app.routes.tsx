@@ -253,6 +253,14 @@ export const appRoutes: RouteObject[] = [
                         )
                     },
                     {
+                        path: '/reports/dashboard',
+                        element: (
+                            <Suspense fallback={<PageLoader />}>
+                                <MainDashboardPage />
+                            </Suspense>
+                        )
+                    },
+                    {
                         path: '/reports/flow-open',
                         element: (
                             <Suspense fallback={<PageLoader />}>
