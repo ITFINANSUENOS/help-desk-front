@@ -34,23 +34,12 @@ export const useRanking = (limit = 50, page = 1, dateRange?: DateRange) =>
         enabled: !!(dateRange?.dateFrom && dateRange?.dateTo),
     });
 
-export const useRegionales = (dateRange?: DateRange) => {
-    // Si no hay dateRange, usar últimos 30 días como fallback
-    const effectiveDateRange = dateRange?.dateFrom || dateRange?.dateTo
-        ? dateRange
-        : {
-            dateFrom: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-            dateTo: new Date().toISOString().split('T')[0]
-        };
-
-    return useQuery({
-        queryKey: DASHBOARD_KEYS.regionales(effectiveDateRange),
-        queryFn: () => dashboardApi.getRegionales(effectiveDateRange),
-        staleTime: 0,
-        refetchOnWindowFocus: true,
-        refetchOnMount: true,
+export const useRegionales = (dateRange?: DateRange) =>
+    useQuery({
+        queryKey: DASHBOARD_KEYS.regionales(dateRange),
+        queryFn: () => dashboardApi.getRegionales(dateRange),
+        enabled: !!(dateRange?.dateFrom && dateRange?.dateTo),
     });
-};
 
 export const useMapaCalor = (regional?: string, dateRange?: DateRange) =>
     useQuery({
