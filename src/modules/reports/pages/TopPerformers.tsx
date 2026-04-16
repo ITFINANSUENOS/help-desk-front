@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTopPerformers } from '../hooks/useDashboard';
 import { ScoreBadge } from '../components/ui/ScoreBadge';
+import { AlertaBanner } from '../components/ui/AlertaBanner';
 import { ClasificacionDot } from '../components/ui/ClasificacionDot';
 import { FiltroFecha, useDateFilter } from '../components/ui/FiltroFecha';
 import { LoadingSkeleton } from '../components/ui/LoadingSkeleton';
@@ -121,22 +122,19 @@ export default function TopPerformers() {
             <div className="flex-1 px-6 py-6 lg:px-8 max-w-[1600px] w-full mx-auto">
 
                 {/* ── Info banner for score system ───────────────────────────── */}
-                <div className="mb-5 flex items-start gap-2 rounded-lg bg-blue-50/80 border border-blue-100 px-4 py-3 text-sm text-blue-900">
-                    <Icon name="info" className="text-blue-500 mt-0.5 text-[1.1rem]" />
-                    <p>
-                        <strong>¿Cómo funciona el Ranking?</strong> Premia a quien hace muchas cosas bien y penaliza fuerte a quien comete errores, sin importar cuántos tickets tenga. <span className="opacity-80 block mt-0.5">Un usuario con 10 tickets perfectos es bueno, pero uno con 100 tickets casi perfectos es mejor. Y uno con muchos tickets pero lleno de errores cae al fondo sin importar su volumen.</span>
-                    </p>
-                </div>
+                <AlertaBanner
+                    type="info"
+                    message="¿Cómo funciona el Ranking? Premia a quien hace muchas cosas bien y penaliza fuerte a quien comete errores, sin importar cuántos tickets tenga. Un usuario con 10 tickets perfectos es bueno, pero uno con 100 tickets casi perfectos es mejor. Y uno con muchos tickets pero lleno de errores cae al fondo sin importar su volumen."
+                    className="mb-5"
+                />
 
                 {/* ── Info banner for bottom view ───────────────────────────── */}
                 {!isTop && (
-                    <div className="mb-5 flex items-start gap-2 rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">
-                        <Icon name="warning" className="mt-0.5 shrink-0 text-[1.1rem] text-amber-500" />
-                        <span>
-                            Usuarios con <strong>mínimo 10 tickets gestionados</strong>. Estos usuarios
-                            presentan el menor puntaje global y pueden requerir acompañamiento o capacitación.
-                        </span>
-                    </div>
+                    <AlertaBanner
+                        type="warning"
+                        message="Usuarios con mínimo 10 tickets gestionados. Estos usuarios presentan el menor puntaje global y pueden requerir acompañamiento o capacitación."
+                        className="mb-5"
+                    />
                 )}
 
                 {/* ── Table ────────────────────────────────────────────────── */}
@@ -166,9 +164,9 @@ export default function TopPerformers() {
                                         <tr>
                                             <td
                                                 colSpan={9}
-                                                className="py-12 text-center text-gray-500 text-sm"
+                                                className="py-12"
                                             >
-                                                No hay datos disponibles para este período.
+                                                <EmptyState icon="inbox" title="Sin datos" description="No hay datos disponibles para este período." />
                                             </td>
                                         </tr>
                                     ) : (

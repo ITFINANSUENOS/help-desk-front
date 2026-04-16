@@ -1,5 +1,4 @@
 import { useMemo, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
     BarChart, Bar, XAxis, YAxis, Tooltip,
     ResponsiveContainer, Cell, ReferenceLine
@@ -12,9 +11,11 @@ import { LoadingSkeleton } from '../components/ui/LoadingSkeleton';
 import { EmptyState } from '../../../shared/components/EmptyState';
 import { Icon } from '../../../shared/components/Icon';
 import { useLayout } from '../../../core/layout/context/LayoutContext';
-import { formatHoras, formatNumero, formatPct, formatFecha } from '../utils/formatters';
+import { formatHoras, formatNumero, formatPct } from '../utils/formatters';
 import { getHexClasificacion } from '../utils/colores';
 import { ReportHeader } from '../components/ui/ReportHeader';
+import { TicketTable } from '../components/ui/TicketTable';
+import { Pagination } from '../components/ui/Pagination';
 
 /** Tooltip personalizado para el BarChart de regionales */
 const RegionalTooltip = ({
@@ -42,7 +43,6 @@ const RegionalTooltip = ({
 };
 
 export default function Regionales() {
-    const navigate = useNavigate();
     const { dateRange, setDateRange } = useDateFilter();
     const { data, isLoading, isError, refetch } = useRegionales(dateRange);
     const { setTitle } = useLayout();
@@ -211,82 +211,13 @@ export default function Regionales() {
                             <div className="p-6"><LoadingSkeleton rows={5} /></div>
                         ) : ticketsData?.data && ticketsData.data.length > 0 ? (
                             <>
-                                <div className="overflow-x-auto">
-                                    <table className="w-full text-left border-collapse">
-                                        <thead>
-                                            <tr className="bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500">
-                                                <th className="py-3 px-4">Ticket</th>
-                                                <th className="py-3 px-4">Título</th>
-                                                <th className="py-3 px-4">Estado</th>
-                                                <th className="py-3 px-4">Categoría</th>
-                                                <th className="py-3 px-4 text-right">Fecha</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-gray-100">
-                                            {ticketsData.data.map((ticket) => (
-                                                <tr
-                                                    key={ticket.id}
-                                                    onClick={() => navigate(`/tickets/${ticket.id}`)}
-                                                    className="hover:bg-blue-50 cursor-pointer transition-colors"
-                                                >
-                                                    <td className="py-3 px-4 text-brand-teal font-medium hover:underline">
-                                                        #{ticket.id}
-                                                    </td>
-                                                    <td className="py-3 px-4 text-gray-800 max-w-xs truncate">
-                                                        {ticket.titulo}
-                                                    </td>
-                                                    <td className="py-3 px-4">
-                                                        <span className={`px-2 py-1 rounded text-xs font-medium ${
-                                                            ticket.estado === 'Cerrado' ? 'bg-green-100 text-green-700' :
-                                                            ticket.estado === 'Pausado' ? 'bg-yellow-100 text-yellow-700' :
-                                                            'bg-blue-100 text-blue-700'
-                                                        }`}>
-                                                            {ticket.estado}
-                                                        </span>
-                                                    </td>
-                                                    <td className="py-3 px-4 text-sm text-gray-600">
-                                                        {[ticket.categoria, ticket.subcategoria].filter(Boolean).join(' / ')}
-                                                    </td>
-                                                    <td className="py-3 px-4 text-right text-gray-500 text-sm">
-                                                        {formatFecha(ticket.fechaCreacion)}
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                                {/* Paginación simple */}
+                                <TicketTable tickets={ticketsData.data} emptyMessage="No hay tickets para esta regional." />
                                 {ticketsData.totalPages > 1 && (
-                                    <div className="px-6 py-3 border-t border-gray-100 flex items-center justify-between">
-                                        <span className="text-xs text-gray-500">
-                                            Mostrando {ticketsData.data.length} de {ticketsData.total} tickets
-                                        </span>
-                                        <div className="flex gap-2">
-                                            <button
-                                                onClick={() => setTicketsPage(p => Math.max(1, p - 1))}
-                                                disabled={ticketsPage === 1}
-                                                className="px-3 py-1 text-xs font-medium text-gray-700 bg-gray-100 rounded hover:bg-gray-200 disabled:opacity-50 transition-colors"
-                                            >
-                                                Anterior
-                                            </button>
-                                            <span className="px-3 py-1 text-xs text-gray-600">
-                                                {ticketsPage} / {ticketsData.totalPages}
-                                            </span>
-                                            <button
-                                                onClick={() => setTicketsPage(p => Math.min(ticketsData.totalPages, p + 1))}
-                                                disabled={ticketsPage === ticketsData.totalPages}
-                                                className="px-3 py-1 text-xs font-medium text-gray-700 bg-gray-100 rounded hover:bg-gray-200 disabled:opacity-50 transition-colors"
-                                            >
-                                                Siguiente
-                                            </button>
-                                        </div>
-                                    </div>
+                                    <Pagination page={ticketsPage} totalPages={ticketsData.totalPages} onPageChange={setTicketsPage} />
                                 )}
                             </>
                         ) : (
-                            <div className="p-8 text-center text-gray-500 text-sm">
-                                No hay tickets para esta regional en el período seleccionado.
-                            </div>
+                            <EmptyState icon="confirmation_number" title="Sin tickets" description="No hay tickets para esta regional en el período seleccionado." />
                         )}
                     </div>
                 )}

@@ -1,47 +1,16 @@
 import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useLayout } from '../../../core/layout/context/LayoutContext';
 import { Icon } from '../../../shared/components/Icon';
 import { Button } from '../../../shared/components/Button';
 import { Select } from '../../../shared/components/Select';
-import { Input } from '../../../shared/components/Input';
 import { StatsCard } from '../../../modules/dashboard/components/StatsCard';
 import { PageLoader } from '../../../shared/components/PageLoader';
+import { FiltroFecha, useDateFilter } from '../components/ui/FiltroFecha';
+import { ReportHeader } from '../components/ui/ReportHeader';
 import { reportService } from '../services/report.service';
 import { workflowService } from '../../workflows/services/workflow.service';
 import type { Workflow } from '../../workflows/interfaces/Workflow';
-
-interface FlowTicket {
-    tick_id: number;
-    tick_titulo: string;
-    fech_crea: string;
-    paso_nombre: string;
-    dias_abierto: number;
-}
-
-interface PasoData {
-    paso_id: number;
-    paso_nombre: string;
-    paso_orden: number;
-    tickets_count: number;
-    tickets: FlowTicket[];
-}
-
-interface FlowData {
-    flujo: {
-        flujo_id: number;
-        flujo_nom: string;
-        cats_id: number;
-        cats_nom: string;
-    };
-    pasos: PasoData[];
-    total_tickets: number;
-    filtros: {
-        fechaInicio?: string;
-        fechaFin?: string;
-        estado: string;
-        regionalId?: number;
-    };
-}
 
 interface Regional {
     reg_id: number;
@@ -50,18 +19,15 @@ interface Regional {
 
 export default function FlowOpenTicketsPage() {
     const { setTitle } = useLayout();
+    const { dateRange, setDateRange } = useDateFilter();
     const [workflows, setWorkflows] = useState<Workflow[]>([]);
     const [regionales, setRegionales] = useState<Regional[]>([]);
     const [selectedWorkflow, setSelectedWorkflow] = useState<string>('');
-    const [flowData, setFlowData] = useState<FlowData | null>(null);
-    const [loading, setLoading] = useState(false);
-    const [loadingWorkflows, setLoadingWorkflows] = useState(true);
+    const [isLoadingWorkflows, setLoadingWorkflows] = useState(true);
     const [exporting, setExporting] = useState(false);
     const [expandedSteps, setExpandedSteps] = useState<Set<number>>(new Set());
-    
+
     // Filtros
-    const [fechaInicio, setFechaInicio] = useState<string>('');
-    const [fechaFin, setFechaFin] = useState<string>('');
     const [estado, setEstado] = useState<string>('Abierto');
     const [regionalId, setRegionalId] = useState<number | undefined>(undefined);
 
@@ -106,46 +72,31 @@ export default function FlowOpenTicketsPage() {
         if (value) {
             const flujoId = Number(value);
             setSelectedWorkflow(String(flujoId));
-            loadFlowDataData(flujoId);
         } else {
             setSelectedWorkflow('');
-            setFlowData(null);
         }
     };
 
-    const loadFlowDataData = async (flujoId: number) => {
-        setLoading(true);
-        try {
-            const data = await reportService.getFlowOpenTickets(
-                flujoId,
-                fechaInicio || undefined,
-                fechaFin || undefined,
-                estado,
-                regionalId
-            );
-            setFlowData(data);
-            setExpandedSteps(new Set(data.pasos.map((p: PasoData) => p.paso_id)));
-        } catch (error) {
-            console.error('Error loading flow data', error);
-        } finally {
-            setLoading(false);
-        }
-    };
+    const { data: flowData, isLoading } = useQuery({
+        queryKey: ['flowOpenTickets', selectedWorkflow, dateRange.dateFrom, dateRange.dateTo, estado, regionalId],
+        queryFn: () => reportService.getFlowOpenTickets(
+            Number(selectedWorkflow),
+            dateRange.dateFrom || undefined,
+            dateRange.dateTo || undefined,
+            estado,
+            regionalId
+        ),
+        enabled: !!selectedWorkflow,
+    });
 
     const handleApplyFilters = () => {
-        if (selectedWorkflow) {
-            loadFlowDataData(Number(selectedWorkflow));
-        }
+        // React Query will refetch automatically when dependencies change
     };
 
     const handleClearFilters = () => {
-        setFechaInicio('');
-        setFechaFin('');
+        setDateRange({ dateFrom: undefined, dateTo: undefined });
         setEstado('Abierto');
         setRegionalId(undefined);
-        if (selectedWorkflow) {
-            loadFlowDataData(Number(selectedWorkflow));
-        }
     };
 
     const handleExport = async () => {
@@ -187,120 +138,85 @@ export default function FlowOpenTicketsPage() {
         return 'bg-green-100 text-green-700';
     };
 
-    if (loadingWorkflows) {
+    if (isLoadingWorkflows) {
         return <PageLoader />;
     }
 
     return (
-        <div className="flex flex-col h-screen overflow-hidden">
-            {/* Header fijo */}
-            <div className="flex-shrink-0 bg-white border-b border-gray-200 px-6 py-4">
-                <div className="flex items-center justify-between mb-4">
-                    <div>
-                        <h2 className="text-2xl font-bold text-gray-900">Tickets Abiertos por Flujo</h2>
-                        <p className="text-sm text-gray-500">
-                            Visualiza y exporta los tickets abiertos de un flujo específico.
-                        </p>
-                    </div>
-                    {selectedWorkflow && (
-                        <Button 
-                            onClick={handleExport} 
-                            disabled={exporting}
-                            variant="brand"
-                            size="lg"
-                            className="gap-2"
-                        >
-                            {exporting ? (
-                                <>
-                                    <Icon name="sync" className="h-5 w-5 animate-spin" />
-                                    <span>Exportando...</span>
-                                </>
-                            ) : (
-                                <>
-                                    <Icon name="download" className="h-5 w-5" />
-                                    <span>Exportar Excel</span>
-                                </>
-                            )}
-                        </Button>
-                    )}
-                </div>
-
-                {/* Filtros */}
-                <div className="flex flex-wrap items-end gap-4">
-                    <div className="w-full md:w-64">
-                        <Select
-                            value={selectedWorkflow}
-                            onChange={handleWorkflowChange}
-                            options={workflowOptions}
-                            placeholder="-- Seleccione un flujo --"
-                            label="Flujo de Trabajo"
-                            required
-                        />
-                    </div>
-
-                    <div className="w-full md:w-40">
-                        <Select
-                            value={estado}
-                            onChange={(val) => setEstado(String(val || 'Abierto'))}
-                            options={estadoOptions}
-                            label="Estado"
-                        />
-                    </div>
-
-                    <div className="w-full md:w-40">
-                        <Select
-                            value={regionalId}
-                            onChange={(val) => setRegionalId(val as number | undefined)}
-                            options={regionalesOptions}
-                            label="Regional"
-                            placeholder="Todas"
-                        />
-                    </div>
-                    
-                    <div className="w-full md:w-40">
-                        <Input
-                            type="date"
-                            label="Fecha Inicio"
-                            value={fechaInicio}
-                            onChange={(e) => setFechaInicio(e.target.value)}
-                        />
-                    </div>
-                    
-                    <div className="w-full md:w-40">
-                        <Input
-                            type="date"
-                            label="Fecha Fin"
-                            value={fechaFin}
-                            onChange={(e) => setFechaFin(e.target.value)}
-                        />
-                    </div>
-
-                    <div className="flex gap-2">
-                        <Button 
-                            onClick={handleApplyFilters}
-                            disabled={loading || !selectedWorkflow}
-                            variant="default"
-                            size="lg"
-                        >
-                            <Icon name="filter_list" className="h-5 w-5 mr-1" />
-                            Filtrar
-                        </Button>
-                        {(fechaInicio || fechaFin) && (
-                            <Button 
-                                onClick={handleClearFilters}
-                                variant="outline"
-                                size="lg"
-                            >
-                                <Icon name="clear" className="h-5 w-5 mr-1" />
-                                Limpiar
-                            </Button>
+        <div className="flex min-h-full flex-col bg-gray-50/50">
+            <ReportHeader
+                title="Tickets Abiertos por Flujo"
+                subtitle="Visualiza y exporta los tickets abiertos de un flujo específico."
+                icon={<Icon name="account_tree" className="text-2xl" />}
+                actions={selectedWorkflow ? (
+                    <Button
+                        onClick={handleExport}
+                        disabled={exporting}
+                        variant="brand"
+                        size="lg"
+                        className="gap-2"
+                    >
+                        {exporting ? (
+                            <>
+                                <Icon name="sync" className="h-5 w-5 animate-spin" />
+                                <span>Exportando...</span>
+                            </>
+                        ) : (
+                            <>
+                                <Icon name="download" className="h-5 w-5" />
+                                <span>Exportar Excel</span>
+                            </>
                         )}
-                    </div>
-                </div>
+                    </Button>
+                ) : undefined}
+            >
+                <Select
+                    value={selectedWorkflow}
+                    onChange={handleWorkflowChange}
+                    options={workflowOptions}
+                    placeholder="-- Seleccione un flujo --"
+                    label="Flujo de Trabajo"
+                    required
+                />
+                <Select
+                    value={estado}
+                    onChange={(val) => setEstado(String(val || 'Abierto'))}
+                    options={estadoOptions}
+                    label="Estado"
+                />
+                <Select
+                    value={regionalId}
+                    onChange={(val) => setRegionalId(val as number | undefined)}
+                    options={regionalesOptions}
+                    label="Regional"
+                    placeholder="Todas"
+                />
+                <FiltroFecha value={dateRange} onChange={setDateRange} />
+                <Button
+                    onClick={handleApplyFilters}
+                    disabled={isLoading || !selectedWorkflow}
+                    variant="default"
+                    size="lg"
+                >
+                    <Icon name="filter_list" className="h-5 w-5 mr-1" />
+                    Filtrar
+                </Button>
+                {(dateRange.dateFrom || dateRange.dateTo) && (
+                    <Button
+                        onClick={handleClearFilters}
+                        variant="outline"
+                        size="lg"
+                    >
+                        <Icon name="clear" className="h-5 w-5 mr-1" />
+                        Limpiar
+                    </Button>
+                )}
+            </ReportHeader>
 
-                {/* Filtros activos */}
-                {flowData?.filtros && (flowData.filtros.fechaInicio || flowData.filtros.fechaFin || flowData.filtros.estado || flowData.filtros.regionalId) && (
-                    <div className="mt-3 flex items-center gap-2 flex-wrap">
+            {/* Filtros activos */}
+            {flowData?.filtros && (flowData.filtros.fechaInicio || flowData.filtros.fechaFin || flowData.filtros.estado || flowData.filtros.regionalId) && (
+                <div className="px-6 pt-4 lg:px-8">
+                    <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-xs text-gray-500">Filtros activos:</span>
                         {flowData.filtros.estado && flowData.filtros.estado !== 'Abierto' && (
                             <span className="px-2 py-1 bg-brand-teal/10 text-brand-teal rounded text-xs font-medium">
@@ -323,20 +239,20 @@ export default function FlowOpenTicketsPage() {
                             </span>
                         )}
                     </div>
-                )}
-            </div>
+                </div>
+            )}
 
-            {/* Contenido scrolleable */}
-            <div className="flex-1 overflow-auto p-6">
+            {/* Content */}
+            <div className="flex flex-col gap-6 px-6 pt-4 pb-16 lg:px-8">
                 {/* Loading */}
-                {loading && (
+                {isLoading && (
                     <div className="flex items-center justify-center py-12">
                         <PageLoader />
                     </div>
                 )}
 
                 {/* Datos del Flujo */}
-                {flowData && !loading && (
+                {flowData && !isLoading && (
                     <div className="space-y-6">
                         {/* Stats Card */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -439,7 +355,7 @@ export default function FlowOpenTicketsPage() {
                 )}
 
                 {/* Sin datos */}
-                {!flowData && !loading && selectedWorkflow && (
+                {!flowData && !isLoading && selectedWorkflow && (
                     <div className="flex flex-col items-center justify-center py-12 text-gray-500">
                         <Icon name="inbox" className="h-12 w-12 text-gray-300 mb-4" />
                         <p>No hay tickets abiertos para este flujo.</p>
@@ -447,7 +363,7 @@ export default function FlowOpenTicketsPage() {
                 )}
 
                 {/* Estado inicial - sin selección */}
-                {!selectedWorkflow && !loading && (
+                {!selectedWorkflow && !isLoading && (
                     <div className="flex flex-col items-center justify-center py-12 text-gray-500">
                         <Icon name="account_tree" className="h-12 w-12 text-gray-300 mb-4" />
                         <p>Selecciona un flujo para ver los tickets abiertos.</p>

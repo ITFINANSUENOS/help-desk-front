@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useNovedades } from '../hooks/useDashboard';
 import { PieNovedades } from '../components/charts/PieNovedades';
 import { ClasificacionDot } from '../components/ui/ClasificacionDot';
+import { AlertaBanner } from '../components/ui/AlertaBanner';
 import { FiltroFecha, useDateFilter } from '../components/ui/FiltroFecha';
 import { LoadingSkeleton } from '../components/ui/LoadingSkeleton';
 import { EmptyState } from '../../../shared/components/EmptyState';
@@ -224,8 +225,8 @@ function TablaUsuarios({ data, filtro, navigate, dateRange }: { data: UsuarioNov
                 <tbody className="divide-y divide-gray-100">
                     {filtradas.length === 0 ? (
                         <tr>
-                            <td colSpan={9} className="py-10 text-center text-gray-500 text-sm">
-                                No hay usuarios con {filtroConf.label.toLowerCase()} registrados.
+                            <td colSpan={9} className="py-10">
+                                <EmptyState icon="group_off" title="Sin usuarios" description={`No hay usuarios con ${filtroConf.label.toLowerCase()} registrados.`} />
                             </td>
                         </tr>
                     ) : (
@@ -360,9 +361,7 @@ export default function Novedades() {
                                         />
                                     </>
                                 ) : (
-                                    <div className="flex items-center justify-center h-40 text-gray-400 text-sm">
-                                        Sin datos de distribución.
-                                    </div>
+                                    <EmptyState icon="inbox" title="Sin datos" description="Sin datos de distribución." />
                                 )}
                             </div>
 
@@ -382,22 +381,16 @@ export default function Novedades() {
                                 {usuarios.length > 0 ? (
                                     <TablaUsuarios data={usuarios} filtro={filtro} navigate={navigate} dateRange={dateRange} />
                                 ) : (
-                                    <div className="flex items-center justify-center h-40 text-gray-400 text-sm">
-                                        Sin usuarios con novedades registradas.
-                                    </div>
+                                    <EmptyState icon="inbox" title="Sin datos" description="Sin usuarios con novedades registradas." />
                                 )}
                             </div>
                         </div>
 
                         {/* ── Nota informativa al pie ───────────────────────── */}
-                        <div className="flex items-start gap-3 rounded-xl bg-amber-50 border border-amber-200 px-5 py-4 text-sm text-amber-800">
-                            <Icon name="warning" className="text-amber-500 mt-0.5 shrink-0 text-[1.1rem]" />
-                            <p>
-                                Los <strong>Errores Graves</strong> (Error de Proceso y Cierre Forzoso) impactan directamente el score de desempeño.
-                                Los usuarios con <strong>≥15% de tickets con errores graves</strong> requieren atención
-                                prioritaria. Use los filtros superiores para analizar cada tipo de incidencia por separado.
-                            </p>
-                        </div>
+                        <AlertaBanner
+                            type="warning"
+                            message="Los Errores Graves (Error de Proceso y Cierre Forzoso) impactan directamente el score de desempeño. Los usuarios con ≥15% de tickets con errores graves requieren atención prioritaria. Use los filtros superiores para analizar cada tipo de incidencia por separado."
+                        />
                     </>
                 )}
             </div>

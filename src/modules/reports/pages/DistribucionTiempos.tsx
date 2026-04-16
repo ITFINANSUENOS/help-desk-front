@@ -10,6 +10,9 @@ import { useLayout } from '../../../core/layout/context/LayoutContext';
 import { formatNumero, formatPct, formatFecha } from '../utils/formatters';
 import type { RangoTiempo } from '../types/dashboard.types';
 import { ReportHeader } from '../components/ui/ReportHeader';
+import { CategoryPath } from '../components/ui/CategoryPath';
+import { StatusBadge } from '../components/ui/StatusBadge';
+import { Pagination } from '../components/ui/Pagination';
 
 export default function DistribucionTiempos() {
     const { dateRange, setDateRange } = useDateFilter();
@@ -239,8 +242,8 @@ export default function DistribucionTiempos() {
                                         <tr><td colSpan={4} className="p-4"><LoadingSkeleton rows={5} /></td></tr>
                                     ) : !data?.rangos || data.rangos.length === 0 ? (
                                         <tr>
-                                            <td colSpan={4} className="py-8 text-center text-gray-400">
-                                                Sin datos
+                                            <td colSpan={4} className="py-8">
+                                                <EmptyState icon="inbox" title="Sin datos" description="Sin datos de distribución de tiempos." />
                                             </td>
                                         </tr>
                                     ) : (
@@ -333,28 +336,22 @@ export default function DistribucionTiempos() {
                                                             {ticket.titulo}
                                                         </td>
                                                         <td className="py-3 px-4">
-                                                            <span className={`px-2 py-1 rounded text-xs font-medium ${
-                                                                ticket.estado === 'Cerrado' ? 'bg-green-100 text-green-700' :
-                                                                ticket.estado === 'Pausado' ? 'bg-yellow-100 text-yellow-700' :
-                                                                'bg-blue-100 text-blue-700'
-                                                            }`}>
-                                                                {ticket.estado}
-                                                            </span>
+                                                            <StatusBadge estado={ticket.estado} />
                                                         </td>
                                                         <td className="py-3 px-4 text-sm text-gray-600">
-                                                            {[ticket.categoria, ticket.subcategoria].filter(Boolean).join(' / ')}
+                                                            <CategoryPath categoria={ticket.categoria} subcategoria={ticket.subcategoria} />
                                                         </td>
                                                         <td className="py-3 px-4 text-center">
                                                             <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${
-                                                                ticket.veces_asignado > 1 ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-600'
+                                                                (ticket.veces_asignado ?? 0) > 1 ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-600'
                                                             }`}>
-                                                                {ticket.veces_asignado}
+                                                                {ticket.veces_asignado ?? 0}
                                                             </span>
                                                         </td>
                                                         <td className="py-3 px-4 text-right text-gray-700 font-medium">
-                                                            {ticket.duracion_horas < 1
+                                                            {typeof ticket.duracion_horas === 'number' && ticket.duracion_horas < 1
                                                                 ? `${Math.round(ticket.duracion_horas * 60)}m`
-                                                                : `${ticket.duracion_horas.toFixed(1)}h`}
+                                                                : typeof ticket.duracion_horas === 'number' ? `${ticket.duracion_horas.toFixed(1)}h` : '-'}
                                                         </td>
                                                         <td className="py-3 px-4 text-right text-gray-500 text-sm">
                                                             {formatFecha(ticket.fechaCreacion)}
@@ -430,36 +427,11 @@ export default function DistribucionTiempos() {
                                     </table>
                                 </div>
                                 {rangoTicketsData.totalPages > 1 && (
-                                    <div className="px-6 py-3 border-t border-gray-100 flex items-center justify-between">
-                                        <span className="text-xs text-gray-500">
-                                            Mostrando {rangoTicketsData.data.length} de {rangoTicketsData.total} tickets
-                                        </span>
-                                        <div className="flex gap-2">
-                                            <button
-                                                onClick={() => setRangoPage(p => Math.max(1, p - 1))}
-                                                disabled={rangoPage === 1}
-                                                className="px-3 py-1 text-xs font-medium text-gray-700 bg-gray-100 rounded hover:bg-gray-200 disabled:opacity-50 transition-colors"
-                                            >
-                                                Anterior
-                                            </button>
-                                            <span className="px-3 py-1 text-xs text-gray-600">
-                                                {rangoPage} / {rangoTicketsData.totalPages}
-                                            </span>
-                                            <button
-                                                onClick={() => setRangoPage(p => Math.min(rangoTicketsData.totalPages, p + 1))}
-                                                disabled={rangoPage === rangoTicketsData.totalPages}
-                                                className="px-3 py-1 text-xs font-medium text-gray-700 bg-gray-100 rounded hover:bg-gray-200 disabled:opacity-50 transition-colors"
-                                            >
-                                                Siguiente
-                                            </button>
-                                        </div>
-                                    </div>
+                                    <Pagination page={rangoPage} totalPages={rangoTicketsData.totalPages} onPageChange={setRangoPage} />
                                 )}
                             </>
                         ) : (
-                            <div className="p-8 text-center text-gray-500 text-sm">
-                                No hay tickets para este rango en el período seleccionado.
-                            </div>
+                            <EmptyState icon="confirmation_number" title="Sin tickets" description="No hay tickets para este rango en el período seleccionado." />
                         )}
                     </div>
                 )}

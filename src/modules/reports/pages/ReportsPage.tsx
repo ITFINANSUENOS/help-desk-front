@@ -5,6 +5,7 @@ import { useLayout } from '../../../core/layout/context/LayoutContext';
 import { Icon } from '../../../shared/components/Icon';
 import { reportService } from '../services/report.service';
 import type { PasosEstadoNullItem } from '../services/report.service';
+import { Pagination } from '../components/ui/Pagination';
 
 export default function ReportsPage() {
     const { can } = usePermissions();
@@ -448,30 +449,7 @@ export default function ReportsPage() {
 
                         {/* Pagination */}
                         {!pasosNullLoading && pasosNullData.length > 0 && (
-                            <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 bg-gray-50">
-                                <p className="text-sm text-gray-500">
-                                    Mostrando {((pasosNullPage - 1) * 100) + 1} - {Math.min(pasosNullPage * 100, pasosNullTotal)} de {pasosNullTotal}
-                                </p>
-                                <div className="flex gap-2">
-                                    <button
-                                        onClick={() => handlePasosNullPageChange(pasosNullPage - 1)}
-                                        disabled={pasosNullPage === 1}
-                                        className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        Anterior
-                                    </button>
-                                    <span className="px-3 py-1 text-sm text-gray-700">
-                                        Página {pasosNullPage} de {Math.ceil(pasosNullTotal / 100)}
-                                    </span>
-                                    <button
-                                        onClick={() => handlePasosNullPageChange(pasosNullPage + 1)}
-                                        disabled={pasosNullPage >= Math.ceil(pasosNullTotal / 100)}
-                                        className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        Siguiente
-                                    </button>
-                                </div>
-                            </div>
+                            <Pagination page={pasosNullPage} totalPages={Math.ceil(pasosNullTotal / 100)} onPageChange={handlePasosNullPageChange} />
                         )}
                     </div>
                 </div>

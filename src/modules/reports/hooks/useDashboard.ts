@@ -17,6 +17,11 @@ export const DASHBOARD_KEYS = {
     ticketsPorRegional: (regional: string, dateRange?: DateRange) => ['dashboard', 'regional', regional, 'tickets', dateRange?.dateFrom ?? 'no-from', dateRange?.dateTo ?? 'no-to'],
     topPerf: (type: string, limit: number, dateRange?: DateRange) => ['dashboard', 'top-performers', type, limit, dateRange?.dateFrom ?? 'no-from', dateRange?.dateTo ?? 'no-to'],
     novedades: (dateRange?: DateRange) => ['dashboard', 'novedades', dateRange?.dateFrom ?? 'no-from', dateRange?.dateTo ?? 'no-to'],
+    ticketsPorCategoria: (categoria: string, dateRange?: DateRange) => ['dashboard', 'categoria', categoria, dateRange?.dateFrom ?? 'no-from', dateRange?.dateTo ?? 'no-to'],
+    ticketsPorSubcategoria: (subcategoria: string, dateRange?: DateRange) => ['dashboard', 'subcategoria', subcategoria, dateRange?.dateFrom ?? 'no-from', dateRange?.dateTo ?? 'no-to'],
+    ticketsPorPaso: (paso: string, dateRange?: DateRange) => ['dashboard', 'paso', paso, dateRange?.dateFrom ?? 'no-from', dateRange?.dateTo ?? 'no-to'],
+    ticketsPorRango: (rango: string, orden: number, dateRange?: DateRange) => ['dashboard', 'rango', rango, orden, dateRange?.dateFrom ?? 'no-from', dateRange?.dateTo ?? 'no-to'],
+    pasosDeTicket: (ticketId: number, dateRange?: DateRange) => ['dashboard', 'ticket', ticketId, 'pasos', dateRange?.dateFrom ?? 'no-from', dateRange?.dateTo ?? 'no-to'],
 };
 
 export const useKpis = (regional?: string, dateRange?: DateRange) =>
@@ -116,7 +121,7 @@ export const useTicketsPorCategoria = (categoria?: string, dateRange?: DateRange
         };
 
     return useQuery({
-        queryKey: ['dashboard', 'categoria', categoria ?? '', effectiveDateRange.dateFrom, effectiveDateRange.dateTo, limit, page],
+        queryKey: DASHBOARD_KEYS.ticketsPorCategoria(categoria ?? '', effectiveDateRange),
         queryFn: () => dashboardApi.getTicketsPorCategoria(categoria!, effectiveDateRange, limit, page),
         enabled: !!categoria,
         staleTime: 0,
@@ -132,7 +137,7 @@ export const useTicketsPorSubcategoria = (subcategoria?: string, dateRange?: Dat
         };
 
     return useQuery({
-        queryKey: ['dashboard', 'subcategoria', subcategoria ?? '', effectiveDateRange.dateFrom, effectiveDateRange.dateTo, limit, page],
+        queryKey: DASHBOARD_KEYS.ticketsPorSubcategoria(subcategoria ?? '', effectiveDateRange),
         queryFn: () => dashboardApi.getTicketsPorSubcategoria(subcategoria!, effectiveDateRange, limit, page),
         enabled: !!subcategoria,
         staleTime: 0,
@@ -148,7 +153,7 @@ export const useTicketsPorPaso = (paso?: string, dateRange?: DateRange, limit = 
         };
 
     return useQuery({
-        queryKey: ['dashboard', 'paso', paso ?? '', effectiveDateRange.dateFrom, effectiveDateRange.dateTo, limit, page],
+        queryKey: DASHBOARD_KEYS.ticketsPorPaso(paso ?? '', effectiveDateRange),
         queryFn: () => dashboardApi.getTicketsPorPaso(paso!, effectiveDateRange, limit, page),
         enabled: !!paso,
         staleTime: 0,
@@ -164,7 +169,7 @@ export const useTicketsPorRango = (rango?: string, orden?: number, dateRange?: D
         };
 
     return useQuery({
-        queryKey: ['dashboard', 'rango', rango ?? '', orden ?? 0, effectiveDateRange.dateFrom, effectiveDateRange.dateTo, limit, page],
+        queryKey: DASHBOARD_KEYS.ticketsPorRango(rango ?? '', orden ?? 0, effectiveDateRange),
         queryFn: () => dashboardApi.getTicketsPorRango(rango!, orden ?? 1, effectiveDateRange, limit, page),
         enabled: !!rango,
         staleTime: 0,
@@ -180,7 +185,7 @@ export const usePasosDeTicket = (ticketId?: number, dateRange?: DateRange) => {
         };
 
     return useQuery({
-        queryKey: ['dashboard', 'ticket', ticketId ?? 0, 'pasos', effectiveDateRange.dateFrom, effectiveDateRange.dateTo],
+        queryKey: DASHBOARD_KEYS.pasosDeTicket(ticketId ?? 0, effectiveDateRange),
         queryFn: () => dashboardApi.getPasosDeTicket(ticketId!, effectiveDateRange),
         enabled: !!ticketId,
         staleTime: 0,

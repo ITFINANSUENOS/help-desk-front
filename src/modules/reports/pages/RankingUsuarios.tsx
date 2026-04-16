@@ -2,6 +2,7 @@ import { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRanking } from '../hooks/useDashboard';
 import { ScoreBadge } from '../components/ui/ScoreBadge';
+import { AlertaBanner } from '../components/ui/AlertaBanner';
 import { ClasificacionDot } from '../components/ui/ClasificacionDot';
 import { FiltroRegional } from '../components/ui/FiltroRegional';
 import { FiltroFecha, useDateFilter } from '../components/ui/FiltroFecha';
@@ -110,12 +111,11 @@ export default function RankingUsuarios() {
             <div className="flex-1 px-6 py-6 lg:px-8 max-w-[1600px] w-full mx-auto">
 
                 {/* ── Info banner for score system ───────────────────────────── */}
-                <div className="mb-5 flex items-start gap-2 rounded-lg bg-blue-50 border border-blue-100 px-4 py-3 text-sm text-blue-900 shadow-sm">
-                    <Icon name="info" className="text-blue-500 mt-0.5 text-[1.1rem]" />
-                    <p>
-                        <strong>¿Cómo funciona el Ranking?</strong> Premia a quien hace muchas cosas bien y penaliza fuerte a quien comete errores, sin importar cuántos tickets tenga. <br /><span className="opacity-80">Un usuario con 10 tickets perfectos es bueno, pero uno con 100 tickets casi perfectos es mejor. Y uno con muchos tickets pero lleno de errores cae al fondo sin importar su volumen.</span>
-                    </p>
-                </div>
+                <AlertaBanner
+                    type="info"
+                    message="¿Cómo funciona el Ranking? Premia a quien hace muchas cosas bien y penaliza fuerte a quien comete errores, sin importar cuántos tickets tenga. Un usuario con 10 tickets perfectos es bueno, pero uno con 100 tickets casi perfectos es mejor. Y uno con muchos tickets pero lleno de errores cae al fondo sin importar su volumen."
+                    className="mb-5"
+                />
 
                 {/* Tabla */}
                 <div className="flex-1 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
@@ -143,8 +143,8 @@ export default function RankingUsuarios() {
                                 <tbody className="divide-y divide-gray-100">
                                     {filteredData.length === 0 ? (
                                         <tr>
-                                            <td colSpan={10} className="py-12 text-center text-gray-500 text-sm">
-                                                No hay usuarios que coincidan con los filtros aplicados.
+                                            <td colSpan={10} className="py-12">
+                                                <EmptyState icon="search_off" title="Sin resultados" description="No hay usuarios que coincidan con los filtros aplicados." />
                                             </td>
                                         </tr>
                                     ) : (

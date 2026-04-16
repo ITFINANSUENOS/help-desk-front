@@ -13,6 +13,9 @@ import { formatHoras, formatFecha } from '../utils/formatters';
 import { ClasificacionDot } from '../components/ui/ClasificacionDot';
 import type { TicketDetalleItem, AsignacionDetalle } from '../types/dashboard.types';
 import { ReportHeader } from '../components/ui/ReportHeader';
+import { CategoryPath } from '../components/ui/CategoryPath';
+import { StatusBadge } from '../components/ui/StatusBadge';
+import { Pagination } from '../components/ui/Pagination';
 
 export default function TicketsUsuarioPage() {
     const navigate = useNavigate();
@@ -45,17 +48,6 @@ export default function TicketsUsuarioPage() {
             return next;
         });
     }, []);
-
-    const getStatusBadge = (estado: string) => {
-        switch (estado) {
-            case 'Cerrado':
-                return 'bg-green-100 text-green-700';
-            case 'Pausado':
-                return 'bg-yellow-100 text-yellow-700';
-            default:
-                return 'bg-blue-100 text-blue-700';
-        }
-    };
 
     const renderExpandedRow = (ticket: TicketDetalleItem) => {
         if (!ticket.historial || ticket.historial.length === 0) {
@@ -278,12 +270,10 @@ export default function TicketsUsuarioPage() {
                                                         {ticket.titulo}
                                                     </td>
                                                     <td className="py-3 px-4">
-                                                        <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusBadge(ticket.estado)}`}>
-                                                            {ticket.estado}
-                                                        </span>
+                                                        <StatusBadge estado={ticket.estado} />
                                                     </td>
                                                     <td className="py-3 px-4 text-sm text-gray-600">
-                                                        {[ticket.categoria, ticket.subcategoria].filter(Boolean).join(' / ')}
+                                                        <CategoryPath categoria={ticket.categoria} subcategoria={ticket.subcategoria} />
                                                     </td>
                                                     {!tipoFiltro && (
                                                         <td className="py-3 px-4">
@@ -317,30 +307,7 @@ export default function TicketsUsuarioPage() {
 
                 {/* Paginación */}
                 {data && data.totalPages > 1 && (
-                    <div className="mt-4 flex items-center justify-between">
-                        <span className="text-sm text-gray-500">
-                            Mostrando {(page - 1) * limit + 1} - {Math.min(page * limit, data.total)} de {data.total} tickets
-                        </span>
-                        <div className="flex items-center gap-2">
-                            <button
-                                onClick={() => setPage(p => Math.max(1, p - 1))}
-                                disabled={page === 1}
-                                className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                            >
-                                Anterior
-                            </button>
-                            <span className="text-sm text-gray-600">
-                                Página {page} de {data.totalPages}
-                            </span>
-                            <button
-                                onClick={() => setPage(p => Math.min(data.totalPages, p + 1))}
-                                disabled={page === data.totalPages}
-                                className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                            >
-                                Siguiente
-                            </button>
-                        </div>
-                    </div>
+                    <Pagination page={page} totalPages={data.totalPages} onPageChange={setPage} />
                 )}
             </div>
         </div>

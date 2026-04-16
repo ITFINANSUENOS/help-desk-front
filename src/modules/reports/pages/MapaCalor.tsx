@@ -118,9 +118,7 @@ export default function MapaCalor() {
                     {isLoading ? (
                         <div className="p-6"><LoadingSkeleton rows={10} /></div>
                     ) : !data || data.length === 0 ? (
-                        <div className="py-16 text-center text-gray-500 text-sm">
-                            No hay datos disponibles para los filtros seleccionados.
-                        </div>
+                        <EmptyState icon="inbox" title="Sin datos" description="No hay datos disponibles para los filtros seleccionados." />
                     ) : (
                         <div className="overflow-x-auto">
                             <table className="w-full text-left border-collapse text-sm">

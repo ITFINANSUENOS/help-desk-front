@@ -20,6 +20,7 @@ import {
     getClasificacionErrores,
 } from '../utils/colores';
 import { ReportHeader } from '../components/ui/ReportHeader';
+import { TicketTable } from '../components/ui/TicketTable';
 
 // ─── ScoreGauge ──────────────────────────────────────────────────────────
 /**
@@ -311,9 +312,9 @@ export default function DetalleUsuario() {
                                     <tr>
                                         <td
                                             colSpan={5}
-                                            className="py-12 text-center text-gray-500 text-sm"
+                                            className="py-12"
                                         >
-                                            No hay datos de pasos de flujo para este usuario.
+                                            <EmptyState icon="assignment" title="Sin pasos" description="No hay datos de pasos de flujo para este usuario." />
                                         </td>
                                     </tr>
                                 ) : (
@@ -365,30 +366,9 @@ export default function DetalleUsuario() {
                                                                 {loadingPasoTickets ? (
                                                                     <div className="py-4 text-center text-gray-400 text-sm">Cargando...</div>
                                                                 ) : !pasoTicketsData?.data || pasoTicketsData.data.length === 0 ? (
-                                                                    <div className="py-4 text-center text-gray-400 text-sm">No hay tickets para este paso.</div>
+                                                                    <EmptyState icon="confirmation_number" title="Sin tickets" description="No hay tickets para este paso." />
                                                                 ) : (
-                                                                    <div className="space-y-1">
-                                                                        {pasoTicketsData.data.map(ticket => (
-                                                                            <div
-                                                                                key={ticket.id}
-                                                                                onClick={() => navigate(`/tickets/${ticket.id}`)}
-                                                                                className="flex items-center gap-3 py-2 px-3 bg-white rounded-lg cursor-pointer hover:bg-blue-100 transition-colors"
-                                                                            >
-                                                                                <span className="text-brand-teal font-medium text-sm">#{ticket.id}</span>
-                                                                                <span className="text-gray-700 text-sm truncate flex-1">{ticket.titulo}</span>
-                                                                                <span className={`px-2 py-0.5 rounded text-xs font-medium ${
-                                                                                    ticket.estado === 'Cerrado' ? 'bg-green-100 text-green-700' :
-                                                                                    ticket.estado === 'Pausado' ? 'bg-yellow-100 text-yellow-700' :
-                                                                                    'bg-blue-100 text-blue-700'
-                                                                                }`}>
-                                                                                    {ticket.estado}
-                                                                                </span>
-                                                                                <span className="text-gray-400 text-xs">
-                                                                                    {ticket.fechaCreacion ? new Date(ticket.fechaCreacion).toLocaleDateString('es-CO') : '—'}
-                                                                                </span>
-                                                                            </div>
-                                                                        ))}
-                                                                    </div>
+                                                                    <TicketTable tickets={pasoTicketsData.data} emptyMessage="No hay tickets para este paso." />
                                                                 )}
                                                             </td>
                                                         </tr>
@@ -426,52 +406,9 @@ export default function DetalleUsuario() {
                         {loadingTickets ? (
                             <div className="p-6"><LoadingSkeleton rows={5} /></div>
                         ) : !ticketsData?.data || ticketsData.data.length === 0 ? (
-                            <div className="py-8 text-center text-gray-500 text-sm">
-                                No hay tickets para este usuario en el período seleccionado.
-                            </div>
+                            <EmptyState icon="confirmation_number" title="Sin tickets" description="No hay tickets para este usuario en el período seleccionado." />
                         ) : (
-                            <table className="w-full text-left border-collapse">
-                                <thead>
-                                    <tr className="bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500">
-                                        <th className="py-3 px-4">Ticket</th>
-                                        <th className="py-3 px-4">Título</th>
-                                        <th className="py-3 px-4">Estado</th>
-                                        <th className="py-3 px-4">Categoría</th>
-                                        <th className="py-3 px-4 text-right">Fecha</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-100">
-                                    {ticketsData.data.map(ticket => (
-                                        <tr
-                                            key={ticket.id}
-                                            onClick={() => navigate(`/tickets/${ticket.id}`)}
-                                            className="hover:bg-blue-50 cursor-pointer transition-colors"
-                                        >
-                                            <td className="py-3 px-4 text-brand-teal font-medium hover:underline">
-                                                #{ticket.id}
-                                            </td>
-                                            <td className="py-3 px-4 text-gray-800 max-w-xs truncate">
-                                                {ticket.titulo}
-                                            </td>
-                                            <td className="py-3 px-4">
-                                                <span className={`px-2 py-1 rounded text-xs font-medium ${
-                                                    ticket.estado === 'Cerrado' ? 'bg-green-100 text-green-700' :
-                                                    ticket.estado === 'Pausado' ? 'bg-yellow-100 text-yellow-700' :
-                                                    'bg-blue-100 text-blue-700'
-                                                }`}>
-                                                    {ticket.estado}
-                                                </span>
-                                            </td>
-                                            <td className="py-3 px-4 text-sm text-gray-600">
-                                                {[ticket.categoria, ticket.subcategoria].filter(Boolean).join(' / ')}
-                                            </td>
-                                            <td className="py-3 px-4 text-right text-gray-500 text-sm">
-                                                {ticket.fechaCreacion ? new Date(ticket.fechaCreacion).toLocaleDateString('es-CO') : '—'}
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                            <TicketTable tickets={ticketsData.data} emptyMessage="No hay tickets para este usuario." />
                         )}
                     </div>
                 )}

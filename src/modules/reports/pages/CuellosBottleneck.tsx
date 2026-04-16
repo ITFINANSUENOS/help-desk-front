@@ -5,9 +5,10 @@ import { LoadingSkeleton } from '../components/ui/LoadingSkeleton';
 import { EmptyState } from '../../../shared/components/EmptyState';
 import { Icon } from '../../../shared/components/Icon';
 import { useLayout } from '../../../core/layout/context/LayoutContext';
-import { formatHoras, formatPct, formatFecha } from '../utils/formatters';
+import { formatHoras, formatPct } from '../utils/formatters';
 import { FiltroFecha, useDateFilter } from '../components/ui/FiltroFecha';
 import { ReportHeader } from '../components/ui/ReportHeader';
+import { TicketTable } from '../components/ui/TicketTable';
 
 const LIMIT_OPTIONS = [10, 20, 30, 50] as const;
 
@@ -42,13 +43,11 @@ export default function CuellosBottleneck() {
 
     // Fila expandida (accordion)
     const [expandedPaso, setExpandedPaso] = useState<string | null>(null);
-    const [pasoPage, setPasoPage] = useState(1);
 
     const { data: pasoTicketsData, isLoading: loadingPasoTickets } = useTicketsPorPaso(
         expandedPaso ?? undefined,
         dateRange,
-        20,
-        pasoPage
+        20
     );
 
     useEffect(() => {
@@ -107,9 +106,7 @@ export default function CuellosBottleneck() {
                     {isLoading ? (
                         <LoadingSkeleton className="h-[400px]" />
                     ) : sortedData.length === 0 ? (
-                        <div className="flex items-center justify-center h-48 text-gray-400 text-sm">
-                            Sin datos para mostrar.
-                        </div>
+                        <EmptyState icon="inbox" title="Sin datos" description="Sin datos para mostrar." />
                     ) : (
                         <BarChartCuellos data={sortedData} />
                     )}
@@ -143,8 +140,8 @@ export default function CuellosBottleneck() {
                                     </tr>
                                 ) : sortedData.length === 0 ? (
                                     <tr>
-                                        <td colSpan={6} className="py-8 text-center text-gray-400">
-                                            Sin datos
+                                        <td colSpan={6} className="py-8">
+                                            <EmptyState icon="inbox" title="Sin datos" description="No hay datos de cuellos de botella." />
                                         </td>
                                     </tr>
                                 ) : (
@@ -207,83 +204,10 @@ export default function CuellosBottleneck() {
                                                                     <LoadingSkeleton rows={3} />
                                                                 ) : pasoTicketsData?.data && pasoTicketsData.data.length > 0 ? (
                                                                     <>
-                                                                        <div className="overflow-x-auto rounded-lg border border-gray-200">
-                                                                            <table className="w-full text-left border-collapse text-xs">
-                                                                                <thead>
-                                                                                    <tr className="bg-gray-100 text-gray-500 font-semibold uppercase tracking-wider">
-                                                                                        <th className="py-2.5 px-4">Ticket</th>
-                                                                                        <th className="py-2.5 px-4">Título</th>
-                                                                                        <th className="py-2.5 px-4">Estado</th>
-                                                                                        <th className="py-2.5 px-4">Categoría</th>
-                                                                                        <th className="py-2.5 px-4 text-right">Tiempo</th>
-                                                                                        <th className="py-2.5 px-4 text-right">Fecha</th>
-                                                                                    </tr>
-                                                                                </thead>
-                                                                                <tbody className="divide-y divide-gray-100 bg-white">
-                                                                                    {pasoTicketsData.data.map((ticket) => (
-                                                                                        <tr key={ticket.id} className="hover:bg-blue-50 transition-colors">
-                                                                                            <td className="py-2.5 px-4 text-brand-teal font-medium">
-                                                                                                #{ticket.id}
-                                                                                            </td>
-                                                                                            <td className="py-2.5 px-4 text-gray-700 max-w-[200px] truncate">
-                                                                                                {ticket.titulo}
-                                                                                            </td>
-                                                                                            <td className="py-2.5 px-4">
-                                                                                                <span className={`px-2 py-0.5 rounded text-[10px] font-medium ${
-                                                                                                    ticket.estado === 'Cerrado' ? 'bg-green-100 text-green-700' :
-                                                                                                    ticket.estado === 'Pausado' ? 'bg-yellow-100 text-yellow-700' :
-                                                                                                    'bg-blue-100 text-blue-700'
-                                                                                                }`}>
-                                                                                                    {ticket.estado}
-                                                                                                </span>
-                                                                                            </td>
-                                                                                            <td className="py-2.5 px-4 text-gray-600">
-                                                                                                {[ticket.categoria, ticket.subcategoria].filter(Boolean).join(' / ')}
-                                                                                            </td>
-                                                                                            <td className="py-2.5 px-4 text-right text-gray-700 font-medium">
-                                                                                                {ticket.duracion_horas < 1
-                                                                                                    ? `${Math.round(ticket.duracion_horas * 60)}m`
-                                                                                                    : `${ticket.duracion_horas.toFixed(1)}h`}
-                                                                                            </td>
-                                                                                            <td className="py-2.5 px-4 text-right text-gray-500">
-                                                                                                {formatFecha(ticket.fechaCreacion)}
-                                                                                            </td>
-                                                                                        </tr>
-                                                                                    ))}
-                                                                                </tbody>
-                                                                            </table>
-                                                                        </div>
-                                                                        {pasoTicketsData.totalPages > 1 && (
-                                                                            <div className="flex items-center justify-between mt-3">
-                                                                                <span className="text-xs text-gray-500">
-                                                                                    Mostrando {pasoTicketsData.data.length} de {pasoTicketsData.total} tickets
-                                                                                </span>
-                                                                                <div className="flex gap-2">
-                                                                                    <button
-                                                                                        onClick={(e) => { e.stopPropagation(); setPasoPage(p => Math.max(1, p - 1)); }}
-                                                                                        disabled={pasoPage === 1}
-                                                                                        className="px-3 py-1 text-xs font-medium text-gray-700 bg-gray-100 rounded hover:bg-gray-200 disabled:opacity-50 transition-colors"
-                                                                                    >
-                                                                                        Anterior
-                                                                                    </button>
-                                                                                    <span className="px-3 py-1 text-xs text-gray-600">
-                                                                                        {pasoPage} / {pasoTicketsData.totalPages}
-                                                                                    </span>
-                                                                                    <button
-                                                                                        onClick={(e) => { e.stopPropagation(); setPasoPage(p => Math.min(pasoTicketsData.totalPages, p + 1)); }}
-                                                                                        disabled={pasoPage === pasoTicketsData.totalPages}
-                                                                                        className="px-3 py-1 text-xs font-medium text-gray-700 bg-gray-100 rounded hover:bg-gray-200 disabled:opacity-50 transition-colors"
-                                                                                    >
-                                                                                        Siguiente
-                                                                                    </button>
-                                                                                </div>
-                                                                            </div>
-                                                                        )}
+                                                                        <TicketTable tickets={pasoTicketsData.data} emptyMessage="No hay tickets para este paso..." />
                                                                     </>
                                                                 ) : (
-                                                                    <p className="text-sm text-gray-400 italic text-center py-4">
-                                                                        No hay tickets para este paso en el período seleccionado.
-                                                                    </p>
+                                                                    <EmptyState icon="confirmation_number" title="Sin tickets" description="No hay tickets para este paso en el período seleccionado." />
                                                                 )}
                                                             </div>
                                                         </td>

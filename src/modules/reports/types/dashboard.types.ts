@@ -258,3 +258,26 @@ export interface TicketsDetalleResponse {
     limit: number;
     totalPages: number;
 }
+
+// ─── Ticket List ────────────────────────────────────────────────────
+export interface TicketListItem {
+    id: number;
+    titulo: string;
+    estado: string;
+    fechaCreacion: string;
+    categoria: string;
+    subcategoria: string;
+    asignadoNombre: string;
+    estadoTiempo: string;
+    paso?: string;
+    duracion_horas?: number;
+    veces_asignado?: number;
+}
+
+export interface PaginatedTicketsResponse {
+    data: TicketListItem[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+}

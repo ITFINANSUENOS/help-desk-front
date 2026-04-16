@@ -3,7 +3,7 @@ import type {
     KpisGlobales, RankingResponse, RegionalStats, MapaCalorItem,
     CategoriaStats, CuelloBottleneck, DistribucionTiempos,
     DetalleUsuario, UsuarioRanking, Novedades,
-    TicketsDetalleResponse
+    TicketsDetalleResponse, PaginatedTicketsResponse
 } from '../types/dashboard.types';
 import type { DateRange } from '../components/ui/FiltroFecha';
 
@@ -39,7 +39,7 @@ export const dashboardApi = {
         axios.get<DistribucionTiempos>(`${BASE}/distribucion-tiempos`, { params: buildDateParams(dateRange) }).then(r => r.data),
 
     getTicketsPorRango: (rango: string, orden: number, dateRange?: DateRange, limit = 50, page = 1) =>
-        axios.get<{ data: Array<{ id: number; titulo: string; estado: string; fechaCreacion: string; categoria: string; subcategoria: string; asignadoNombre: string; estadoTiempo: string; paso?: string; duracion_horas: number; veces_asignado: number }>; total: number; page: number; limit: number; totalPages: number; rango: string }>(
+        axios.get<PaginatedTicketsResponse>(
             `${BASE}/distribucion-tiempos/${encodeURIComponent(rango)}/tickets`,
             { params: { orden, ...buildDateParams(dateRange), limit, page } }
         ).then(r => r.data),
@@ -66,25 +66,25 @@ export const dashboardApi = {
         ).then(r => r.data),
 
     getTicketsPorRegional: (regional: string, dateRange?: DateRange, limit = 50, page = 1) =>
-        axios.get<{ data: Array<{ id: number; titulo: string; estado: string; fechaCreacion: string; categoria: string; subcategoria: string; asignadoNombre: string; estadoTiempo: string; paso?: string }>; total: number; page: number; limit: number; totalPages: number }>(
+        axios.get<PaginatedTicketsResponse>(
             `${BASE}/regionales/${encodeURIComponent(regional)}/tickets`,
             { params: { ...buildDateParams(dateRange), limit, page } }
         ).then(r => r.data),
 
     getTicketsPorCategoria: (categoria: string, dateRange?: DateRange, limit = 50, page = 1) =>
-        axios.get<{ data: Array<{ id: number; titulo: string; estado: string; fechaCreacion: string; categoria: string; subcategoria: string; asignadoNombre: string; estadoTiempo: string; paso?: string }>; total: number; page: number; limit: number; totalPages: number }>(
+        axios.get<PaginatedTicketsResponse>(
             `${BASE}/categorias/${encodeURIComponent(categoria)}/tickets`,
             { params: { ...buildDateParams(dateRange), limit, page } }
         ).then(r => r.data),
 
     getTicketsPorSubcategoria: (subcategoria: string, dateRange?: DateRange, limit = 50, page = 1) =>
-        axios.get<{ data: Array<{ id: number; titulo: string; estado: string; fechaCreacion: string; categoria: string; subcategoria: string; asignadoNombre: string; estadoTiempo: string; paso?: string }>; total: number; page: number; limit: number; totalPages: number }>(
+        axios.get<PaginatedTicketsResponse>(
             `${BASE}/subcategorias/${encodeURIComponent(subcategoria)}/tickets`,
             { params: { ...buildDateParams(dateRange), limit, page } }
         ).then(r => r.data),
 
     getTicketsPorPaso: (paso: string, dateRange?: DateRange, limit = 50, page = 1) =>
-        axios.get<{ data: Array<{ id: number; titulo: string; estado: string; fechaCreacion: string; categoria: string; subcategoria: string; asignadoNombre: string; estadoTiempo: string; paso?: string; duracion_horas: number }>; total: number; page: number; limit: number; totalPages: number }>(
+        axios.get<PaginatedTicketsResponse>(
             `${BASE}/pasos/${encodeURIComponent(paso)}/tickets`,
             { params: { ...buildDateParams(dateRange), limit, page } }
         ).then(r => r.data),
