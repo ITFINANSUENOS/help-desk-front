@@ -368,38 +368,58 @@ export default function DistribucionTiempos() {
                                                                         Pasos del ticket #{ticket.id}
                                                                         {loadingPasos && <span className="ml-2 text-gray-400 font-normal">(Cargando...)</span>}
                                                                     </p>
-                                                                    <div className="space-y-1">
-                                                                        {pasosData && pasosData.length > 0 ? (
-                                                                            pasosData.map((paso, idx) => (
-                                                                                <div key={idx} className="flex items-center gap-2 text-xs text-gray-600 bg-white rounded px-3 py-2 border border-gray-100">
-                                                                                    <span className={`w-4 h-4 flex items-center justify-center rounded-full text-[10px] font-bold ${idx === 0 ? 'bg-teal-100 text-teal-700' : 'bg-gray-200 text-gray-600'}`}>
-                                                                                        {idx + 1}
-                                                                                    </span>
-                                                                                    <span className="font-medium">{paso.asignadoNombre}</span>
-                                                                                    <span className="text-gray-400">•</span>
-                                                                                    <span className="text-gray-500">{paso.paso}</span>
-                                                                                    <span className="ml-auto text-right">
-                                                                                        <span className="text-gray-400 text-[10px]">
-                                                                                            {paso.duracion_horas < 1
-                                                                                                ? `${Math.round(paso.duracion_horas * 60)}m`
-                                                                                                : `${paso.duracion_horas.toFixed(1)}h`}
-                                                                                        </span>
-                                                                                        <span className={`ml-2 px-1.5 py-0.5 rounded text-[10px] font-medium ${
-                                                                                            paso.estadoTiempo === 'A Tiempo' ? 'bg-green-100 text-green-700' :
-                                                                                            paso.estadoTiempo === 'Vencido' ? 'bg-red-100 text-red-700' :
-                                                                                            paso.estadoTiempo === 'Pendiente' ? 'bg-yellow-100 text-yellow-700' :
-                                                                                            paso.estadoTiempo === 'En curso' ? 'bg-blue-100 text-blue-700' :
-                                                                                            'bg-gray-100 text-gray-600'
-                                                                                        }`}>
-                                                                                            {paso.estadoTiempo}
-                                                                                        </span>
-                                                                                    </span>
-                                                                                </div>
-                                                                            ))
-                                                                        ) : (
-                                                                            <p className="text-xs text-gray-400 italic">No se encontraron pasos para este ticket.</p>
-                                                                        )}
-                                                                    </div>
+                                                                    {pasosData && pasosData.length > 0 ? (
+                                                                        <div className="overflow-x-auto rounded-lg border border-gray-200">
+                                                                            <table className="w-full text-left border-collapse text-xs">
+                                                                                <thead>
+                                                                                    <tr className="bg-gray-100 text-gray-500 font-semibold uppercase tracking-wider">
+                                                                                        <th className="py-2 px-3">#</th>
+                                                                                        <th className="py-2 px-3">Asignado</th>
+                                                                                        <th className="py-2 px-3">Paso</th>
+                                                                                        <th className="py-2 px-3 text-right">Tiempo</th>
+                                                                                        <th className="py-2 px-3 text-center">Estado</th>
+                                                                                    </tr>
+                                                                                </thead>
+                                                                                <tbody className="divide-y divide-gray-100 bg-white">
+                                                                                    {pasosData.map((paso, idx) => (
+                                                                                        <tr key={idx} className="hover:bg-blue-50 transition-colors">
+                                                                                            <td className="py-2 px-3">
+                                                                                                <span className={`w-5 h-5 flex items-center justify-center rounded-full text-[10px] font-bold ${idx === 0 ? 'bg-teal-100 text-teal-700' : 'bg-gray-200 text-gray-600'}`}>
+                                                                                                    {idx + 1}
+                                                                                                </span>
+                                                                                            </td>
+                                                                                            <td className="py-2 px-3 text-gray-700 font-medium">
+                                                                                                {paso.asignadoNombre}
+                                                                                            </td>
+                                                                                            <td className="py-2 px-3 text-gray-500">
+                                                                                                {paso.paso}
+                                                                                            </td>
+                                                                                            <td className="py-2 px-3 text-right text-gray-700 font-medium">
+                                                                                                {paso.duracion_horas < 1
+                                                                                                    ? `${Math.round(paso.duracion_horas * 60)}m`
+                                                                                                    : `${paso.duracion_horas.toFixed(1)}h`}
+                                                                                            </td>
+                                                                                            <td className="py-2 px-3 text-center">
+                                                                                                <span className={`px-2 py-0.5 rounded text-[10px] font-medium ${
+                                                                                                    paso.estadoTiempo === 'A Tiempo' ? 'bg-green-100 text-green-700' :
+                                                                                                    paso.estadoTiempo === 'Vencido' ? 'bg-red-100 text-red-700' :
+                                                                                                    paso.estadoTiempo === 'Pendiente' ? 'bg-yellow-100 text-yellow-700' :
+                                                                                                    paso.estadoTiempo === 'En curso' ? 'bg-blue-100 text-blue-700' :
+                                                                                                    'bg-gray-100 text-gray-600'
+                                                                                                }`}>
+                                                                                                    {paso.estadoTiempo}
+                                                                                                </span>
+                                                                                            </td>
+                                                                                        </tr>
+                                                                                    ))}
+                                                                                </tbody>
+                                                                            </table>
+                                                                        </div>
+                                                                    ) : (
+                                                                        <p className="text-xs text-gray-400 italic text-center py-4">
+                                                                            No se encontraron pasos para este ticket.
+                                                                        </p>
+                                                                    )}
                                                                 </div>
                                                             </td>
                                                         </tr>

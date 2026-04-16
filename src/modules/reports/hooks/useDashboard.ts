@@ -139,6 +139,22 @@ export const useTicketsPorSubcategoria = (subcategoria?: string, dateRange?: Dat
     });
 };
 
+export const useTicketsPorPaso = (paso?: string, dateRange?: DateRange, limit = 50, page = 1) => {
+    const effectiveDateRange = dateRange?.dateFrom || dateRange?.dateTo
+        ? dateRange
+        : {
+            dateFrom: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            dateTo: new Date().toISOString().split('T')[0]
+        };
+
+    return useQuery({
+        queryKey: ['dashboard', 'paso', paso ?? '', effectiveDateRange.dateFrom, effectiveDateRange.dateTo, limit, page],
+        queryFn: () => dashboardApi.getTicketsPorPaso(paso!, effectiveDateRange, limit, page),
+        enabled: !!paso,
+        staleTime: 0,
+    });
+};
+
 export const useTicketsPorRango = (rango?: string, orden?: number, dateRange?: DateRange, limit = 50, page = 1) => {
     const effectiveDateRange = dateRange?.dateFrom || dateRange?.dateTo
         ? dateRange

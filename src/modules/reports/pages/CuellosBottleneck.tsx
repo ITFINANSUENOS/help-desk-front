@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
-import { useCuellos } from '../hooks/useDashboard';
+import React, { useEffect, useState } from 'react';
+import { useCuellos, useTicketsPorPaso } from '../hooks/useDashboard';
 import { BarChartCuellos } from '../components/charts/BarChartCuellos';
 import { LoadingSkeleton } from '../components/ui/LoadingSkeleton';
 import { EmptyState } from '../../../shared/components/EmptyState';
 import { Icon } from '../../../shared/components/Icon';
 import { useLayout } from '../../../core/layout/context/LayoutContext';
-import { formatHoras, formatPct } from '../utils/formatters';
+import { formatHoras, formatPct, formatFecha } from '../utils/formatters';
 import { FiltroFecha, useDateFilter } from '../components/ui/FiltroFecha';
 import { ReportHeader } from '../components/ui/ReportHeader';
 
@@ -40,6 +40,17 @@ export default function CuellosBottleneck() {
     const { data, isLoading, isError, refetch } = useCuellos(limit, dateRange);
     const { setTitle } = useLayout();
 
+    // Fila expandida (accordion)
+    const [expandedPaso, setExpandedPaso] = useState<string | null>(null);
+    const [pasoPage, setPasoPage] = useState(1);
+
+    const { data: pasoTicketsData, isLoading: loadingPasoTickets } = useTicketsPorPaso(
+        expandedPaso ?? undefined,
+        dateRange,
+        20,
+        pasoPage
+    );
+
     useEffect(() => {
         setTitle('Dashboard Analytics');
     }, [setTitle]);
@@ -57,7 +68,7 @@ export default function CuellosBottleneck() {
         );
     }
 
-    // Ordenar por duración promedio desc para la tabla
+    // Ordenar por duración promedio desc
     const sortedData = data
         ? [...data].sort((a, b) => Number(b.duracion_promedio) - Number(a.duracion_promedio))
         : [];
@@ -84,62 +95,77 @@ export default function CuellosBottleneck() {
                 <FiltroFecha value={dateRange} onChange={setDateRange} />
             </ReportHeader>
 
-            {/* Scrollable Content */}
-            <div className="flex-1 px-6 py-6 lg:px-8 max-w-[1600px] w-full mx-auto">
+            {/* Contenido */}
+            <div className="flex flex-col gap-6 px-6 pt-2 pb-16 lg:px-8 max-w-[1600px] w-full mx-auto">
 
-                {/* Row: 2 columnas */}
-                {isLoading ? (
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <LoadingSkeleton className="h-[420px]" />
-                        <LoadingSkeleton className="h-[420px]" />
-                    </div>
-                ) : (
-                    <div className="mb-6">
-                        {/* Sección Superior — Gráfico */}
-                        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
-                            <h3 className="text-sm font-semibold text-gray-700 mb-4">
-                                Duración Promedio por Paso (horas)
-                            </h3>
-                            {sortedData.length === 0 ? (
-                                <div className="flex items-center justify-center h-48 text-gray-400 text-sm">
-                                    Sin datos para mostrar.
-                                </div>
-                            ) : (
-                                <BarChartCuellos data={sortedData} />
-                            )}
+                {/* ── Gráfico ──────────────────────────────────────── */}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <h3 className="text-base font-semibold text-gray-800 mb-6 flex items-center gap-2">
+                        <Icon name="insert_chart" className="text-gray-400 text-xl" />
+                        Duración Promedio por Paso (horas)
+                    </h3>
+                    {isLoading ? (
+                        <LoadingSkeleton className="h-[400px]" />
+                    ) : sortedData.length === 0 ? (
+                        <div className="flex items-center justify-center h-48 text-gray-400 text-sm">
+                            Sin datos para mostrar.
                         </div>
+                    ) : (
+                        <BarChartCuellos data={sortedData} />
+                    )}
+                </div>
 
-                        {/* Sección Inferior — Tabla */}
-                        <div className="bg-white rounded-xl shadow-sm border border-gray-100 flex flex-col">
-                            <div className="overflow-x-auto flex-1">
-                                <table className="w-full text-left border-collapse text-sm">
-                                    <thead className="sticky top-0 z-10">
-                                        <tr className="border-b border-gray-200 bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wider backdrop-blur-sm bg-opacity-95">
-                                            <th scope="col" className="py-3.5 px-4 rounded-tl-lg">Paso</th>
-                                            <th scope="col" className="py-3.5 px-4 text-right">Ocurr.</th>
-                                            <th scope="col" className="py-3.5 px-4 text-right">Dur. Prom</th>
-                                            <th scope="col" className="py-3.5 px-4 text-right">% Atrasos</th>
-                                            <th scope="col" className="py-3.5 px-4 text-center rounded-tr-lg">Severidad</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-50">
-                                        {sortedData.length === 0 ? (
-                                            <tr>
-                                                <td colSpan={5} className="py-8 text-center text-gray-400 text-xs">
-                                                    Sin datos
-                                                </td>
-                                            </tr>
-                                        ) : (
-                                            sortedData.map((item, idx) => (
+                {/* ── Tabla Detalle ───────────────────────────────── */}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div className="p-6 border-b border-gray-100 bg-[#FAFAFA]">
+                        <h3 className="text-base font-semibold text-gray-800 flex items-center gap-2">
+                            <Icon name="table_chart" className="text-gray-400 text-xl" />
+                            Detalle por Paso
+                        </h3>
+                    </div>
+
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse text-sm">
+                            <thead>
+                                <tr className="bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500 border-b border-gray-100">
+                                    <th className="py-3.5 px-4">Paso</th>
+                                    <th className="py-3.5 px-4 text-right">Ocurr.</th>
+                                    <th className="py-3.5 px-4 text-right">Dur. Prom</th>
+                                    <th className="py-3.5 px-4 text-right">% Atrasos</th>
+                                    <th className="py-3.5 px-4 text-center">Severidad</th>
+                                    <th className="py-3.5 px-4 text-center">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-50">
+                                {isLoading ? (
+                                    <tr>
+                                        <td colSpan={6} className="p-4"><LoadingSkeleton rows={5} /></td>
+                                    </tr>
+                                ) : sortedData.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={6} className="py-8 text-center text-gray-400">
+                                            Sin datos
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    sortedData.map((item, idx) => {
+                                        const isExpanded = expandedPaso === item.paso_flujo;
+                                        return (
+                                            <React.Fragment key={idx}>
                                                 <tr
-                                                    key={`${item.paso_flujo}-${idx}`}
-                                                    className={`hover:bg-blue-50/50 transition-colors ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/60'}`}
+                                                    onClick={() => setExpandedPaso(isExpanded ? null : item.paso_flujo)}
+                                                    className={`hover:bg-blue-50 cursor-pointer transition-colors ${isExpanded ? 'bg-teal-50' : idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/60'}`}
                                                 >
-                                                    <td
-                                                        className="py-3 px-4 font-medium text-gray-800 max-w-[160px]"
-                                                        title={item.paso_flujo}
-                                                    >
-                                                        <span className="block truncate">{item.paso_flujo}</span>
+                                                    <td className="py-3 px-4">
+                                                        <div className="flex items-center gap-2">
+                                                            <Icon
+                                                                name={isExpanded ? 'expand_less' : 'expand_more'}
+                                                                className="text-gray-400 text-xl"
+                                                            />
+                                                            <span className="font-medium text-gray-800 max-w-[200px] truncate" title={item.paso_flujo}>
+                                                                {item.paso_flujo}
+                                                            </span>
+                                                        </div>
                                                     </td>
                                                     <td className="py-3 px-4 text-right text-gray-600">
                                                         {Number(item.total_asignaciones).toLocaleString('es-CO')}
@@ -153,41 +179,159 @@ export default function CuellosBottleneck() {
                                                     <td className="py-3 px-4 text-center">
                                                         <SeveridadBadge severidad={item.severidad} />
                                                     </td>
+                                                    <td className="py-3 px-4 text-center">
+                                                        <button
+                                                            onClick={(e) => { e.stopPropagation(); setExpandedPaso(isExpanded ? null : item.paso_flujo); }}
+                                                            className="text-xs text-[#43BBCA] hover:text-[#2B378A] font-medium"
+                                                        >
+                                                            {isExpanded ? 'Ocultar' : 'Ver tickets'}
+                                                        </button>
+                                                    </td>
                                                 </tr>
-                                            ))
-                                        )}
-                                    </tbody>
-                                </table>
+
+                                                {/* Accordion: Tickets del paso */}
+                                                {isExpanded && (
+                                                    <tr>
+                                                        <td colSpan={6} className="p-0 bg-gray-50 border-t-2 border-teal-200">
+                                                            <div className="px-6 py-4">
+                                                                <div className="flex items-center justify-between mb-3">
+                                                                    <p className="text-sm font-semibold text-gray-700">
+                                                                        Tickets del paso: <span className="text-teal-700">{item.paso_flujo}</span>
+                                                                    </p>
+                                                                    {loadingPasoTickets && (
+                                                                        <span className="text-xs text-gray-400">Cargando...</span>
+                                                                    )}
+                                                                </div>
+
+                                                                {loadingPasoTickets ? (
+                                                                    <LoadingSkeleton rows={3} />
+                                                                ) : pasoTicketsData?.data && pasoTicketsData.data.length > 0 ? (
+                                                                    <>
+                                                                        <div className="overflow-x-auto rounded-lg border border-gray-200">
+                                                                            <table className="w-full text-left border-collapse text-xs">
+                                                                                <thead>
+                                                                                    <tr className="bg-gray-100 text-gray-500 font-semibold uppercase tracking-wider">
+                                                                                        <th className="py-2.5 px-4">Ticket</th>
+                                                                                        <th className="py-2.5 px-4">Título</th>
+                                                                                        <th className="py-2.5 px-4">Estado</th>
+                                                                                        <th className="py-2.5 px-4">Categoría</th>
+                                                                                        <th className="py-2.5 px-4 text-right">Tiempo</th>
+                                                                                        <th className="py-2.5 px-4 text-right">Fecha</th>
+                                                                                    </tr>
+                                                                                </thead>
+                                                                                <tbody className="divide-y divide-gray-100 bg-white">
+                                                                                    {pasoTicketsData.data.map((ticket) => (
+                                                                                        <tr key={ticket.id} className="hover:bg-blue-50 transition-colors">
+                                                                                            <td className="py-2.5 px-4 text-brand-teal font-medium">
+                                                                                                #{ticket.id}
+                                                                                            </td>
+                                                                                            <td className="py-2.5 px-4 text-gray-700 max-w-[200px] truncate">
+                                                                                                {ticket.titulo}
+                                                                                            </td>
+                                                                                            <td className="py-2.5 px-4">
+                                                                                                <span className={`px-2 py-0.5 rounded text-[10px] font-medium ${
+                                                                                                    ticket.estado === 'Cerrado' ? 'bg-green-100 text-green-700' :
+                                                                                                    ticket.estado === 'Pausado' ? 'bg-yellow-100 text-yellow-700' :
+                                                                                                    'bg-blue-100 text-blue-700'
+                                                                                                }`}>
+                                                                                                    {ticket.estado}
+                                                                                                </span>
+                                                                                            </td>
+                                                                                            <td className="py-2.5 px-4 text-gray-600">
+                                                                                                {[ticket.categoria, ticket.subcategoria].filter(Boolean).join(' / ')}
+                                                                                            </td>
+                                                                                            <td className="py-2.5 px-4 text-right text-gray-700 font-medium">
+                                                                                                {ticket.duracion_horas < 1
+                                                                                                    ? `${Math.round(ticket.duracion_horas * 60)}m`
+                                                                                                    : `${ticket.duracion_horas.toFixed(1)}h`}
+                                                                                            </td>
+                                                                                            <td className="py-2.5 px-4 text-right text-gray-500">
+                                                                                                {formatFecha(ticket.fechaCreacion)}
+                                                                                            </td>
+                                                                                        </tr>
+                                                                                    ))}
+                                                                                </tbody>
+                                                                            </table>
+                                                                        </div>
+                                                                        {pasoTicketsData.totalPages > 1 && (
+                                                                            <div className="flex items-center justify-between mt-3">
+                                                                                <span className="text-xs text-gray-500">
+                                                                                    Mostrando {pasoTicketsData.data.length} de {pasoTicketsData.total} tickets
+                                                                                </span>
+                                                                                <div className="flex gap-2">
+                                                                                    <button
+                                                                                        onClick={(e) => { e.stopPropagation(); setPasoPage(p => Math.max(1, p - 1)); }}
+                                                                                        disabled={pasoPage === 1}
+                                                                                        className="px-3 py-1 text-xs font-medium text-gray-700 bg-gray-100 rounded hover:bg-gray-200 disabled:opacity-50 transition-colors"
+                                                                                    >
+                                                                                        Anterior
+                                                                                    </button>
+                                                                                    <span className="px-3 py-1 text-xs text-gray-600">
+                                                                                        {pasoPage} / {pasoTicketsData.totalPages}
+                                                                                    </span>
+                                                                                    <button
+                                                                                        onClick={(e) => { e.stopPropagation(); setPasoPage(p => Math.min(pasoTicketsData.totalPages, p + 1)); }}
+                                                                                        disabled={pasoPage === pasoTicketsData.totalPages}
+                                                                                        className="px-3 py-1 text-xs font-medium text-gray-700 bg-gray-100 rounded hover:bg-gray-200 disabled:opacity-50 transition-colors"
+                                                                                    >
+                                                                                        Siguiente
+                                                                                    </button>
+                                                                                </div>
+                                                                            </div>
+                                                                        )}
+                                                                    </>
+                                                                ) : (
+                                                                    <p className="text-sm text-gray-400 italic text-center py-4">
+                                                                        No hay tickets para este paso en el período seleccionado.
+                                                                    </p>
+                                                                )}
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                )}
+                                            </React.Fragment>
+                                        );
+                                    })
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {/* Footer */}
+                    {!isLoading && sortedData.length > 0 && (
+                        <div className="p-4 border-t border-gray-100 bg-gray-50 text-xs text-center text-gray-500">
+                            Top {sortedData.length} pasos con mayor duración
+                        </div>
+                    )}
+                </div>
+
+                {/* ── Leyenda ─────────────────────────────────────── */}
+                {!isLoading && sortedData.length > 0 && (
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Criterios de severidad</p>
+                        <div className="flex flex-wrap gap-6 text-sm">
+                            <div className="flex items-center gap-2">
+                                <span className="w-3 h-3 rounded-full bg-red-500 flex-shrink-0" />
+                                <span className="text-gray-700">
+                                    <span className="font-semibold text-red-700">Crítico:</span> ≥ 100 hrs
+                                </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <span className="w-3 h-3 rounded-full bg-yellow-400 flex-shrink-0" />
+                                <span className="text-gray-700">
+                                    <span className="font-semibold text-yellow-700">Moderado:</span> ≥ 50 hrs
+                                </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <span className="w-3 h-3 rounded-full bg-green-500 flex-shrink-0" />
+                                <span className="text-gray-700">
+                                    <span className="font-semibold text-green-700">Normal:</span> &lt; 50 hrs
+                                </span>
                             </div>
                         </div>
                     </div>
                 )}
-
-                {/* Leyenda de severidad */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Criterios de severidad</p>
-                    <div className="flex flex-wrap gap-6 text-sm">
-                        <div className="flex items-center gap-2">
-                            <span className="w-3 h-3 rounded-full bg-red-500 flex-shrink-0" />
-                            <span className="text-gray-700">
-                                <span className="font-semibold text-red-700">Crítico:</span> duración promedio ≥ 100 hrs
-                            </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <span className="w-3 h-3 rounded-full bg-yellow-400 flex-shrink-0" />
-                            <span className="text-gray-700">
-                                <span className="font-semibold text-yellow-700">Moderado:</span> duración promedio ≥ 50 hrs
-                            </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <span className="w-3 h-3 rounded-full bg-green-500 flex-shrink-0" />
-                            <span className="text-gray-700">
-                                <span className="font-semibold text-green-700">Normal:</span> duración promedio &lt; 50 hrs
-                            </span>
-                        </div>
-                    </div>
-                </div>
             </div>
-        </div >
+        </div>
     );
 }

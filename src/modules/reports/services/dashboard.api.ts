@@ -83,6 +83,12 @@ export const dashboardApi = {
             { params: { ...buildDateParams(dateRange), limit, page } }
         ).then(r => r.data),
 
+    getTicketsPorPaso: (paso: string, dateRange?: DateRange, limit = 50, page = 1) =>
+        axios.get<{ data: Array<{ id: number; titulo: string; estado: string; fechaCreacion: string; categoria: string; subcategoria: string; asignadoNombre: string; estadoTiempo: string; paso?: string; duracion_horas: number }>; total: number; page: number; limit: number; totalPages: number }>(
+            `${BASE}/pasos/${encodeURIComponent(paso)}/tickets`,
+            { params: { ...buildDateParams(dateRange), limit, page } }
+        ).then(r => r.data),
+
     getTopPerformers: (typeParam: 'top' | 'bottom' = 'top', limitParam = 10, dateRange?: DateRange) =>
         axios.get<UsuarioRanking[]>(`${BASE}/top-performers`, { params: { type: typeParam, limit: limitParam, ...buildDateParams(dateRange) } }).then(r => r.data),
 
