@@ -15,7 +15,6 @@ export default function ReportsPage() {
     const [exportingTickets, setExportingTickets] = useState(false);
     const [exportingPerformance, setExportingPerformance] = useState(false);
     const [exportingDashboard, setExportingDashboard] = useState(false);
-    const [exportingTickets, setExportingTickets] = useState(false);
 
     // Pasos con estado null (Admin only)
     const [showPasosNullModal, setShowPasosNullModal] = useState(false);
