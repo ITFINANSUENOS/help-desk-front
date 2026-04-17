@@ -83,10 +83,10 @@ export const dashboardApi = {
             { params: { ...buildDateParams(dateRange), limit, page } }
         ).then(r => r.data),
 
-    getTicketsPorPaso: (paso: string, dateRange?: DateRange, limit = 50, page = 1) =>
+    getTicketsPorPaso: (paso: string, dateRange?: DateRange, limit = 50, page = 1, usuarioId?: number) =>
         axios.get<PaginatedTicketsResponse>(
             `${BASE}/pasos/${encodeURIComponent(paso)}/tickets`,
-            { params: { ...buildDateParams(dateRange), limit, page } }
+            { params: { ...buildDateParams(dateRange), limit, page, ...(usuarioId ? { usuarioId } : {}) } }
         ).then(r => r.data),
 
     getTopPerformers: (typeParam: 'top' | 'bottom' = 'top', limitParam = 10, dateRange?: DateRange) =>

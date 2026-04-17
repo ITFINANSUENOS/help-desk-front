@@ -105,7 +105,7 @@ export const useTicketsPorRegional = (regional?: string, dateRange?: DateRange, 
         };
 
     return useQuery({
-        queryKey: DASHBOARD_KEYS.ticketsPorRegional(regional ?? '', effectiveDateRange),
+        queryKey: [...DASHBOARD_KEYS.ticketsPorRegional(regional ?? '', effectiveDateRange), limit, page],
         queryFn: () => dashboardApi.getTicketsPorRegional(regional!, effectiveDateRange, limit, page),
         enabled: !!regional,
         staleTime: 0,
@@ -121,7 +121,7 @@ export const useTicketsPorCategoria = (categoria?: string, dateRange?: DateRange
         };
 
     return useQuery({
-        queryKey: DASHBOARD_KEYS.ticketsPorCategoria(categoria ?? '', effectiveDateRange),
+        queryKey: [...DASHBOARD_KEYS.ticketsPorCategoria(categoria ?? '', effectiveDateRange), limit, page],
         queryFn: () => dashboardApi.getTicketsPorCategoria(categoria!, effectiveDateRange, limit, page),
         enabled: !!categoria,
         staleTime: 0,
@@ -137,14 +137,14 @@ export const useTicketsPorSubcategoria = (subcategoria?: string, dateRange?: Dat
         };
 
     return useQuery({
-        queryKey: DASHBOARD_KEYS.ticketsPorSubcategoria(subcategoria ?? '', effectiveDateRange),
+        queryKey: [...DASHBOARD_KEYS.ticketsPorSubcategoria(subcategoria ?? '', effectiveDateRange), limit, page],
         queryFn: () => dashboardApi.getTicketsPorSubcategoria(subcategoria!, effectiveDateRange, limit, page),
         enabled: !!subcategoria,
         staleTime: 0,
     });
 };
 
-export const useTicketsPorPaso = (paso?: string, dateRange?: DateRange, limit = 50, page = 1) => {
+export const useTicketsPorPaso = (paso?: string, dateRange?: DateRange, limit = 50, page = 1, usuarioId?: number) => {
     const effectiveDateRange = dateRange?.dateFrom || dateRange?.dateTo
         ? dateRange
         : {
@@ -153,8 +153,8 @@ export const useTicketsPorPaso = (paso?: string, dateRange?: DateRange, limit = 
         };
 
     return useQuery({
-        queryKey: DASHBOARD_KEYS.ticketsPorPaso(paso ?? '', effectiveDateRange),
-        queryFn: () => dashboardApi.getTicketsPorPaso(paso!, effectiveDateRange, limit, page),
+        queryKey: [...DASHBOARD_KEYS.ticketsPorPaso(paso ?? '', effectiveDateRange), limit, page, usuarioId ?? 'all'],
+        queryFn: () => dashboardApi.getTicketsPorPaso(paso!, effectiveDateRange, limit, page, usuarioId),
         enabled: !!paso,
         staleTime: 0,
     });
@@ -169,7 +169,7 @@ export const useTicketsPorRango = (rango?: string, orden?: number, dateRange?: D
         };
 
     return useQuery({
-        queryKey: DASHBOARD_KEYS.ticketsPorRango(rango ?? '', orden ?? 0, effectiveDateRange),
+        queryKey: [...DASHBOARD_KEYS.ticketsPorRango(rango ?? '', orden ?? 0, effectiveDateRange), limit, page],
         queryFn: () => dashboardApi.getTicketsPorRango(rango!, orden ?? 1, effectiveDateRange, limit, page),
         enabled: !!rango,
         staleTime: 0,

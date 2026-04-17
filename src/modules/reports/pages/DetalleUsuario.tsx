@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { useDetalleUsuario, useTicketsPorUsuario } from '../hooks/useDashboard';
+import { useDetalleUsuario, useTicketsPorUsuario, useTicketsPorPaso } from '../hooks/useDashboard';
 import { FiltroFecha, useDateFilter } from '../components/ui/FiltroFecha';
 import { Icon } from '../../../shared/components/Icon';
 import { useLayout } from '../../../core/layout/context/LayoutContext';
@@ -21,6 +21,7 @@ import {
 } from '../utils/colores';
 import { ReportHeader } from '../components/ui/ReportHeader';
 import { TicketTable } from '../components/ui/TicketTable';
+import { Pagination } from '../components/ui/Pagination';
 
 // ─── ScoreGauge ──────────────────────────────────────────────────────────
 /**
@@ -133,6 +134,7 @@ export default function DetalleUsuario() {
 
     const [showTickets, setShowTickets] = useState(false);
     const [selectedPaso, setSelectedPaso] = useState<string | null>(null);
+    const [pasoPage, setPasoPage] = useState(1);
 
     const {
         data: ticketsData,
@@ -143,7 +145,7 @@ export default function DetalleUsuario() {
     const {
         data: pasoTicketsData,
         isLoading: loadingPasoTickets,
-    } = useTicketsPorUsuario(userId, dateRange, 50, 1, selectedPaso ?? undefined);
+    } = useTicketsPorPaso(selectedPaso ?? undefined, dateRange, 20, pasoPage, userId);
 
     const loadTickets = async () => {
         if (!userId) return;
@@ -330,7 +332,7 @@ export default function DetalleUsuario() {
                                                 <>
                                                     <tr
                                                         key={`${paso.paso_flujo}-${idx}`}
-                                                        onClick={() => setSelectedPaso(isSelected ? null : paso.paso_flujo)}
+                                                        onClick={() => { setSelectedPaso(isSelected ? null : paso.paso_flujo); setPasoPage(1); }}
                                                         className={`cursor-pointer transition-colors ${
                                                             idx % 2 === 0
                                                                 ? 'bg-white hover:bg-blue-50'
@@ -368,7 +370,18 @@ export default function DetalleUsuario() {
                                                                 ) : !pasoTicketsData?.data || pasoTicketsData.data.length === 0 ? (
                                                                     <EmptyState icon="confirmation_number" title="Sin tickets" description="No hay tickets para este paso." />
                                                                 ) : (
-                                                                    <TicketTable tickets={pasoTicketsData.data} emptyMessage="No hay tickets para este paso." />
+                                                                    <>
+                                                                        <TicketTable tickets={pasoTicketsData.data} emptyMessage="No hay tickets para este paso." />
+                                                                        {pasoTicketsData.totalPages > 1 && (
+                                                                            <div className="mt-3">
+                                                                                <Pagination
+                                                                                    page={pasoPage}
+                                                                                    totalPages={pasoTicketsData.totalPages}
+                                                                                    onPageChange={setPasoPage}
+                                                                                />
+                                                                            </div>
+                                                                        )}
+                                                                    </>
                                                                 )}
                                                             </td>
                                                         </tr>

@@ -9,6 +9,7 @@ import { formatHoras, formatPct } from '../utils/formatters';
 import { FiltroFecha, useDateFilter } from '../components/ui/FiltroFecha';
 import { ReportHeader } from '../components/ui/ReportHeader';
 import { TicketTable } from '../components/ui/TicketTable';
+import { Pagination } from '../components/ui/Pagination';
 
 const LIMIT_OPTIONS = [10, 20, 30, 50] as const;
 
@@ -43,11 +44,13 @@ export default function CuellosBottleneck() {
 
     // Fila expandida (accordion)
     const [expandedPaso, setExpandedPaso] = useState<string | null>(null);
+    const [pasoPage, setPasoPage] = useState(1);
 
     const { data: pasoTicketsData, isLoading: loadingPasoTickets } = useTicketsPorPaso(
         expandedPaso ?? undefined,
         dateRange,
-        20
+        20,
+        pasoPage
     );
 
     useEffect(() => {
@@ -150,7 +153,7 @@ export default function CuellosBottleneck() {
                                         return (
                                             <React.Fragment key={idx}>
                                                 <tr
-                                                    onClick={() => setExpandedPaso(isExpanded ? null : item.paso_flujo)}
+                                                    onClick={() => { setExpandedPaso(isExpanded ? null : item.paso_flujo); setPasoPage(1); }}
                                                     className={`hover:bg-blue-50 cursor-pointer transition-colors ${isExpanded ? 'bg-teal-50' : idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/60'}`}
                                                 >
                                                     <td className="py-3 px-4">
@@ -178,7 +181,7 @@ export default function CuellosBottleneck() {
                                                     </td>
                                                     <td className="py-3 px-4 text-center">
                                                         <button
-                                                            onClick={(e) => { e.stopPropagation(); setExpandedPaso(isExpanded ? null : item.paso_flujo); }}
+                                                            onClick={(e) => { e.stopPropagation(); setExpandedPaso(isExpanded ? null : item.paso_flujo); setPasoPage(1); }}
                                                             className="text-xs text-[#43BBCA] hover:text-[#2B378A] font-medium"
                                                         >
                                                             {isExpanded ? 'Ocultar' : 'Ver tickets'}
@@ -205,6 +208,15 @@ export default function CuellosBottleneck() {
                                                                 ) : pasoTicketsData?.data && pasoTicketsData.data.length > 0 ? (
                                                                     <>
                                                                         <TicketTable tickets={pasoTicketsData.data} emptyMessage="No hay tickets para este paso..." />
+                                                                        {pasoTicketsData.totalPages > 1 && (
+                                                                            <div className="mt-3">
+                                                                                <Pagination
+                                                                                    page={pasoPage}
+                                                                                    totalPages={pasoTicketsData.totalPages}
+                                                                                    onPageChange={setPasoPage}
+                                                                                />
+                                                                            </div>
+                                                                        )}
                                                                     </>
                                                                 ) : (
                                                                     <EmptyState icon="confirmation_number" title="Sin tickets" description="No hay tickets para este paso en el período seleccionado." />
