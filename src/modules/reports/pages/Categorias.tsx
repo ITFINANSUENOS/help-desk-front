@@ -62,12 +62,13 @@ export default function Categorias() {
     const [selectedItemForTickets, setSelectedItemForTickets] = useState<{type: 'categoria' | 'subcategoria'; name: string} | null>(null);
     const [categoriaPage, setCategoriaPage] = useState(1);
     const [subcategoriaExpandedTickets, setSubcategoriaExpandedTickets] = useState<string | null>(null);
+    const [subcategoriaPage, setSubcategoriaPage] = useState(1);
 
     const { data: subcategoriaTicketsData, isLoading: loadingSubcategoriaTickets } = useTicketsPorSubcategoria(
         subcategoriaExpandedTickets ?? undefined,
         dateRange,
         20,
-        categoriaPage
+        subcategoriaPage
     );
 
     const { data: categoriaTicketsData, isLoading: loadingCategoriaTickets } = useTicketsPorCategoria(
@@ -153,15 +154,15 @@ export default function Categorias() {
                                     <tr className="bg-[#2B378A] text-white text-xs font-semibold uppercase tracking-wider">
                                         <th className="py-3.5 px-4 w-10"></th>
                                         <th className="py-3.5 px-4">Categoría / Proceso</th>
-                                        <th className="py-3.5 px-4 text-right">Tickets</th>
-                                        <th className="py-3.5 px-4 text-right">T. Pasos</th>
-                                        <th className="py-3.5 px-4 text-right" title="Mayor valor = flujo más complejo">Pasos/Tk</th>
-                                        <th className="py-3.5 px-4 text-right">Dur. Prom</th>
-                                        <th className="py-3.5 px-4 text-right">Dur. Máx</th>
-                                        <th className="py-3.5 px-4 text-right">% SLA</th>
-                                        <th className="py-3.5 px-4 text-right">Err. Graves</th>
-                                        <th className="py-3.5 px-4 text-right">% Novedad</th>
-                                        <th className="py-3.5 px-4 text-center">Estado</th>
+                                        <th className="py-3.5 px-4 text-right">Total Tickets</th>
+                                        <th className="py-3.5 px-4 text-right">Total Pasos</th>
+                                        <th className="py-3.5 px-4 text-right" title="Mayor valor = flujo más complejo">Pasos por Ticket</th>
+                                        <th className="py-3.5 px-4 text-right">Duración Promedio</th>
+                                        <th className="py-3.5 px-4 text-right">Duración Máxima</th>
+                                        <th className="py-3.5 px-4 text-right">% Cumplimiento SLA</th>
+                                        <th className="py-3.5 px-4 text-right">Errores Graves</th>
+                                        <th className="py-3.5 px-4 text-right">% Tickets con Novedad</th>
+                                        <th className="py-3.5 px-4 text-center">Clasificación</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-100">
@@ -249,6 +250,7 @@ export default function Categorias() {
                                                                             setSubcategoriaExpandedTickets(null);
                                                                         } else {
                                                                             setSubcategoriaExpandedTickets(sub.subcategoria);
+                                                                            setSubcategoriaPage(1);
                                                                             setSelectedItemForTickets(null);
                                                                             setCategoriaPage(1);
                                                                         }
@@ -308,7 +310,18 @@ export default function Categorias() {
                                                                                 {isLoadingSubTickets ? (
                                                                                     <LoadingSkeleton rows={3} />
                                                                                 ) : subTicketsData?.data && subTicketsData.data.length > 0 ? (
-                                                                                    <TicketTable tickets={subTicketsData.data} emptyMessage="No hay tickets para esta subcategoría." />
+                                                                                    <>
+                                                                                        <TicketTable tickets={subTicketsData.data} emptyMessage="No hay tickets para esta subcategoría." />
+                                                                                        {subTicketsData.totalPages > 1 && (
+                                                                                            <div className="mt-3">
+                                                                                                <Pagination
+                                                                                                    page={subcategoriaPage}
+                                                                                                    totalPages={subTicketsData.totalPages}
+                                                                                                    onPageChange={setSubcategoriaPage}
+                                                                                                />
+                                                                                            </div>
+                                                                                        )}
+                                                                                    </>
                                                                                 ) : (
                                                                                     <EmptyState icon="confirmation_number" title="Sin tickets" description="No hay tickets para esta subcategoría." />
                                                                                 )}
