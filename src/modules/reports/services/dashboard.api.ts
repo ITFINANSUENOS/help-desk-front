@@ -2,7 +2,7 @@ import { api as axios } from '../../../core/api/api';
 import type {
     KpisGlobales, RankingResponse, RegionalStats, MapaCalorItem,
     CategoriaStats, CuelloBottleneck, DistribucionTiempos,
-    DetalleUsuario, UsuarioRanking, Novedades,
+    DetalleUsuario, Novedades,
     TicketsDetalleResponse, PaginatedTicketsResponse
 } from '../types/dashboard.types';
 import type { DateRange } from '../components/ui/FiltroFecha';
@@ -88,9 +88,6 @@ export const dashboardApi = {
             `${BASE}/pasos/${encodeURIComponent(paso)}/tickets`,
             { params: { ...buildDateParams(dateRange), limit, page, ...(usuarioId ? { usuarioId } : {}) } }
         ).then(r => r.data),
-
-    getTopPerformers: (typeParam: 'top' | 'bottom' = 'top', limitParam = 10, dateRange?: DateRange) =>
-        axios.get<UsuarioRanking[]>(`${BASE}/top-performers`, { params: { type: typeParam, limit: limitParam, ...buildDateParams(dateRange) } }).then(r => r.data),
 
     getNovedades: (dateRange?: DateRange) =>
         axios.get<Novedades>(`${BASE}/novedades`, { params: buildDateParams(dateRange) }).then(r => r.data),

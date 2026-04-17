@@ -39,7 +39,6 @@ const MapaCalorPage = lazy(() => import('../modules/reports/pages/MapaCalor'));
 const CategoriasPage = lazy(() => import('../modules/reports/pages/Categorias'));
 const CuellosBottleneckPage = lazy(() => import('../modules/reports/pages/CuellosBottleneck'));
 const DistribucionTiemposPage = lazy(() => import('../modules/reports/pages/DistribucionTiempos'));
-const TopPerformersPage = lazy(() => import('../modules/reports/pages/TopPerformers'));
 const NovedadesPage = lazy(() => import('../modules/reports/pages/Novedades'));
 const DetalleUsuarioPage = lazy(() => import('../modules/reports/pages/DetalleUsuario'));
 const FlowOpenTicketsPage = lazy(() => import('../modules/reports/pages/FlowOpenTicketsPage'));
@@ -329,14 +328,6 @@ export const appRoutes: RouteObject[] = [
                         element: (
                             <Suspense fallback={<PageLoader />}>
                                 <DistribucionTiemposPage />
-                            </Suspense>
-                        )
-                    },
-                    {
-                        path: '/reports/dashboard/top-performers',
-                        element: (
-                            <Suspense fallback={<PageLoader />}>
-                                <TopPerformersPage />
                             </Suspense>
                         )
                     },

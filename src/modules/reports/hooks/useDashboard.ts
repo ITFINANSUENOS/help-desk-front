@@ -15,7 +15,6 @@ export const DASHBOARD_KEYS = {
     ticketsUsuario: (id: number, dateRange?: DateRange) => ['dashboard', 'usuario', id, 'tickets', dateRange?.dateFrom ?? 'no-from', dateRange?.dateTo ?? 'no-to'],
     ticketsDetalleUsuario: (id: number, dateRange?: DateRange) => ['dashboard', 'usuario', id, 'tickets-detalle', dateRange?.dateFrom ?? 'no-from', dateRange?.dateTo ?? 'no-to'],
     ticketsPorRegional: (regional: string, dateRange?: DateRange) => ['dashboard', 'regional', regional, 'tickets', dateRange?.dateFrom ?? 'no-from', dateRange?.dateTo ?? 'no-to'],
-    topPerf: (type: string, limit: number, dateRange?: DateRange) => ['dashboard', 'top-performers', type, limit, dateRange?.dateFrom ?? 'no-from', dateRange?.dateTo ?? 'no-to'],
     novedades: (dateRange?: DateRange) => ['dashboard', 'novedades', dateRange?.dateFrom ?? 'no-from', dateRange?.dateTo ?? 'no-to'],
     ticketsPorCategoria: (categoria: string, dateRange?: DateRange) => ['dashboard', 'categoria', categoria, dateRange?.dateFrom ?? 'no-from', dateRange?.dateTo ?? 'no-to'],
     ticketsPorSubcategoria: (subcategoria: string, dateRange?: DateRange) => ['dashboard', 'subcategoria', subcategoria, dateRange?.dateFrom ?? 'no-from', dateRange?.dateTo ?? 'no-to'],
@@ -191,13 +190,6 @@ export const usePasosDeTicket = (ticketId?: number, dateRange?: DateRange) => {
         staleTime: 0,
     });
 };
-
-export const useTopPerformers = (type: 'top' | 'bottom' = 'top', limit = 10, dateRange?: DateRange) =>
-    useQuery({
-        queryKey: DASHBOARD_KEYS.topPerf(type, limit, dateRange),
-        queryFn: () => dashboardApi.getTopPerformers(type, limit, dateRange),
-        enabled: !!(dateRange?.dateFrom && dateRange?.dateTo),
-    });
 
 export const useNovedades = (dateRange?: DateRange) =>
     useQuery({
