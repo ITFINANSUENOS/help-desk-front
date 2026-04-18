@@ -181,7 +181,7 @@ export function Sidebar({ isCollapsed, toggleCollapse, isMobileOpen, closeMobile
                     >
                         <div className="flex items-center gap-3 overflow-hidden">
                             <div className="flex h-20 w-20 flex-shrink-0 items-center justify-center">
-                                <img src="img/LOGO-EC-FN.png" alt="" />
+                                <img src="/img/LOGO-EC-FN.png" alt="" />
                             </div>
                             <span
                                 className={cn(
