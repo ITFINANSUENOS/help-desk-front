@@ -44,10 +44,10 @@ export const dashboardApi = {
             { params: { orden, ...buildDateParams(dateRange), limit, page } }
         ).then(r => r.data),
 
-    getPasosDeTicket: (ticketId: number, dateRange?: DateRange) =>
-        axios.get<Array<{ id: number; titulo: string; estado: string; fechaCreacion: string; categoria: string; subcategoria: string; asignadoNombre: string; estadoTiempo: string; paso: string; duracion_horas: number; fechaCompletado: string }>>(
+    getPasosDeTicket: (ticketId: number, dateRange?: DateRange, limit = 50, page = 1) =>
+        axios.get<{ data: Array<{ id: number; titulo: string; estado: string; fechaCreacion: string; categoria: string; subcategoria: string; asignadoNombre: string; estadoTiempo: string; paso: string; duracion_horas: number; fechaCompletado: string }>; total: number; page: number; limit: number; totalPages: number }>(
             `${BASE}/tickets/${ticketId}/pasos`,
-            { params: buildDateParams(dateRange) }
+            { params: { ...buildDateParams(dateRange), limit, page } }
         ).then(r => r.data),
 
     getDetalleUsuario: (id: number, dateRange?: DateRange) =>

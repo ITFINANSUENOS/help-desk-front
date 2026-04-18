@@ -175,7 +175,7 @@ export const useTicketsPorRango = (rango?: string, orden?: number, dateRange?: D
     });
 };
 
-export const usePasosDeTicket = (ticketId?: number, dateRange?: DateRange) => {
+export const usePasosDeTicket = (ticketId?: number, dateRange?: DateRange, limit = 50, page = 1) => {
     const effectiveDateRange = dateRange?.dateFrom || dateRange?.dateTo
         ? dateRange
         : {
@@ -184,8 +184,8 @@ export const usePasosDeTicket = (ticketId?: number, dateRange?: DateRange) => {
         };
 
     return useQuery({
-        queryKey: DASHBOARD_KEYS.pasosDeTicket(ticketId ?? 0, effectiveDateRange),
-        queryFn: () => dashboardApi.getPasosDeTicket(ticketId!, effectiveDateRange),
+        queryKey: [...DASHBOARD_KEYS.pasosDeTicket(ticketId ?? 0, effectiveDateRange), limit, page],
+        queryFn: () => dashboardApi.getPasosDeTicket(ticketId!, effectiveDateRange, limit, page),
         enabled: !!ticketId,
         staleTime: 0,
     });
