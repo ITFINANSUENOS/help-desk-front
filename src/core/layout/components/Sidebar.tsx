@@ -20,7 +20,7 @@ interface MenuItem {
     subject?: PermissionSubject;
     action?: string;
     /** Child items render an inline collapsible submenu */
-    children?: Array<{ to: string; icon: string; label: string }>;
+    children?: Array<{ to: string; icon: string; label: string; action?: string }>;
 }
 
 /** Collapsible submenu rendered inline inside the sidebar nav. */
@@ -29,17 +29,29 @@ function SubMenu({
     isCollapsed,
     closeMobile,
 }: {
-    items: Array<{ to: string; icon: string; label: string }>;
+    items: Array<{ to: string; icon: string; label: string; action?: string }>;
     isCollapsed: boolean;
     closeMobile: () => void;
 }) {
     const location = useLocation();
+    const { user } = useAuth();
+
+    const hasPermission = (action?: string) => {
+        if (!action) return true;
+        if (!user?.permissions) return false;
+        return user.permissions.some((p) =>
+            (p.subject === 'ListaPrecio' || p.subject === 'all') &&
+            (p.action === action || p.action === 'manage'),
+        );
+    };
 
     if (isCollapsed) return null;
 
+    const filteredItems = items.filter((sub) => hasPermission(sub.action));
+
     return (
         <ul className="mt-1 ml-3 space-y-1 border-l border-white/20 pl-3">
-            {items.map((sub) => {
+            {filteredItems.map((sub) => {
                 const isActive = location.pathname === sub.to;
                 return (
                     <li key={sub.to}>
@@ -103,6 +115,10 @@ export function Sidebar({ isCollapsed, toggleCollapse, isMobileOpen, closeMobile
         { to: '/organigrama', icon: 'account_tree', label: 'Organigrama', subject: 'Organigrama' as any, action: 'manage' },
         { to: '/error-types', icon: 'quick_phrases', label: 'Tipos de Error', subject: 'FastAnswer' as any, action: 'manage' },
         { to: '/mapping-rules', icon: 'rule', label: 'Reglas de Mapeo', subject: 'Rule' as any, action: 'manage' },
+        { to: '/price-lists', icon: 'sell', label: 'Listas de Precios', subject: 'ListaPrecio' as any, action: 'read', children: [
+            { to: '/price-lists', icon: 'list', label: 'Ver Listas', action: 'read' },
+            { to: '/price-lists/admin', icon: 'settings', label: 'Configuración', action: 'manage' },
+        ]},
         { to: "/reports/flow-open", icon: "pending_actions", label: "Tickets Abiertos por Flujo", subject: 'Report', action: 'read' },
         {
             to: '/reports',

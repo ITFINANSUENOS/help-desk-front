@@ -4,8 +4,13 @@ import { Modal } from '../../../shared/components/Modal';
 import { Icon } from '../../../shared/components/Icon';
 import { Select, type Option } from '../../../shared/components/Select';
 import type { ListaPrecio, CreateListaPrecioDto } from '../interfaces/PriceList';
+import { priceListService, type PriceListConfig } from '../services/price-list.service';
 import { departmentService } from '../../../shared/services/catalog.service';
-import { priceListService } from '../services/price-list.service';
+
+interface Department {
+  id: number;
+  nombre: string;
+}
 
 interface CreatePriceListModalProps {
   isOpen: boolean;
@@ -23,7 +28,8 @@ const tipoOptions: Option[] = [
 export function CreatePriceListModal({ isOpen, onClose, onSubmit, priceList }: CreatePriceListModalProps) {
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [departments, setDepartments] = useState<{ id: number; nombre: string }[]>([]);
+  const [config, setConfig] = useState<PriceListConfig[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [formData, setFormData] = useState<CreateListaPrecioDto>({
     descripcion: '',
@@ -37,7 +43,11 @@ export function CreatePriceListModal({ isOpen, onClose, onSubmit, priceList }: C
 
   useEffect(() => {
     if (isOpen) {
-      departmentService.getAllActive().then((depts) => {
+      Promise.all([
+        priceListService.getConfig(),
+        departmentService.getAllActive(),
+      ]).then(([cfg, depts]) => {
+        setConfig(cfg);
         setDepartments(depts.map((d: any) => ({ id: d.id, nombre: d.nombre })));
       });
     }
@@ -70,6 +80,30 @@ export function CreatePriceListModal({ isOpen, onClose, onSubmit, priceList }: C
       }
     }
   }, [isOpen, priceList]);
+
+  // Auto-set department based on config when config loads or tipo changes
+  useEffect(() => {
+    if (config.length > 0 && formData.departamentoId === undefined && !priceList) {
+      const defaultDept = getDefaultDepartmentId(formData.tipo);
+      if (defaultDept) {
+        setFormData((prev) => ({ ...prev, departamentoId: defaultDept }));
+      }
+    }
+  }, [config, formData.tipo, priceList]);
+
+  const getDefaultDepartmentId = (tipo: string): number | undefined => {
+    const cfg = config.find((c) => c.tipo === tipo);
+    return cfg?.departamentoId;
+  };
+
+  const handleTipoChange = (tipo: string) => {
+    const defaultDept = getDefaultDepartmentId(tipo);
+    setFormData((prev) => ({
+      ...prev,
+      tipo: tipo as 'general' | 'promocional' | 'finansuenos',
+      departamentoId: defaultDept,
+    }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -110,11 +144,6 @@ export function CreatePriceListModal({ isOpen, onClose, onSubmit, priceList }: C
     }
   };
 
-  const departmentOptions: Option[] = [
-    { value: '', label: 'Seleccione un departamento' },
-    ...departments.map((d) => ({ value: d.id.toString(), label: d.nombre })),
-  ];
-
   return (
     <Modal
       isOpen={isOpen}
@@ -127,21 +156,16 @@ export function CreatePriceListModal({ isOpen, onClose, onSubmit, priceList }: C
           <Select
             label="Tipo de Lista *"
             value={formData.tipo}
-            onChange={(value) => setFormData((prev) => ({ ...prev, tipo: value as 'general' | 'promocional' | 'finansuenos' }))}
+            onChange={(value) => handleTipoChange(value as string)}
             options={tipoOptions}
             required
           />
 
           <Select
-            label="Departamento Responsable"
+            label="Departamento"
             value={formData.departamentoId?.toString() || ''}
-            onChange={(value) =>
-              setFormData((prev) => ({
-                ...prev,
-                departamentoId: value ? parseInt(value as string) : undefined,
-              }))
-            }
-            options={departmentOptions}
+            options={departments.map((d) => ({ value: d.id.toString(), label: d.nombre }))}
+            disabled
           />
         </div>
 

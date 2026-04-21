@@ -192,11 +192,11 @@ export default function PriceListsPage() {
         <span
           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
             p.esVigente === 1
-              ? 'bg-green-100 text-green-800'
-              : 'bg-gray-100 text-gray-800'
+              ? 'bg-green-500 text-white font-bold'
+              : 'bg-gray-100 text-gray-600'
           }`}
         >
-          {p.esVigente === 1 ? 'Vigente' : 'Historico'}
+          {p.esVigente === 1 ? '● Vigente' : 'Histórico'}
         </span>
       ),
     },
