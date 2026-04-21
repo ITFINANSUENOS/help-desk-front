@@ -8,7 +8,7 @@ export interface Option {
 
 interface SelectProps {
     value?: string | number;
-    onChange: (value: string | number | undefined) => void;
+    onChange?: (value: string | number | undefined) => void;
     options: Option[];
     placeholder?: string;
     className?: string;
@@ -41,6 +41,7 @@ export const Select: React.FC<SelectProps> = ({
     const handleChange = (
         newValue: SingleValue<Option> | MultiValue<Option>
     ) => {
+        if (!onChange) return;
         const val = newValue as SingleValue<Option>;
         onChange(val ? val.value : undefined);
     };

@@ -164,6 +164,7 @@ export function CreatePriceListModal({ isOpen, onClose, onSubmit, priceList }: C
           <Select
             label="Departamento"
             value={formData.departamentoId?.toString() || ''}
+            onChange={() => {}}
             options={departments.map((d) => ({ value: d.id.toString(), label: d.nombre }))}
             disabled
           />
