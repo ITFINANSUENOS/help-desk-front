@@ -14,6 +14,7 @@ import type { Route } from '../interfaces/Route';
 import { RouteModal } from './RouteModal';
 import { RouteStepsModal } from './RouteStepsModal';
 import { toast } from 'sonner';
+import { Tooltip } from '../../../shared/components/Tooltip';
 
 interface TransitionModalProps {
     isOpen: boolean;
@@ -191,7 +192,10 @@ export const TransitionModal = ({ isOpen, onClose, stepOrigenId, stepOrigenNombr
                         <div className="space-y-4">
                             <div className="flex gap-4">
                                 <div className="w-1/3">
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Tipo Destino</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Tipo Destino
+                                        <Tooltip content="Paso: avanza a un paso específico del flujo. Ruta: avanza a un sub-flujo alternativo (ej. flujo de firmas)" position="right" />
+                                    </label>
                                     <div className="flex rounded-md shadow-sm">
                                         <button
                                             type="button"
@@ -267,12 +271,14 @@ export const TransitionModal = ({ isOpen, onClose, stepOrigenId, stepOrigenNombr
                             <div className="grid grid-cols-2 gap-4">
                                 <Input
                                     label="Nombre Condición"
-                                    placeholder="Ej. Aprobar"
+                                    description="Nombre que identifica la acción (ej. Aprobar, Rechazar)"
+                                    placeholder="Ej. Aprobar, Rechazar, Solicitar Info"
                                     {...register('condicionNombre', { required: true })}
                                 />
                                 <Input
                                     label="Clave (Opcional)"
-                                    placeholder="Ej. APROBADO"
+                                    description="Código corto para integraciones (ej. APROB, RECH)"
+                                    placeholder="Ej. APROB, RECH"
                                     {...register('condicionClave')}
                                 />
                             </div>

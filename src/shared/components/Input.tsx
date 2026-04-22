@@ -12,6 +12,7 @@ export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
     label?: string;
     icon?: string; // Material symbol name
     onIconClick?: () => void;
+    description?: string; // Texto de ayuda debajo del label
 }
 
 /**
@@ -19,13 +20,16 @@ export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
  * Incluye soporte para etiquetas, íconos y estilos de enfoque personalizados.
  */
 const Input = forwardRef<HTMLInputElement, InputProps>(
-    ({ className, type, label, icon, onIconClick, id, ...props }, ref) => {
+    ({ className, type, label, icon, onIconClick, id, description, ...props }, ref) => {
         return (
             <div className="flex flex-col gap-2">
                 {label && (
                     <label htmlFor={id} className="text-[#121617] text-sm font-semibold">
                         {label}
                     </label>
+                )}
+                {description && (
+                    <p className="text-xs text-gray-500 -mt-1">{description}</p>
                 )}
                 <div className="relative">
                     <input

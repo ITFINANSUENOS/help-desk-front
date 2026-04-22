@@ -13,6 +13,7 @@ interface SelectProps {
     placeholder?: string;
     className?: string;
     label?: string;
+    description?: string;
     error?: string;
     disabled?: boolean;
     required?: boolean;
@@ -28,6 +29,7 @@ export const Select: React.FC<SelectProps> = ({
     placeholder = 'Seleccionar...',
     className,
     label,
+    description,
     error,
     disabled,
     required,
@@ -100,6 +102,9 @@ export const Select: React.FC<SelectProps> = ({
                 <label htmlFor={id} className="block text-sm font-bold text-gray-700 mb-1">
                     {label} {required && <span className="text-red-500">*</span>}
                 </label>
+            )}
+            {description && (
+                <p className="text-xs text-gray-500 -mt-1 mb-1">{description}</p>
             )}
             <ReactSelect<Option, false, GroupBase<Option>>
                 id={id}

@@ -16,6 +16,7 @@ import { SignatureConfig } from './SignatureConfig';
 import { TemplateFieldsConfig } from './TemplateFieldsConfig';
 import { SpecificAssignmentConfig } from './SpecificAssignmentConfig';
 import { Icon } from '../../../shared/components/Icon';
+import { Tooltip } from '../../../shared/components/Tooltip';
 
 interface StepModalProps {
     isOpen: boolean;
@@ -198,7 +199,7 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
                             <Input
                                 label="Nombre del Paso"
                                 {...register('nombre', { required: 'Requerido' })}
-                                placeholder="Ej. Aprobación Gerencia"
+                                placeholder="Ej. Aprobación de Liquidación, Verificación TH, Entrega de documento"
                             />
                         </div>
                     </div>
@@ -235,18 +236,17 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
                                 options={positions.map(p => ({ value: p.id, label: p.nombre }))}
                                 onChange={(val) => field.onChange(val)}
                                 placeholder="-- Seleccionar --"
+                                description={watch('esPool') ? "Se ignora si es Pool" : "Cargo default para asignación automática"}
                             />
                         )}
                     />
-                    {!!watch('esPool') && (
-                        <p className="text-xs text-brand-teal mt-1">Cargo deshabilitado por ser asignación en Pool. Escoge los usuarios abajo.</p>
-                    )}
                 </div>
 
                 <div className="space-y-2">
                     <Input
                         label="Tiempo SLA (Días)"
                         type="number"
+                        description="Días hábiles para completar. Afecta vencimientos."
                         {...register('tiempoHabil')}
                         placeholder="Ej. 1"
                     />
@@ -263,39 +263,46 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
                                 options={Array.isArray(templateFields) ? templateFields.map(f => ({ value: f.id, label: `${f.etiqueta} (${f.codigo})` })) : []}
                                 onChange={(val) => field.onChange(val)}
                                 placeholder="-- Seleccionar Campo --"
+                                description="Determina dinámicamente el jefe inmediato del asignado"
                             />
                         )}
                     />
-                    <p className="text-xs text-gray-500">Usado para determinar jefe inmediato dinámicamente.</p>
                 </div>
 
                 {/* Flags Section */}
                 <div className="col-span-1 md:col-span-2 pt-4 border-t border-gray-100">
                     <h3 className="text-sm font-semibold text-gray-900 mb-3">Configuraciones Adicionales</h3>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-y-3 gap-x-6">
 
-                        <label className="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" {...register('esAprobacion')} className="rounded text-brand-teal focus:ring-brand-teal" />
-                            <span className="text-sm text-gray-700">Es Aprobación</span>
-                        </label>
-
-                        <label className="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" {...register('esTareaNacional')} className="rounded text-brand-teal focus:ring-brand-teal" />
-                            <span className="text-sm text-gray-700">Tarea Nacional</span>
-                        </label>
-
-                        <label className="flex items-center gap-2 cursor-pointer">
-                            {/* Note: manually handled in onSubmit to number */}
-                            <input type="checkbox" {...register('requiereSeleccionManual')} className="rounded text-brand-teal focus:ring-brand-teal" />
-                            <span className="text-sm text-gray-700">Selección Manual</span>
-                        </label>
-
+                    {/* Grupo 1: Asignación */}
+                    <div className="mb-4 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+                        <div className="flex items-center gap-2 mb-3">
+                            <Icon name="person_pin" className="text-blue-600" style={{ fontSize: '18px' }} />
+                            <h4 className="text-sm font-semibold text-gray-900">Asignación</h4>
+                            <Tooltip content="Configura cómo se asigna el paso a los usuarios" position="top" />
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-y-3 gap-x-6">
+                            <label className="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" {...register('esPool')} className="rounded text-brand-teal focus:ring-brand-teal" />
+                                <span className="text-sm text-gray-700 font-medium">Asignación Grupo (Pool)</span>
+                                <Tooltip content="Permite asignar a múltiples usuarios/cargos en lugar de uno solo" position="right" />
+                            </label>
+                            <label className="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" {...register('asignarCreador')} className="rounded text-brand-teal focus:ring-brand-teal" />
+                                <span className="text-sm text-gray-700">Asignar a Creador</span>
+                                <Tooltip content="El ticket se asigna automáticamente al usuario que lo creó" position="right" />
+                            </label>
+                            <label className="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" {...register('requiereSeleccionManual')} className="rounded text-brand-teal focus:ring-brand-teal" />
+                                <span className="text-sm text-gray-700">Selección Manual</span>
+                                <Tooltip content="El paso no se asigna automáticamente; requiere selección manual" position="right" />
+                            </label>
+                        </div>
                         {/* Show Specific Assignment Config when manual selection is enabled OR when esPool is used */}
                         {(!!watch('requiereSeleccionManual') || !!watch('esPool')) && (
-                            <div className="col-span-full mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                                <h4 className="text-sm font-semibold text-gray-900 mb-3">
+                            <div className="mt-4 p-4 bg-white rounded-lg border border-gray-200">
+                                <h5 className="text-sm font-semibold text-gray-900 mb-3">
                                     {watch('esPool') ? "Usuarios del Grupo (Pool)" : "Usuarios y Cargos Específicos"}
-                                </h4>
+                                </h5>
                                 <Controller
                                     control={control}
                                     name="usuariosEspecificos"
@@ -308,51 +315,84 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
                                 />
                             </div>
                         )}
+                    </div>
 
-                        <label className="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" {...register('necesitaAprobacionJefe')} className="rounded text-brand-teal focus:ring-brand-teal" />
-                            <span className="text-sm text-gray-700">Aprueba Jefe</span>
-                        </label>
+                    {/* Grupo 2: Aprobación y Firma */}
+                    <div className="mb-4 p-4 bg-green-50 rounded-lg border-l-4 border-green-500">
+                        <div className="flex items-center gap-2 mb-3">
+                            <Icon name="fact_check" className="text-green-600" style={{ fontSize: '18px' }} />
+                            <h4 className="text-sm font-semibold text-gray-900">Aprobación y Firma</h4>
+                            <Tooltip content="Configura requisitos de aprobación y firma digital" position="top" />
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-y-3 gap-x-6">
+                            <label className="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" {...register('esAprobacion')} className="rounded text-brand-teal focus:ring-brand-teal" />
+                                <span className="text-sm text-gray-700">Es Aprobación</span>
+                                <Tooltip content="Este paso requiere aprobación explícita para continuar el flujo" position="right" />
+                            </label>
+                            <label className="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" {...register('necesitaAprobacionJefe')} className="rounded text-brand-teal focus:ring-brand-teal" />
+                                <span className="text-sm text-gray-700">Aprueba Jefe</span>
+                                <Tooltip content="El jefe inmediato del asignado debe aprobar antes de continuar" position="right" />
+                            </label>
+                            <label className="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" {...register('requiereFirma')} className="rounded text-brand-teal focus:ring-brand-teal" />
+                                <span className="text-sm text-gray-700">Requiere Firma</span>
+                                <Tooltip content="Requiere firma digital en documento PDF" position="right" />
+                            </label>
+                            <label className="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" {...register('esTareaNacional')} className="rounded text-brand-teal focus:ring-brand-teal" />
+                                <span className="text-sm text-gray-700">Tarea Nacional</span>
+                                <Tooltip content="Aplica para todos los usuarios sin importar su regional" position="right" />
+                            </label>
+                        </div>
+                    </div>
 
-                        <label className="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" {...register('requiereFirma')} className="rounded text-brand-teal focus:ring-brand-teal" />
-                            <span className="text-sm text-gray-700">Requiere Firma</span>
-                        </label>
+                    {/* Grupo 3: Cierre y Finalización */}
+                    <div className="mb-4 p-4 bg-orange-50 rounded-lg border-l-4 border-orange-500">
+                        <div className="flex items-center gap-2 mb-3">
+                            <Icon name="task_alt" className="text-orange-600" style={{ fontSize: '18px' }} />
+                            <h4 className="text-sm font-semibold text-gray-900">Cierre y Finalización</h4>
+                            <Tooltip content="Configura cómo se cierra o finaliza el ticket en este paso" position="top" />
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-y-3 gap-x-6">
+                            <label className="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" {...register('permiteCerrar')} className="rounded text-brand-teal focus:ring-brand-teal" />
+                                <span className="text-sm text-gray-700">Permite Cerrar</span>
+                                <Tooltip content="Este paso permite cerrar el ticket directamente" position="right" />
+                            </label>
+                            <label className="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" {...register('cerrarTicketObligatorio')} className="rounded text-brand-teal focus:ring-brand-teal" />
+                                <span className="text-sm text-gray-700">Cerrar Ticket Obligatorio</span>
+                                <Tooltip content="Obliga a cerrar el ticket al completar este paso" position="right" />
+                            </label>
+                        </div>
+                    </div>
 
-                        <label className="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" {...register('permiteCerrar')} className="rounded text-brand-teal focus:ring-brand-teal" />
-                            <span className="text-sm text-gray-700">Permite Cerrar</span>
-                        </label>
-
-                        <label className="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" {...register('asignarCreador')} className="rounded text-brand-teal focus:ring-brand-teal" />
-                            <span className="text-sm text-gray-700">Asignar a Creador</span>
-                        </label>
-
-                        <label className="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" {...register('esParalelo')} className="rounded text-brand-teal focus:ring-brand-teal" />
-                            <span className="text-sm text-gray-700">Es Paralelo</span>
-                        </label>
-
-                        <label className="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" {...register('esPool')} className="rounded text-brand-teal focus:ring-brand-teal" />
-                            <span className="text-sm text-gray-700 font-medium">Asignación Grupo (Pool)</span>
-                        </label>
-
-                        <label className="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" {...register('cerrarTicketObligatorio')} className="rounded text-brand-teal focus:ring-brand-teal" />
-                            <span className="text-sm text-gray-700">Cerrar Ticket Obligatorio</span>
-                        </label>
-
-                        <label className="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" {...register('permiteDespachoMasivo')} className="rounded text-brand-teal focus:ring-brand-teal" />
-                            <span className="text-sm text-gray-700">Permite Despacho Masivo</span>
-                        </label>
-
-                        <label className="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" {...register('requiereCamposPlantilla')} className="rounded text-brand-teal focus:ring-brand-teal" />
-                            <span className="text-sm text-gray-700">Requiere Campos Plantilla</span>
-                        </label>
+                    {/* Grupo 4: Configuración Avanzada */}
+                    <div className="mb-4 p-4 bg-purple-50 rounded-lg border-l-4 border-purple-500">
+                        <div className="flex items-center gap-2 mb-3">
+                            <Icon name="settings" className="text-purple-600" style={{ fontSize: '18px' }} />
+                            <h4 className="text-sm font-semibold text-gray-900">Configuración Avanzada</h4>
+                            <Tooltip content="Opciones avanzadas para comportamientos específicos del paso" position="top" />
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-y-3 gap-x-6">
+                            <label className="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" {...register('esParalelo')} className="rounded text-brand-teal focus:ring-brand-teal" />
+                                <span className="text-sm text-gray-700">Es Paralelo</span>
+                                <Tooltip content="Permite que múltiples asignados trabajen simultáneamente" position="right" />
+                            </label>
+                            <label className="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" {...register('permiteDespachoMasivo')} className="rounded text-brand-teal focus:ring-brand-teal" />
+                                <span className="text-sm text-gray-700">Permite Despacho Masivo</span>
+                                <Tooltip content="Permite enviar el ticket a múltiples destinos" position="right" />
+                            </label>
+                            <label className="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" {...register('requiereCamposPlantilla')} className="rounded text-brand-teal focus:ring-brand-teal" />
+                                <span className="text-sm text-gray-700">Requiere Campos Plantilla</span>
+                                <Tooltip content="Requiere completar campos específicos de una plantilla" position="right" />
+                            </label>
+                        </div>
                     </div>
 
                     {!!watch('requiereFirma') && (
