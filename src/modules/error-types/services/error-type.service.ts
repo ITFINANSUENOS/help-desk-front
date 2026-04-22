@@ -19,7 +19,7 @@ export const errorTypeService = {
         params.limit = filter.limit || 10;
 
         if (filter.search) {
-            params['filter[title]'] = filter.search;
+            params['search'] = filter.search;
         }
 
         if (filter.isActive !== undefined && filter.isActive !== 'all') {

@@ -123,7 +123,7 @@ export default function FlowOpenTicketsPage() {
 
     const workflowOptions = workflows.map(w => ({
         value: w.id,
-        label: w.nombre || `Flujo #${w.id}`
+        label: w.nombre || w.subcategoria?.nombre || `Flujo #${w.id}`
     }));
 
     const getDaysBadgeClass = (dias: number) => {
