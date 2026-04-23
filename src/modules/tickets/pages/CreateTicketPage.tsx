@@ -146,6 +146,14 @@ export default function CreateTicketPage() {
             setAvailableDecisions([]);
             setSelectedDecision(null);
             try {
+                // Only call if both subcategory and company are selected
+                if (!subcategoryId || !companyId) {
+                    setTemplateFields([]);
+                    setTemplateValues({});
+                    setCheckingFlow(false);
+                    return;
+                }
+
                 const result = await workflowService.checkStartFlow(subcategoryId as number, companyId ? Number(companyId) : undefined);
                 setRequiresManualSelection(result.requiresManualSelection);
                 setInitialStepName(result.initialStepName);
@@ -178,7 +186,7 @@ export default function CreateTicketPage() {
             }
         };
         checkWorkflow();
-    }, [subcategoryId, subcategories, companyId]);
+    }, [subcategoryId, companyId]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
