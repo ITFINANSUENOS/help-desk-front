@@ -14,6 +14,7 @@ interface TemplateFieldsConfigProps {
     campos: StepTemplateField[];
     onChange: (campos: StepTemplateField[]) => void;
     flujoId: number;
+    onOpenPdfPicker?: (initialCoords?: { coordX: number; coordY: number; pagina: number }) => void;
 }
 
 const ExcelQueryConfig = ({ control, flujoId, setValue }: { control: Control<StepTemplateField>, flujoId: number, setValue: UseFormSetValue<StepTemplateField> }) => {
@@ -137,12 +138,14 @@ export const TemplateFieldsConfig = ({ campos, onChange, flujoId }: TemplateFiel
             updated[editingIndex] = newCampo;
             onChange(updated);
             setEditingIndex(null);
+            setIsAdding(false);
+            toast.success('Campo actualizado');
         } else {
             onChange([...campos, newCampo]);
+            setIsAdding(false);
+            reset();
+            toast.success('Campo agregado');
         }
-
-        reset();
-        setIsAdding(false);
     };
 
     const handleEdit = (index: number) => {

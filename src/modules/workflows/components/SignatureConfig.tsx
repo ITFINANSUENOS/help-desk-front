@@ -11,13 +11,14 @@ interface SignatureConfigProps {
     firmas: StepSignature[];
     onChange: (firmas: StepSignature[]) => void;
     positions: Position[];
+    onOpenPdfPicker?: (initialCoords?: { coordX: number; coordY: number; pagina: number }) => void;
 }
 
-export const SignatureConfig = ({ firmas, onChange, positions }: SignatureConfigProps) => {
+export const SignatureConfig = ({ firmas, onChange, positions, onOpenPdfPicker }: SignatureConfigProps) => {
     const [isAdding, setIsAdding] = useState(false);
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
-    const { register, handleSubmit, reset, setValue, control } = useForm<StepSignature>();
+    const { register, handleSubmit, reset, setValue, control, watch } = useForm<StepSignature>();
 
     const onSubmit = (data: StepSignature) => {
         const selectedCargosIds = data.cargosIds ? data.cargosIds.map(Number).filter(n => !isNaN(n)) : undefined;
@@ -35,15 +36,16 @@ export const SignatureConfig = ({ firmas, onChange, positions }: SignatureConfig
             const newFirmas = [...firmas];
             newFirmas[editingIndex] = newFirma;
             onChange(newFirmas);
+            // Don't reset - just hide the form and keep values for next edit
             setEditingIndex(null);
+            setIsAdding(false);
             toast.success('Zona actualizada');
         } else {
             onChange([...firmas, newFirma]);
+            setIsAdding(false);
+            reset();
             toast.success('Zona agregada');
         }
-
-        reset();
-        setIsAdding(false);
     };
 
     const handleEdit = (index: number) => {
@@ -162,12 +164,40 @@ export const SignatureConfig = ({ firmas, onChange, positions }: SignatureConfig
                             <p className="text-xs text-gray-500 mt-1">Etiqueta en el PDF para ubicar la firma automáticamente</p>
                         </div>
 
-                        <Input
-                            label="Página"
-                            type="number"
-                            {...register('pagina', { required: true, min: 1 })}
-                            placeholder="1"
-                        />
+                        <div className="grid grid-cols-3 gap-2">
+                            <Input
+                                label="Página"
+                                type="number"
+                                {...register('pagina', { required: true, min: 1 })}
+                                placeholder="1"
+                            />
+                            <Input
+                                label="Coord X"
+                                type="number"
+                                {...register('coordX', { required: true })}
+                                placeholder="X"
+                            />
+                            <Input
+                                label="Coord Y"
+                                type="number"
+                                {...register('coordY', { required: true })}
+                                placeholder="Y"
+                            />
+                        </div>
+                        {onOpenPdfPicker && (
+                            <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                    const data = { coordX: Number(watch('coordX')) || 0, coordY: Number(watch('coordY')) || 0, pagina: Number(watch('pagina')) || 1 };
+                                    onOpenPdfPicker(data);
+                                }}
+                            >
+                                <Icon name="edit" className="mr-1 text-[16px]" />
+                                Seleccionar en PDF
+                            </Button>
+                        )}
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Cargos Permitidos (Opcional)</label>

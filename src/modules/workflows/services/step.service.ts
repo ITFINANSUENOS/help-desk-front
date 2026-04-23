@@ -58,6 +58,13 @@ export const stepService = {
         await api.delete(`/workflows/steps/${id}`);
     },
 
+    async getCoordinates(stepId: number, empresaId: number): Promise<{ firmas: any[]; campos: any[] }> {
+        const response = await api.get<{ firmas: any[]; campos: any[] }>(`/workflows/steps/${stepId}/coordinates`, {
+            params: { empresaId },
+        });
+        return response.data;
+    },
+
     async uploadFile(id: number, file: File): Promise<void> {
         const formData = new FormData();
         formData.append('file', file);

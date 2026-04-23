@@ -4,6 +4,7 @@ import { RichTextEditor } from '../../../components/ui/RichTextEditor';
 import { FormModal } from '../../../shared/components/FormModal';
 import { Input } from '../../../shared/components/Input';
 import { Select } from '../../../shared/components/Select';
+import { Button } from '../../../shared/components/Button';
 import type { Step, CreateStepDto, StepSignature } from '../interfaces/Step';
 import type { StepTemplateField } from '../interfaces/TemplateField';
 import { stepService } from '../services/step.service';
@@ -11,12 +12,27 @@ import { positionService } from '../../../shared/services/catalog.service';
 import type { Position } from '../../../shared/interfaces/Catalog';
 import { templateService } from '../../templates/services/template.service';
 import type { TemplateField } from '../../templates/interfaces/TemplateField';
+import { companyService } from '../../companies/services/company.service';
 import { toast } from 'sonner';
 import { SignatureConfig } from './SignatureConfig';
 import { TemplateFieldsConfig } from './TemplateFieldsConfig';
 import { SpecificAssignmentConfig } from './SpecificAssignmentConfig';
+import { PdfPickerModal } from './PdfCoordinatePicker/PdfPickerModal';
+import type { PlacementMarker } from './PdfCoordinatePicker/types';
 import { Icon } from '../../../shared/components/Icon';
 import { Tooltip } from '../../../shared/components/Tooltip';
+
+interface Company {
+    id: number;
+    nombre: string;
+}
+
+interface FlujoPlantillaTemplate {
+    id: number;
+    empresaId: number;
+    empresa: Company;
+    nombrePlantilla: string;
+}
 
 interface StepModalProps {
     isOpen: boolean;
@@ -32,6 +48,14 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
     const [positions, setPositions] = useState<Position[]>([]);
     const [templateFields, setTemplateFields] = useState<TemplateField[]>([]);
     const [pdfFile, setPdfFile] = useState<File | null>(null);
+    const [companies, setCompanies] = useState<Company[]>([]);
+    const [selectedEmpresaId, setSelectedEmpresaId] = useState<number | null>(null);
+    const [plantillas, setPlantillas] = useState<FlujoPlantillaTemplate[]>([]);
+    const [selectedPlantilla, setSelectedPlantilla] = useState<FlujoPlantillaTemplate | null>(null);
+    const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+    const [pickerOpen, setPickerOpen] = useState(false);
+    const [pickerMode, setPickerMode] = useState<'firma' | 'campo'>('firma');
+    const [pickerTarget, setPickerTarget] = useState<'firmas' | 'campos'>('firmas');
 
 
 
@@ -113,6 +137,118 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
     const loadCatalogs = () => {
         positionService.getAllActive().then(setPositions).catch(console.error);
         templateService.getAllFields().then(setTemplateFields).catch(console.error);
+        companyService.getCompanies({ limit: 100 }).then(res => setCompanies(res.data || [])).catch(console.error);
+    };
+
+    // Load plantillas when empresaId changes
+    const loadPlantillas = async (empresaId: number) => {
+        try {
+            const data = await templateService.getTemplates(flujoId);
+            const filtered = (data || []).filter((t: any) => t.empresa?.id === empresaId);
+            setPlantillas(filtered);
+        } catch (err) {
+            console.error('Error loading plantillas:', err);
+            setPlantillas([]);
+        }
+    };
+
+    const handleEmpresaChange = async (empresaId: number) => {
+        setSelectedEmpresaId(empresaId);
+        setSelectedPlantilla(null);
+        setPdfUrl(null);
+        loadPlantillas(empresaId);
+
+        // Load existing coordinates for this step and empresa
+        if (step?.id) {
+            try {
+                const coords = await stepService.getCoordinates(step.id, empresaId);
+                setValue('firmas', coords.firmas || []);
+                setValue('campos', coords.campos || []);
+            } catch (err) {
+                console.error('Error loading coordinates:', err);
+                setValue('firmas', []);
+                setValue('campos', []);
+            }
+        }
+    };
+
+    const handlePlantillaChange = (plantillaId: number) => {
+        const plantilla = plantillas.find(p => p.id === plantillaId);
+        setSelectedPlantilla(plantilla || null);
+        if (plantilla) {
+            const apiUrl = import.meta.env.VITE_API_URL || '';
+            setPdfUrl(`${apiUrl}/documents/flow-template/${plantilla.id}`);
+        } else {
+            setPdfUrl(null);
+        }
+    };
+
+    const handleOpenPicker = (mode: 'firma' | 'campo', target: 'firmas' | 'campos') => {
+        if (!pdfUrl) {
+            toast.error('Seleccione primero una plantilla de empresa');
+            return;
+        }
+        setPickerMode(mode);
+        setPickerTarget(target);
+        setPickerOpen(true);
+    };
+
+    const handlePickerSave = (data: {
+        coordX: number;
+        coordY: number;
+        pagina: number;
+        etiqueta: string;
+        cargosIds: number[];
+        nombre?: string;
+        codigo?: string;
+        tipo?: string;
+        fontSize?: number;
+      }) => {
+        if (pickerTarget === 'firmas') {
+            const currentFirmas = watch('firmas') || [];
+            setValue('firmas', [...currentFirmas, {
+                coordX: data.coordX,
+                coordY: data.coordY,
+                pagina: data.pagina,
+                etiqueta: data.etiqueta,
+                cargosIds: data.cargosIds,
+            }]);
+        } else {
+            const currentCampos = watch('campos') || [];
+            setValue('campos', [...currentCampos, {
+                coordX: data.coordX,
+                coordY: data.coordY,
+                pagina: data.pagina,
+                nombre: data.nombre || '',
+                codigo: data.codigo || '',
+                tipo: data.tipo || 'text',
+                fontSize: data.fontSize || 10,
+                campoTrigger: 0,
+                mostrarDiasTranscurridos: false,
+            }]);
+        }
+        setPickerOpen(false);
+    };
+
+    const getMarkers = (): PlacementMarker[] => {
+        if (pickerTarget === 'firmas') {
+            return (watch('firmas') || []).map((f: any, idx: number) => ({
+                id: `firma-${idx}`,
+                pasoId: f.pasoId || 0,
+                label: f.etiqueta || `Firma ${idx + 1}`,
+                coordX: f.coordX,
+                coordY: f.coordY,
+                pagina: f.pagina || 1,
+            }));
+        }
+        return (watch('campos') || []).map((c: any, idx: number) => ({
+            id: `campo-${idx}`,
+            pasoId: c.pasoId || 0,
+            label: c.etiqueta || c.nombre || `Campo ${idx + 1}`,
+            coordX: c.coordX,
+            coordY: c.coordY,
+            pagina: c.pagina || 1,
+        }));
     };
 
     const isPool = watch('esPool');
@@ -121,12 +257,6 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
             setValue('cargoAsignadoId', undefined);
         }
     }, [isPool, setValue]);
-
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files[0]) {
-            setPdfFile(e.target.files[0]);
-        }
-    };
 
     const onSubmit = async (data: CreateStepDto) => {
         try {
@@ -150,6 +280,11 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
             data.requiereSeleccionManual = data.requiereSeleccionManual ? 1 : 0;
             data.permiteCerrar = data.permiteCerrar ? 1 : 0;
             data.requiereCamposPlantilla = data.requiereCamposPlantilla ? 1 : 0;
+
+            // Include empresaId for plantilla-level coordinate storage
+            if (selectedEmpresaId) {
+                (data as any).empresaId = selectedEmpresaId;
+            }
 
 
 
@@ -399,43 +534,90 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
                         <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
                             <div className="mb-4">
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Base PDF para Firmas
+                                    Empresa / Plantilla PDF
                                 </label>
-                                <div className="flex gap-2 items-center">
-                                    <label className="cursor-pointer bg-white px-3 py-2 border border-gray-300 rounded text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2 shadow-sm">
-                                        <Icon name="upload" className="text-[20px]" />
-                                        <span>
-                                            {pdfFile ? pdfFile.name : step?.nombreAdjunto ? 'Cambiar PDF' : 'Subir PDF'}
-                                        </span>
-                                        <input
-                                            type="file"
-                                            accept="application/pdf"
-                                            className="hidden"
-                                            onChange={handleFileChange}
-                                        />
-                                    </label>
-                                    {(pdfFile || step?.nombreAdjunto) && (
-                                        <span className="text-sm text-green-600 font-medium">
-                                            {pdfFile ? 'Archivo seleccionado' : `Actual: ${step?.nombreAdjunto}`}
-                                        </span>
-                                    )}
+                                <div className="flex gap-2 items-center mb-2">
+                                    <select
+                                        className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm"
+                                        value={selectedEmpresaId || ''}
+                                        onChange={(e) => handleEmpresaChange(Number(e.target.value))}
+                                    >
+                                        <option value="">Seleccione empresa...</option>
+                                        {companies.map(c => (
+                                            <option key={c.id} value={c.id}>{c.nombre}</option>
+                                        ))}
+                                    </select>
+                                    <select
+                                        className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm"
+                                        value={selectedPlantilla?.id || ''}
+                                        onChange={(e) => handlePlantillaChange(Number(e.target.value))}
+                                        disabled={!selectedEmpresaId}
+                                    >
+                                        <option value="">Seleccione plantilla...</option>
+                                        {plantillas.map(p => (
+                                            <option key={p.id} value={p.id}>{p.nombrePlantilla}</option>
+                                        ))}
+                                    </select>
                                 </div>
+                                {pdfUrl && (
+                                    <Button type="button" size="sm" variant="outline" onClick={() => handleOpenPicker('firma', 'firmas')}>
+                                        <Icon name="edit" className="mr-1 text-[16px]" />
+                                        Seleccionar coordenadas en PDF
+                                    </Button>
+                                )}
                             </div>
 
                             <SignatureConfig
                                 firmas={(watch('firmas') || []) as unknown as StepSignature[]}
                                 onChange={(newFirmas) => setValue('firmas', newFirmas)}
                                 positions={positions}
+                                onOpenPdfPicker={() => handleOpenPicker('firma', 'firmas')}
                             />
                         </div>
                     )}
 
                     {!!watch('requiereCamposPlantilla') && (
-                        <div className="mt-4">
+                        <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Empresa / Plantilla PDF
+                                </label>
+                                <div className="flex gap-2 items-center mb-2">
+                                    <select
+                                        className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm"
+                                        value={selectedEmpresaId || ''}
+                                        onChange={(e) => handleEmpresaChange(Number(e.target.value))}
+                                    >
+                                        <option value="">Seleccione empresa...</option>
+                                        {companies.map(c => (
+                                            <option key={c.id} value={c.id}>{c.nombre}</option>
+                                        ))}
+                                    </select>
+                                    <select
+                                        className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm"
+                                        value={selectedPlantilla?.id || ''}
+                                        onChange={(e) => handlePlantillaChange(Number(e.target.value))}
+                                        disabled={!selectedEmpresaId}
+                                    >
+                                        <option value="">Seleccione plantilla...</option>
+                                        {plantillas.map(p => (
+                                            <option key={p.id} value={p.id}>{p.nombrePlantilla}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                {pdfUrl && (
+                                    <Button type="button" size="sm" variant="outline" onClick={() => handleOpenPicker('campo', 'campos')}>
+                                        <Icon name="edit" className="mr-1 text-[16px]" />
+                                        Seleccionar coordenadas en PDF
+                                    </Button>
+                                )}
+                            </div>
+
                             <TemplateFieldsConfig
                                 campos={(watch('campos') || []) as unknown as StepTemplateField[]}
                                 onChange={(newCampos) => setValue('campos', newCampos)}
                                 flujoId={Number(flujoId)}
+                                onOpenPdfPicker={() => handleOpenPicker('campo', 'campos')}
                             />
                         </div>
                     )}
@@ -449,6 +631,16 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
                     </div>
                 </div>
             </div>
+
+            <PdfPickerModal
+                isOpen={pickerOpen}
+                onClose={() => setPickerOpen(false)}
+                pdfUrl={pdfUrl || ''}
+                markers={getMarkers()}
+                mode={pickerMode}
+                positions={positions}
+                onSave={handlePickerSave}
+            />
         </FormModal>
     );
 };
