@@ -56,6 +56,7 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
     const [pickerOpen, setPickerOpen] = useState(false);
     const [pickerMode, setPickerMode] = useState<'firma' | 'campo'>('firma');
     const [pickerTarget, setPickerTarget] = useState<'firmas' | 'campos'>('firmas');
+    const [pickerEditingIndex, setPickerEditingIndex] = useState<number | null>(null);
 
 
 
@@ -183,13 +184,14 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
         }
     };
 
-    const handleOpenPicker = (mode: 'firma' | 'campo', target: 'firmas' | 'campos') => {
+    const handleOpenPicker = (mode: 'firma' | 'campo', target: 'firmas' | 'campos', editingIndex?: number) => {
         if (!pdfUrl) {
             toast.error('Seleccione primero una plantilla de empresa');
             return;
         }
         setPickerMode(mode);
         setPickerTarget(target);
+        setPickerEditingIndex(editingIndex ?? null);
         setPickerOpen(true);
     };
 
@@ -206,28 +208,41 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
       }) => {
         if (pickerTarget === 'firmas') {
             const currentFirmas = watch('firmas') || [];
-            setValue('firmas', [...currentFirmas, {
-                coordX: data.coordX,
-                coordY: data.coordY,
-                pagina: data.pagina,
-                etiqueta: data.etiqueta,
-                cargosIds: data.cargosIds,
-            }]);
+            if (pickerEditingIndex !== null) {
+                const updated = [...currentFirmas];
+                updated[pickerEditingIndex] = { ...updated[pickerEditingIndex], coordX: data.coordX, coordY: data.coordY, pagina: data.pagina, etiqueta: data.etiqueta, cargosIds: data.cargosIds };
+                setValue('firmas', updated);
+            } else {
+                setValue('firmas', [...currentFirmas, {
+                    coordX: data.coordX,
+                    coordY: data.coordY,
+                    pagina: data.pagina,
+                    etiqueta: data.etiqueta,
+                    cargosIds: data.cargosIds,
+                }]);
+            }
         } else {
             const currentCampos = watch('campos') || [];
-            setValue('campos', [...currentCampos, {
-                coordX: data.coordX,
-                coordY: data.coordY,
-                pagina: data.pagina,
-                nombre: data.nombre || '',
-                codigo: data.codigo || '',
-                tipo: data.tipo || 'text',
-                fontSize: data.fontSize || 10,
-                campoTrigger: 0,
-                mostrarDiasTranscurridos: false,
-            }]);
+            if (pickerEditingIndex !== null) {
+                const updated = [...currentCampos];
+                updated[pickerEditingIndex] = { ...updated[pickerEditingIndex], coordX: data.coordX, coordY: data.coordY, pagina: data.pagina };
+                setValue('campos', updated);
+            } else {
+                setValue('campos', [...currentCampos, {
+                    coordX: data.coordX,
+                    coordY: data.coordY,
+                    pagina: data.pagina,
+                    nombre: data.nombre || '',
+                    codigo: data.codigo || '',
+                    tipo: data.tipo || 'text',
+                    fontSize: data.fontSize || 10,
+                    campoTrigger: 0,
+                    mostrarDiasTranscurridos: false,
+                }]);
+            }
         }
         setPickerOpen(false);
+        setPickerEditingIndex(null);
     };
 
     const getMarkers = (): PlacementMarker[] => {
@@ -617,7 +632,9 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
                                 campos={(watch('campos') || []) as unknown as StepTemplateField[]}
                                 onChange={(newCampos) => setValue('campos', newCampos)}
                                 flujoId={Number(flujoId)}
-                                onOpenPdfPicker={() => handleOpenPicker('campo', 'campos')}
+                                onOpenPdfPicker={(coords, editingIndex) => {
+                                    handleOpenPicker('campo', 'campos', editingIndex);
+                                }}
                             />
                         </div>
                     )}

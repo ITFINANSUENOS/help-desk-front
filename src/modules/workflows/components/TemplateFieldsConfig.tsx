@@ -14,7 +14,7 @@ interface TemplateFieldsConfigProps {
     campos: StepTemplateField[];
     onChange: (campos: StepTemplateField[]) => void;
     flujoId: number;
-    onOpenPdfPicker?: (initialCoords?: { coordX: number; coordY: number; pagina: number }) => void;
+    onOpenPdfPicker?: (initialCoords?: { coordX: number; coordY: number; pagina: number }, editingIndex?: number) => void;
 }
 
 const ExcelQueryConfig = ({ control, flujoId, setValue }: { control: Control<StepTemplateField>, flujoId: number, setValue: UseFormSetValue<StepTemplateField> }) => {
@@ -113,24 +113,36 @@ const ExcelQueryConfig = ({ control, flujoId, setValue }: { control: Control<Ste
     );
 };
 
-export const TemplateFieldsConfig = ({ campos, onChange, flujoId }: TemplateFieldsConfigProps) => {
+export const TemplateFieldsConfig = ({ campos, onChange, flujoId, onOpenPdfPicker }: TemplateFieldsConfigProps) => {
     const [isAdding, setIsAdding] = useState(false);
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
-    const { register, handleSubmit, reset, setValue, control } = useForm<StepTemplateField>();
+    const { register, handleSubmit, reset, setValue, control, watch } = useForm<StepTemplateField>();
 
     // Filter only active campos (estado = 1)
     const activeCampos = campos.filter(campo => campo.estado === 1 || campo.estado === undefined);
 
+    // Sync form when campos prop changes (e.g., after PDF picker updates coordinates)
+    useEffect(() => {
+        if (editingIndex !== null && campos[editingIndex]) {
+            const campo = campos[editingIndex];
+            setValue('coordX', campo.coordX || 0, { shouldValidate: false });
+            setValue('coordY', campo.coordY || 0, { shouldValidate: false });
+            setValue('pagina', campo.pagina || 1, { shouldValidate: false });
+        }
+    }, [campos, editingIndex, setValue]);
+
     const handleAdd = (data: StepTemplateField) => {
+        const originalId = editingIndex !== null ? campos[editingIndex]?.id : undefined;
         const newCampo: StepTemplateField = {
             ...data,
+            id: originalId,
             coordX: Number(data.coordX) || 0,
             coordY: Number(data.coordY) || 0,
             pagina: Number(data.pagina),
             fontSize: Number(data.fontSize) || 10,
             campoTrigger: data.campoTrigger ? 1 : 0,
             mostrarDiasTranscurridos: !!data.mostrarDiasTranscurridos,
-            estado: 1, // Always set as active
+            estado: 1,
         };
 
         if (editingIndex !== null) {
@@ -150,8 +162,29 @@ export const TemplateFieldsConfig = ({ campos, onChange, flujoId }: TemplateFiel
 
     const handleEdit = (index: number) => {
         const campo = activeCampos[index];
-        reset(campo);
         const actualIndex = campos.findIndex(c => c === campo);
+
+        reset({
+            nombre: campo.nombre || '',
+            codigo: campo.codigo || '',
+            tipo: campo.tipo || 'text',
+            pagina: campo.pagina || 1,
+            etiqueta: campo.etiqueta || '',
+            fontSize: campo.fontSize || 10,
+            coordX: campo.coordX || 0,
+            coordY: campo.coordY || 0,
+            campoQuery: campo.campoQuery || '',
+            campoTrigger: campo.campoTrigger || 0,
+            mostrarDiasTranscurridos: campo.mostrarDiasTranscurridos || false,
+        });
+
+        // Explicitly set values after reset for inputs that might not update correctly
+        setValue('coordX', campo.coordX || 0, { shouldValidate: false });
+        setValue('coordY', campo.coordY || 0, { shouldValidate: false });
+        setValue('pagina', campo.pagina || 1, { shouldValidate: false });
+        setValue('fontSize', campo.fontSize || 10, { shouldValidate: false });
+
+        // Pass the actual index in the full campos array, not activeCampos index
         setEditingIndex(actualIndex);
         setIsAdding(true);
     };
@@ -295,6 +328,36 @@ export const TemplateFieldsConfig = ({ campos, onChange, flujoId }: TemplateFiel
                             placeholder="10"
                         />
                     </div>
+
+                    {/* Coords & PDF Picker */}
+                    <div className="grid grid-cols-3 gap-2">
+                        <Input
+                            label="Coord X"
+                            type="number"
+                            {...register('coordX', { required: true })}
+                            placeholder="X"
+                        />
+                        <Input
+                            label="Coord Y"
+                            type="number"
+                            {...register('coordY', { required: true })}
+                            placeholder="Y"
+                        />
+                    </div>
+                    {onOpenPdfPicker && (
+                        <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                                const data = { coordX: Number(watch('coordX')) || 0, coordY: Number(watch('coordY')) || 0, pagina: Number(watch('pagina')) || 1 };
+                                onOpenPdfPicker(data, editingIndex!);
+                            }}
+                        >
+                            <Icon name="edit" className="mr-1 text-[16px]" />
+                            Seleccionar en PDF
+                        </Button>
+                    )}
 
                     {/* Source Config */}
                     <div className="space-y-2 border-t pt-2 mt-2">

@@ -22,8 +22,10 @@ export const SignatureConfig = ({ firmas, onChange, positions, onOpenPdfPicker }
 
     const onSubmit = (data: StepSignature) => {
         const selectedCargosIds = data.cargosIds ? data.cargosIds.map(Number).filter(n => !isNaN(n)) : undefined;
-        const newFirma = {
+        const existingFirma = editingIndex !== null ? firmas[editingIndex] : null;
+        const newFirma: StepSignature = {
             ...data,
+            id: existingFirma?.id,
             coordX: Number(data.coordX) || 0,
             coordY: Number(data.coordY) || 0,
             pagina: Number(data.pagina),
@@ -36,7 +38,6 @@ export const SignatureConfig = ({ firmas, onChange, positions, onOpenPdfPicker }
             const newFirmas = [...firmas];
             newFirmas[editingIndex] = newFirma;
             onChange(newFirmas);
-            // Don't reset - just hide the form and keep values for next edit
             setEditingIndex(null);
             setIsAdding(false);
             toast.success('Zona actualizada');
