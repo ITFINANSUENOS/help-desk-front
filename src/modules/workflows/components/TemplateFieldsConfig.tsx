@@ -9,6 +9,7 @@ import { excelDataService } from '../../imports/services/excel-data.service';
 import type { ExcelData } from '../../imports/interfaces/ExcelData';
 import { toast } from 'sonner';
 import { Icon } from '../../../shared/components/Icon';
+import { Tooltip } from '../../../shared/components/Tooltip';
 
 interface TemplateFieldsConfigProps {
     campos: StepTemplateField[];
@@ -85,29 +86,38 @@ const ExcelQueryConfig = ({ control, flujoId, setValue }: { control: Control<Ste
     };
 
     return (
-        <div className="space-y-2 p-3 bg-gray-50 rounded border border-gray-200">
-            <label className="text-xs font-semibold text-gray-700 block">Configuración Excel</label>
-            <Select
-                value={currentFileId}
-                onChange={(val) => {
-                    const e = { target: { value: val ? String(val) : '' } } as React.ChangeEvent<HTMLSelectElement>;
-                    handleFileChange(e);
-                }}
-                disabled={loadingFiles}
-                placeholder="-- Seleccionar Archivo --"
-                options={excelFiles.map(f => ({ value: f.id, label: f.nombreArchivo }))}
-            />
+        <div className="p-3 bg-gray-50 rounded border border-gray-200 space-y-3">
+            <div className="flex items-center gap-2">
+                <Icon name="table_chart" className="text-gray-600" style={{ fontSize: '16px' }} />
+                <span className="text-xs font-semibold text-gray-700">Configuración Excel</span>
+            </div>
+            <div className="flex items-center gap-2">
+                <Select
+                    value={currentFileId}
+                    onChange={(val) => {
+                        const e = { target: { value: val ? String(val) : '' } } as React.ChangeEvent<HTMLSelectElement>;
+                        handleFileChange(e);
+                    }}
+                    disabled={loadingFiles}
+                    placeholder="-- Seleccionar Archivo --"
+                    options={excelFiles.map(f => ({ value: f.id, label: f.nombreArchivo }))}
+                />
+                <Tooltip content="Archivo Excel con los datos de origen" position="right" />
+            </div>
 
-            <Select
-                value={currentCol}
-                onChange={(val) => {
-                    const e = { target: { value: val ? String(val) : '' } } as React.ChangeEvent<HTMLSelectElement>;
-                    handleColChange(e);
-                }}
-                disabled={!currentFileId || loadingCols}
-                placeholder="-- Seleccionar Columna --"
-                options={columns.map(c => ({ value: c, label: c }))}
-            />
+            <div className="flex items-center gap-2">
+                <Select
+                    value={currentCol}
+                    onChange={(val) => {
+                        const e = { target: { value: val ? String(val) : '' } } as React.ChangeEvent<HTMLSelectElement>;
+                        handleColChange(e);
+                    }}
+                    disabled={!currentFileId || loadingCols}
+                    placeholder="-- Seleccionar Columna --"
+                    options={columns.map(c => ({ value: c, label: c }))}
+                />
+                <Tooltip content="Columna del Excel que contiene el valor" position="right" />
+            </div>
             {isExcel && <p className="text-xs text-gray-400 font-mono mt-1">{campoQuery}</p>}
         </div>
     );
@@ -271,158 +281,209 @@ export const TemplateFieldsConfig = ({ campos, onChange, flujoId, onOpenPdfPicke
 
             {/* Formulario para agregar/editar */}
             {isAdding && (
-                <div className="bg-white p-4 rounded border border-gray-300 space-y-3">
-                    <div className="grid grid-cols-2 gap-3">
-                        <Input
-                            label="Nombre"
-                            {...register('nombre', { required: true })}
-                            placeholder="Ej. Cédula"
-                        />
-                        <Input
-                            label="Código"
-                            {...register('codigo', { required: true })}
-                            placeholder="Ej. cedula"
-                        />
+                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-3">
+                    {/* Header */}
+                    <div className="flex justify-between items-center">
+                        <h5 className="text-xs font-bold uppercase text-gray-700">
+                            {editingIndex !== null ? 'Editar Campo' : 'Nuevo Campo'}
+                        </h5>
+                        <button
+                            type="button"
+                            onClick={handleCancel}
+                            className="text-gray-400 hover:text-gray-600"
+                        >
+                            <Icon name="close" className="text-[18px]" />
+                        </button>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
-                        <div className="space-y-1">
-                            <label className="text-sm font-semibold text-gray-700">Tipo</label>
-                            <Controller
-                                name="tipo"
-                                control={control}
-                                rules={{ required: true }}
-                                render={({ field }) => (
-                                    <Select
-                                        {...field}
-                                        options={FIELD_TYPES.map(type => ({ value: type.value, label: type.label }))}
-                                        onChange={(val) => field.onChange(val)}
-                                        placeholder="Seleccionar..."
-                                    />
-                                )}
+                    {/* Basic Info Section */}
+                    <div className="p-3 bg-white rounded-lg border-l-4 border-blue-500 shadow-sm">
+                        <div className="flex items-center gap-2 mb-2">
+                            <Icon name="label" className="text-blue-600" style={{ fontSize: '16px' }} />
+                            <span className="text-xs font-semibold text-gray-900">Información del Campo</span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                            <Input
+                                label="Nombre"
+                                {...register('nombre', { required: true })}
+                                placeholder="Ej. Cédula"
+                            />
+                            <Input
+                                label="Código"
+                                {...register('codigo', { required: true })}
+                                placeholder="Ej. cedula"
                             />
                         </div>
-                        <Input
-                            label="Página"
-                            type="number"
-                            {...register('pagina', { required: true })}
-                            placeholder="1"
-                        />
-                    </div>
 
-                    <div className="space-y-1">
-                        <label className="text-sm font-semibold text-gray-700">Etiqueta PDF (Smart Tag)</label>
-                        <input
-                            {...register('etiqueta')}
-                            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                            placeholder="Ej. CAMPO_FECHA_1"
-                        />
-                        <p className="text-xs text-gray-500">Etiqueta en el PDF para ubicar el campo automáticamente</p>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3">
-                        <Input
-                            label="Font Size"
-                            type="number"
-                            {...register('fontSize')}
-                            placeholder="10"
-                        />
-                    </div>
-
-                    {/* Coords & PDF Picker */}
-                    <div className="grid grid-cols-3 gap-2">
-                        <Input
-                            label="Coord X"
-                            type="number"
-                            {...register('coordX', { required: true })}
-                            placeholder="X"
-                        />
-                        <Input
-                            label="Coord Y"
-                            type="number"
-                            {...register('coordY', { required: true })}
-                            placeholder="Y"
-                        />
-                    </div>
-                    {onOpenPdfPicker && (
-                        <Button
-                            type="button"
-                            size="sm"
-                            variant="outline"
-                            onClick={() => {
-                                const data = { coordX: Number(watch('coordX')) || 0, coordY: Number(watch('coordY')) || 0, pagina: Number(watch('pagina')) || 1 };
-                                onOpenPdfPicker(data, editingIndex!);
-                            }}
-                        >
-                            <Icon name="edit" className="mr-1 text-[16px]" />
-                            Seleccionar en PDF
-                        </Button>
-                    )}
-
-                    {/* Source Config */}
-                    <div className="space-y-2 border-t pt-2 mt-2">
-                        <label className="text-sm font-semibold text-gray-700">Fuente de Datos</label>
-                        <Select
-                            value={sourceType}
-                            onChange={(val) => {
-                                const e = { target: { value: val ? String(val) : '' } } as React.ChangeEvent<HTMLSelectElement>;
-                                handleSourceTypeChange(e);
-                            }}
-                            options={[
-                                { value: '', label: 'Ninguna' },
-                                { value: 'CUSTOM', label: 'Consulta Manual / SQL' },
-                                { value: 'EXCEL', label: 'Datos Excel' },
-                                { value: 'PRESET_FECHA_ACTUAL', label: 'Fecha Actual' }
-                            ]}
-                        />
-
-                        {/* Render specific config based on source */}
-                        {sourceType === 'CUSTOM' && (
+                        <div className="grid grid-cols-2 gap-3 mt-3">
                             <div className="space-y-1">
-                                <label className="text-xs font-semibold text-gray-700">Query SQL / Valor</label>
-                                <textarea
-                                    {...register('campoQuery')}
-                                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-mono"
-                                    rows={2}
-                                    placeholder="SELECT ip FROM..."
+                                <div className="flex items-center gap-2">
+                                    <label className="text-xs font-semibold text-[#121617]">Tipo</label>
+                                    <Tooltip content="Tipo de dato del campo (text, number, date, etc.)" position="right" />
+                                </div>
+                                <Controller
+                                    name="tipo"
+                                    control={control}
+                                    rules={{ required: true }}
+                                    render={({ field }) => (
+                                        <Select
+                                            {...field}
+                                            options={FIELD_TYPES.map(type => ({ value: type.value, label: type.label }))}
+                                            onChange={(val) => field.onChange(val)}
+                                            placeholder="Seleccionar..."
+                                        />
+                                    )}
                                 />
                             </div>
-                        )}
-
-                        {sourceType === 'EXCEL' && (
-                            <ExcelQueryConfig
-                                control={control}
-                                flujoId={flujoId}
-                                setValue={setValue}
+                            <Input
+                                label="Página"
+                                type="number"
+                                description="Página del PDF"
+                                {...register('pagina', { required: true })}
+                                placeholder="1"
                             />
+                        </div>
+
+                        <div className="space-y-1 mt-3">
+                            <label className="text-xs font-semibold text-[#121617]">Etiqueta PDF (Smart Tag)</label>
+                            <input
+                                {...register('etiqueta')}
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                                placeholder="Ej. CAMPO_FECHA_1"
+                            />
+                            <p className="text-xs text-gray-500">Etiqueta para ubicar el campo automáticamente</p>
+                        </div>
+                    </div>
+
+                    {/* Positioning Section */}
+                    <div className="p-3 bg-white rounded-lg border-l-4 border-orange-500 shadow-sm">
+                        <div className="flex items-center gap-2 mb-2">
+                            <Icon name="pin_drop" className="text-orange-600" style={{ fontSize: '16px' }} />
+                            <span className="text-xs font-semibold text-gray-900">Posición en PDF</span>
+                            <Tooltip content="Coordenadas y tamaño del campo" position="top" />
+                        </div>
+                        <div className="grid grid-cols-3 gap-2">
+                            <Input
+                                label="Coord X"
+                                type="number"
+                                description="Horizontal"
+                                {...register('coordX', { required: true })}
+                                placeholder="X"
+                            />
+                            <Input
+                                label="Coord Y"
+                                type="number"
+                                description="Vertical"
+                                {...register('coordY', { required: true })}
+                                placeholder="Y"
+                            />
+                            <Input
+                                label="Font Size"
+                                type="number"
+                                description="Tamaño"
+                                {...register('fontSize')}
+                                placeholder="10"
+                            />
+                        </div>
+                        {onOpenPdfPicker && (
+                            <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                className="mt-2"
+                                onClick={() => {
+                                    const data = { coordX: Number(watch('coordX')) || 0, coordY: Number(watch('coordY')) || 0, pagina: Number(watch('pagina')) || 1 };
+                                    onOpenPdfPicker(data, editingIndex!);
+                                }}
+                            >
+                                <Icon name="edit" className="mr-1 text-[16px]" />
+                                Seleccionar en PDF
+                            </Button>
                         )}
                     </div>
 
-                    <div className="flex gap-4 pt-2">
-                        <label className="flex items-center gap-2 cursor-pointer">
-                            <input
-                                type="checkbox"
-                                {...register('campoTrigger')}
-                                className="rounded text-brand-teal focus:ring-brand-teal"
-                            />
-                            <span className="text-sm text-gray-700">Campo Trigger</span>
-                        </label>
-                        <label className="flex items-center gap-2 cursor-pointer">
-                            <input
-                                type="checkbox"
-                                {...register('mostrarDiasTranscurridos')}
-                                className="rounded text-brand-teal focus:ring-brand-teal"
-                            />
-                            <span className="text-sm text-gray-700">Mostrar Días Transcurridos</span>
-                        </label>
+                    {/* Source Config */}
+                    <div className="p-3 bg-white rounded-lg border-l-4 border-green-500 shadow-sm">
+                        <div className="flex items-center gap-2 mb-2">
+                            <Icon name="storage" className="text-green-600" style={{ fontSize: '16px' }} />
+                            <span className="text-xs font-semibold text-gray-900">Fuente de Datos</span>
+                            <Tooltip content="Define de dónde obtiene su valor este campo" position="top" />
+                        </div>
+                        <div className="space-y-3">
+                            <div className="flex items-center gap-2">
+                                <label className="text-xs font-semibold text-[#121617] whitespace-nowrap">Tipo:</label>
+                                <Select
+                                    value={sourceType}
+                                    onChange={(val) => {
+                                        const e = { target: { value: val ? String(val) : '' } } as React.ChangeEvent<HTMLSelectElement>;
+                                        handleSourceTypeChange(e);
+                                    }}
+                                    options={[
+                                        { value: '', label: 'Ninguna' },
+                                        { value: 'CUSTOM', label: 'Consulta Manual / SQL' },
+                                        { value: 'EXCEL', label: 'Datos Excel' },
+                                        { value: 'PRESET_FECHA_ACTUAL', label: 'Fecha Actual' }
+                                    ]}
+                                />
+                                <Tooltip content="Selecciona el origen de los datos" position="right" />
+                            </div>
+
+                            {sourceType === 'CUSTOM' && (
+                                <div className="space-y-1">
+                                    <label className="text-xs font-semibold text-[#121617]">Query SQL / Valor</label>
+                                    <textarea
+                                        {...register('campoQuery')}
+                                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-mono"
+                                        rows={2}
+                                        placeholder="SELECT ip FROM..."
+                                    />
+                                </div>
+                            )}
+
+                            {sourceType === 'EXCEL' && (
+                                <ExcelQueryConfig
+                                    control={control}
+                                    flujoId={flujoId}
+                                    setValue={setValue}
+                                />
+                            )}
+                        </div>
                     </div>
 
-                    <div className="flex gap-2 pt-2">
+                    {/* Flags Section */}
+                    <div className="p-3 bg-white rounded-lg border-l-4 border-purple-500 shadow-sm">
+                        <div className="flex items-center gap-2 mb-2">
+                            <Icon name="widgets" className="text-purple-600" style={{ fontSize: '16px' }} />
+                            <span className="text-xs font-semibold text-gray-900">Opciones de Campo</span>
+                            <Tooltip content="Comportamiento especial del campo" position="top" />
+                        </div>
+                        <div className="grid grid-cols-2 gap-y-2 gap-x-4">
+                            <label className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    {...register('campoTrigger')}
+                                    className="rounded text-brand-teal focus:ring-brand-teal"
+                                />
+                                <span className="text-xs text-gray-700">Campo Trigger</span>
+                                <Tooltip content="Campo que inicia el conteo de días transcurridos" position="right" />
+                            </label>
+                            <label className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    {...register('mostrarDiasTranscurridos')}
+                                    className="rounded text-brand-teal focus:ring-brand-teal"
+                                />
+                                <span className="text-xs text-gray-700">Mostrar Días</span>
+                                <Tooltip content="Muestra el tiempo transcurrido" position="right" />
+                            </label>
+                        </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex justify-end gap-2 pt-2 border-t">
+                        <Button type="button" size="sm" variant="ghost" onClick={handleCancel}>Cancelar</Button>
                         <Button type="button" size="sm" variant="brand" onClick={handleSubmit(handleAdd)}>
                             {editingIndex !== null ? 'Actualizar' : 'Agregar'}
-                        </Button>
-                        <Button type="button" size="sm" variant="ghost" onClick={handleCancel}>
-                            Cancelar
                         </Button>
                     </div>
                 </div>

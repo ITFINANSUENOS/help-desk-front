@@ -547,32 +547,26 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
 
                     {!!watch('requiereFirma') && (
                         <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                            <div className="mb-4">
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Empresa / Plantilla PDF
-                                </label>
+                            <div className="mb-4 p-4 bg-white rounded-lg border-l-4 border-cyan-500 shadow-sm">
+                                <div className="flex items-center gap-2 mb-3">
+                                    <Icon name="description" className="text-cyan-600" style={{ fontSize: '18px' }} />
+                                    <h4 className="text-sm font-semibold text-gray-900">Empresa / Plantilla PDF</h4>
+                                    <Tooltip content="Selecciona la empresa y plantilla PDF para las firmas" position="top" />
+                                </div>
                                 <div className="flex gap-2 items-center mb-2">
-                                    <select
-                                        className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm"
+                                    <Select
                                         value={selectedEmpresaId || ''}
-                                        onChange={(e) => handleEmpresaChange(Number(e.target.value))}
-                                    >
-                                        <option value="">Seleccione empresa...</option>
-                                        {companies.map(c => (
-                                            <option key={c.id} value={c.id}>{c.nombre}</option>
-                                        ))}
-                                    </select>
-                                    <select
-                                        className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm"
+                                        onChange={(val) => handleEmpresaChange(Number(val))}
+                                        options={companies.map(c => ({ value: c.id, label: c.nombre }))}
+                                        placeholder="Seleccione empresa..."
+                                    />
+                                    <Select
                                         value={selectedPlantilla?.id || ''}
-                                        onChange={(e) => handlePlantillaChange(Number(e.target.value))}
+                                        onChange={(val) => handlePlantillaChange(Number(val))}
+                                        options={plantillas.map(p => ({ value: p.id, label: p.nombrePlantilla }))}
+                                        placeholder="Seleccione plantilla..."
                                         disabled={!selectedEmpresaId}
-                                    >
-                                        <option value="">Seleccione plantilla...</option>
-                                        {plantillas.map(p => (
-                                            <option key={p.id} value={p.id}>{p.nombrePlantilla}</option>
-                                        ))}
-                                    </select>
+                                    />
                                 </div>
                                 {pdfUrl && (
                                     <Button type="button" size="sm" variant="outline" onClick={() => handleOpenPicker('firma', 'firmas')}>
@@ -593,32 +587,26 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
 
                     {!!watch('requiereCamposPlantilla') && (
                         <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                            <div className="mb-4">
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Empresa / Plantilla PDF
-                                </label>
+                            <div className="mb-4 p-4 bg-white rounded-lg border-l-4 border-cyan-500 shadow-sm">
+                                <div className="flex items-center gap-2 mb-3">
+                                    <Icon name="description" className="text-cyan-600" style={{ fontSize: '18px' }} />
+                                    <h4 className="text-sm font-semibold text-gray-900">Empresa / Plantilla PDF</h4>
+                                    <Tooltip content="Selecciona la empresa y plantilla PDF para los campos" position="top" />
+                                </div>
                                 <div className="flex gap-2 items-center mb-2">
-                                    <select
-                                        className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm"
+                                    <Select
                                         value={selectedEmpresaId || ''}
-                                        onChange={(e) => handleEmpresaChange(Number(e.target.value))}
-                                    >
-                                        <option value="">Seleccione empresa...</option>
-                                        {companies.map(c => (
-                                            <option key={c.id} value={c.id}>{c.nombre}</option>
-                                        ))}
-                                    </select>
-                                    <select
-                                        className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm"
+                                        onChange={(val) => handleEmpresaChange(Number(val))}
+                                        options={companies.map(c => ({ value: c.id, label: c.nombre }))}
+                                        placeholder="Seleccione empresa..."
+                                    />
+                                    <Select
                                         value={selectedPlantilla?.id || ''}
-                                        onChange={(e) => handlePlantillaChange(Number(e.target.value))}
+                                        onChange={(val) => handlePlantillaChange(Number(val))}
+                                        options={plantillas.map(p => ({ value: p.id, label: p.nombrePlantilla }))}
+                                        placeholder="Seleccione plantilla..."
                                         disabled={!selectedEmpresaId}
-                                    >
-                                        <option value="">Seleccione plantilla...</option>
-                                        {plantillas.map(p => (
-                                            <option key={p.id} value={p.id}>{p.nombrePlantilla}</option>
-                                        ))}
-                                    </select>
+                                    />
                                 </div>
                                 {pdfUrl && (
                                     <Button type="button" size="sm" variant="outline" onClick={() => handleOpenPicker('campo', 'campos')}>
@@ -632,7 +620,7 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
                                 campos={(watch('campos') || []) as unknown as StepTemplateField[]}
                                 onChange={(newCampos) => setValue('campos', newCampos)}
                                 flujoId={Number(flujoId)}
-                                onOpenPdfPicker={(coords, editingIndex) => {
+                                onOpenPdfPicker={(_coords, editingIndex) => {
                                     handleOpenPicker('campo', 'campos', editingIndex);
                                 }}
                             />

@@ -6,6 +6,7 @@ import type { StepSignature } from '../interfaces/Step';
 import type { Position } from '../../../shared/interfaces/Catalog';
 import { toast } from 'sonner';
 import { Icon } from '../../../shared/components/Icon';
+import { Tooltip } from '../../../shared/components/Tooltip';
 
 interface SignatureConfigProps {
     firmas: StepSignature[];
@@ -151,36 +152,61 @@ export const SignatureConfig = ({ firmas, onChange, positions, onOpenPdfPicker }
             </div>
 
             {isAdding && (
-                <div className="bg-white p-3 rounded border border-blue-200 space-y-3 shadow-md">
-                    <h5 className="text-xs font-bold uppercase text-blue-600 flex justify-between items-center">
-                        {editingIndex !== null ? 'Editar Zona' : 'Nueva Zona'}
-                    </h5>
-                    <div className="space-y-3">
-                        <div>
-                            <Input
-                                label="Etiqueta PDF (Smart Tag)"
-                                {...register('etiqueta')}
-                                placeholder="Ej. FIRMA_GERENTE"
-                            />
-                            <p className="text-xs text-gray-500 mt-1">Etiqueta en el PDF para ubicar la firma automáticamente</p>
-                        </div>
+                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                    {/* Header */}
+                    <div className="flex justify-between items-center">
+                        <h5 className="text-xs font-bold uppercase text-gray-700">
+                            {editingIndex !== null ? 'Editar Zona' : 'Nueva Zona'}
+                        </h5>
+                        <button
+                            type="button"
+                            onClick={handleCancel}
+                            className="text-gray-400 hover:text-gray-600"
+                        >
+                            <Icon name="close" className="text-[18px]" />
+                        </button>
+                    </div>
 
+                    {/* Zone Info Section */}
+                    <div className="p-3 bg-white rounded-lg border-l-4 border-blue-500 shadow-sm">
+                        <div className="flex items-center gap-2 mb-2">
+                            <Icon name="edit_document" className="text-blue-600" style={{ fontSize: '16px' }} />
+                            <span className="text-xs font-semibold text-gray-900">Información de Zona</span>
+                        </div>
+                        <Input
+                            label="Etiqueta PDF (Smart Tag)"
+                            description="Etiqueta para ubicar la zona de firma automáticamente"
+                            {...register('etiqueta')}
+                            placeholder="Ej. FIRMA_GERENTE"
+                        />
+                    </div>
+
+                    {/* Positioning Section */}
+                    <div className="p-3 bg-white rounded-lg border-l-4 border-orange-500 shadow-sm">
+                        <div className="flex items-center gap-2 mb-2">
+                            <Icon name="pin_drop" className="text-orange-600" style={{ fontSize: '16px' }} />
+                            <span className="text-xs font-semibold text-gray-900">Posición en PDF</span>
+                            <Tooltip content="Coordenadas de la zona de firma" position="top" />
+                        </div>
                         <div className="grid grid-cols-3 gap-2">
                             <Input
                                 label="Página"
                                 type="number"
+                                description="Página"
                                 {...register('pagina', { required: true, min: 1 })}
                                 placeholder="1"
                             />
                             <Input
                                 label="Coord X"
                                 type="number"
+                                description="Horizontal"
                                 {...register('coordX', { required: true })}
                                 placeholder="X"
                             />
                             <Input
                                 label="Coord Y"
                                 type="number"
+                                description="Vertical"
                                 {...register('coordY', { required: true })}
                                 placeholder="Y"
                             />
@@ -190,6 +216,7 @@ export const SignatureConfig = ({ firmas, onChange, positions, onOpenPdfPicker }
                                 type="button"
                                 size="sm"
                                 variant="outline"
+                                className="mt-2"
                                 onClick={() => {
                                     const data = { coordX: Number(watch('coordX')) || 0, coordY: Number(watch('coordY')) || 0, pagina: Number(watch('pagina')) || 1 };
                                     onOpenPdfPicker(data);
@@ -200,17 +227,22 @@ export const SignatureConfig = ({ firmas, onChange, positions, onOpenPdfPicker }
                             </Button>
                         )}
                     </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Cargos Permitidos (Opcional)</label>
-                        <p className="text-xs text-gray-500 mb-2">Seleccione uno o más cargos. Si el usuario tiene alguno de estos cargos, podrá firmar en este espacio.</p>
+
+                    {/* Cargos Section */}
+                    <div className="p-3 bg-white rounded-lg border-l-4 border-green-500 shadow-sm">
+                        <div className="flex items-center gap-2 mb-2">
+                            <Icon name="badge" className="text-green-600" style={{ fontSize: '16px' }} />
+                            <span className="text-xs font-semibold text-gray-900">Cargos que Pueden Firmar</span>
+                            <Tooltip content="Seleccione los cargos habilitados para firmar" position="top" />
+                        </div>
                         <Controller
                             name="cargosIds"
                             control={control}
                             defaultValue={[]}
                             render={({ field }) => (
-                                <div className="max-h-32 overflow-y-auto border rounded p-2 space-y-1">
+                                <div className="grid grid-cols-2 md:grid-cols-3 gap-y-2 gap-x-4 max-h-40 overflow-y-auto">
                                     {positions.map(p => (
-                                        <label key={p.id} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-gray-50 p-1 rounded">
+                                        <label key={p.id} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-gray-50 px-2 py-1 rounded">
                                             <input
                                                 type="checkbox"
                                                 checked={field.value?.includes(Number(p.id))}
@@ -222,17 +254,19 @@ export const SignatureConfig = ({ firmas, onChange, positions, onOpenPdfPicker }
                                                         field.onChange(selected.filter((id: number) => id !== Number(p.id)));
                                                     }
                                                 }}
-                                                className="rounded border-gray-300"
+                                                className="rounded text-brand-teal focus:ring-brand-teal"
                                             />
-                                            {p.nombre}
+                                            <span className="text-gray-700 text-xs">{p.nombre}</span>
                                         </label>
                                     ))}
                                 </div>
                             )}
                         />
-                        <p className="text-xs text-gray-400 mt-1">Deja vacío para que cualquier usuario pueda firmar.</p>
+                        <p className="text-xs text-gray-400 mt-2">Dejar vacío para que cualquier usuario pueda firmar</p>
                     </div>
-                    <div className="flex justify-end gap-2 pt-2">
+
+                    {/* Actions */}
+                    <div className="flex justify-end gap-2 pt-2 border-t">
                         <Button type="button" size="sm" variant="ghost" onClick={handleCancel}>Cancelar</Button>
                         <Button type="button" size="sm" variant="brand" onClick={handleSubmit(onSubmit)}>
                             {editingIndex !== null ? 'Actualizar' : 'Agregar'}
