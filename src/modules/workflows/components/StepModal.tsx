@@ -587,7 +587,11 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
 
                             <SignatureConfig
                                 firmas={(watch('firmas') || []) as unknown as StepSignature[]}
-                                onChange={(newFirmas) => setValue('firmas', newFirmas)}
+                                onChange={(newFirmas) => {
+                                    console.log('[StepModal] SignatureConfig onChange called with:', newFirmas);
+                                    setValue('firmas', newFirmas);
+                                    console.log('[StepModal] firmas after setValue:', watch('firmas'));
+                                }}
                                 positions={positions}
                                 onOpenPdfPicker={(_coords, editingIndex) => {
                                     handleOpenPicker('firma', 'firmas', editingIndex);

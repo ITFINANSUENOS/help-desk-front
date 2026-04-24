@@ -33,8 +33,10 @@ export const SignatureConfig = ({ firmas, onChange, positions, onOpenPdfPicker }
     }, [firmas, editingIndex, setValue]);
 
     const onSubmit = (data: StepSignature) => {
+        console.log('[SignatureConfig] onSubmit called', { data, firmas, editingIndex, isAdding });
         const selectedCargosIds = data.cargosIds ? data.cargosIds.map(Number).filter(n => !isNaN(n)) : undefined;
         const existingFirma = editingIndex !== null ? firmas[editingIndex] : null;
+        console.log('[SignatureConfig] existingFirma:', existingFirma);
         const newFirma: StepSignature = {
             ...data,
             id: existingFirma?.id,
@@ -47,14 +49,19 @@ export const SignatureConfig = ({ firmas, onChange, positions, onOpenPdfPicker }
         };
 
         if (editingIndex !== null) {
+            console.log('[SignatureConfig] Updating existing signature at index', editingIndex);
             const newFirmas = [...firmas];
             newFirmas[editingIndex] = newFirma;
+            console.log('[SignatureConfig] Calling onChange with updated firmas:', newFirmas);
             onChange(newFirmas);
             setEditingIndex(null);
             setIsAdding(false);
             toast.success('Zona actualizada');
         } else {
-            onChange([...firmas, newFirma]);
+            console.log('[SignatureConfig] Adding new signature, current firmas:', firmas);
+            const updatedFirmas = [...firmas, newFirma];
+            console.log('[SignatureConfig] Calling onChange with:', updatedFirmas);
+            onChange(updatedFirmas);
             setIsAdding(false);
             reset();
             toast.success('Zona agregada');
