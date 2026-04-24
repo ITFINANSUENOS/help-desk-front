@@ -130,7 +130,25 @@ export const WorkflowStepsPage = () => {
                     {
                         key: 'cargoAsignado',
                         header: 'Cargo Asignado',
-                        render: (step: Step) => step.cargoAsignado?.nombre || <span className="text-gray-400 italic">Sin asignar</span>
+                        render: (step: Step) => {
+                            if (step.cargoAsignado?.nombre) {
+                                return step.cargoAsignado.nombre;
+                            }
+                            // Mostrar según tipo de asignación
+                            if (step.esPool) {
+                                return <span className="text-blue-600 font-medium uppercase">Pool (Múltiple)</span>;
+                            }
+                            if (step.asignarCreador) {
+                                return <span className="text-purple-600 font-medium uppercase">Creador Ticket</span>;
+                            }
+                            if (step.requiereSeleccionManual) {
+                                return <span className="text-orange-600 font-medium uppercase">Selección Manual</span>;
+                            }
+                            if (step.necesitaAprobacionJefe) {
+                                return <span className="text-amber-600 font-medium uppercase">Jefe Inmediato</span>;
+                            }
+                            return <span className="text-gray-400 italic uppercase">Sin asignar</span>;
+                        }
                     },
                     {
                         key: 'config',
