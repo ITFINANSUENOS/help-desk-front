@@ -16,7 +16,6 @@ export interface Step {
     esTareaNacional: boolean;
     requiereSeleccionManual?: number; // 1 or 0
     nombreAdjunto?: string;
-    campoReferenciaJefeId?: number;
     permiteCerrar?: number; // 1 or 0
     necesitaAprobacionJefe?: boolean;
     esParalelo?: boolean;
@@ -69,7 +68,6 @@ export interface CreateStepDto {
     esTareaNacional?: boolean;
     requiereSeleccionManual?: number;
     nombreAdjunto?: string;
-    campoReferenciaJefeId?: number;
     permiteCerrar?: number;
     necesitaAprobacionJefe?: boolean;
     esParalelo?: boolean;

@@ -11,7 +11,6 @@ import { stepService } from '../services/step.service';
 import { positionService } from '../../../shared/services/catalog.service';
 import type { Position } from '../../../shared/interfaces/Catalog';
 import { templateService } from '../../templates/services/template.service';
-import type { TemplateField } from '../../templates/interfaces/TemplateField';
 import { companyService } from '../../companies/services/company.service';
 import { toast } from 'sonner';
 import { SignatureConfig } from './SignatureConfig';
@@ -46,7 +45,6 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
     const isEdit = !!step;
     const { register, handleSubmit, reset, control, setValue, watch, formState: { isSubmitting } } = useForm<CreateStepDto>();
     const [positions, setPositions] = useState<Position[]>([]);
-    const [templateFields, setTemplateFields] = useState<TemplateField[]>([]);
     const [pdfFile, setPdfFile] = useState<File | null>(null);
     const [companies, setCompanies] = useState<Company[]>([]);
     const [selectedEmpresaId, setSelectedEmpresaId] = useState<number | null>(null);
@@ -86,7 +84,6 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
                             descripcion: fullStep.descripcion,
                             cargoAsignadoId: fullStep.cargoAsignadoId,
                             tiempoHabil: fullStep.tiempoHabil,
-                            campoReferenciaJefeId: fullStep.campoReferenciaJefeId,
                             esAprobacion: !!fullStep.esAprobacion,
                             esTareaNacional: !!fullStep.esTareaNacional,
                             requiereSeleccionManual: fullStep.requiereSeleccionManual,
@@ -137,7 +134,6 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
 
     const loadCatalogs = () => {
         positionService.getAllActive().then(setPositions).catch(console.error);
-        templateService.getAllFields().then(setTemplateFields).catch(console.error);
         companyService.getCompanies({ limit: 100 }).then(res => setCompanies(res.data || [])).catch(console.error);
     };
 
@@ -429,24 +425,6 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
                                 </div>
                             </div>
 
-                            <div className="space-y-1 col-span-2">
-                                <div className="flex items-center gap-1">
-                                    <label className="text-sm font-semibold text-[#121617]">Campo Ref. Jefe (Opcional)</label>
-                                    <Tooltip content="Campo de la plantilla que indica quién es el jefe del asignado" position="right" />
-                                </div>
-                                <Controller
-                                    name="campoReferenciaJefeId"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <Select
-                                            {...field}
-                                            options={Array.isArray(templateFields) ? templateFields.map(f => ({ value: f.id, label: `${f.etiqueta} (${f.codigo})` })) : []}
-                                            onChange={(val) => field.onChange(val)}
-                                            placeholder="-- Seleccionar Campo --"
-                                        />
-                                    )}
-                                />
-                            </div>
                         </div>
                     </div>
 

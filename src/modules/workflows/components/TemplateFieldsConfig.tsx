@@ -233,15 +233,7 @@ export const TemplateFieldsConfig = ({ campos, onChange, flujoId, onOpenPdfPicke
 
     return (
         <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-            <div className="flex justify-between items-center mb-4">
-                <h4 className="font-semibold text-gray-700">Campos de Plantilla</h4>
-                {!isAdding && (
-                    <Button size="sm" variant="outline" onClick={() => setIsAdding(true)}>
-                        <Icon name="add" className="mr-1 text-[18px]" />
-                        Agregar Campo
-                    </Button>
-                )}
-            </div>
+            <h4 className="font-semibold text-gray-700 mb-4">Campos de Plantilla</h4>
 
             {/* Lista de campos existentes */}
             {activeCampos.length > 0 && (
