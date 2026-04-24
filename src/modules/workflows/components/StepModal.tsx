@@ -580,7 +580,9 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
                                 firmas={(watch('firmas') || []) as unknown as StepSignature[]}
                                 onChange={(newFirmas) => setValue('firmas', newFirmas)}
                                 positions={positions}
-                                onOpenPdfPicker={() => handleOpenPicker('firma', 'firmas')}
+                                onOpenPdfPicker={(_coords, editingIndex) => {
+                                    handleOpenPicker('firma', 'firmas', editingIndex);
+                                }}
                             />
                         </div>
                     )}

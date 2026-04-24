@@ -56,6 +56,15 @@ export const PdfCoordinatePicker = ({
   const [selectedCargos, setSelectedCargos] = useState<number[]>([]);
   const [nombre, setNombre] = useState('');
   const [codigo, setCodigo] = useState('');
+  const [cargoSearch, setCargoSearch] = useState('');
+
+  const toggleCargo = (cargoId: number) => {
+    setSelectedCargos(prev =>
+      prev.includes(cargoId)
+        ? prev.filter(id => id !== cargoId)
+        : [...prev, cargoId]
+    );
+  };
 
   const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
     setNumPages(numPages);
@@ -117,14 +126,7 @@ export const PdfCoordinatePicker = ({
     setCodigo('');
   };
 
-  const toggleCargo = (cargoId: number) => {
-    setSelectedCargos(prev =>
-      prev.includes(cargoId)
-        ? prev.filter(id => id !== cargoId)
-        : [...prev, cargoId]
-    );
-  };
-
+  
   const markersOnPage = markers.filter((m) => m.pagina === currentPage);
 
   return (
@@ -262,21 +264,43 @@ export const PdfCoordinatePicker = ({
                   <p className="text-xs text-gray-500 mb-2">
                     Dejar vacío = cualquier cargo puede firmar
                   </p>
+                  {/* Search input */}
+                  <input
+                    type="text"
+                    placeholder="Buscar cargo..."
+                    value={cargoSearch}
+                    onChange={(e) => setCargoSearch(e.target.value)}
+                    className="w-full mb-2 px-3 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-brand-teal"
+                  />
+                  {/* Jefe Inmediato option */}
+                  <div className="mb-2 p-2 bg-amber-50 rounded border border-amber-200">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={selectedCargos.includes(-1)}
+                        onChange={() => toggleCargo(-1)}
+                        className="rounded text-brand-teal focus:ring-brand-teal"
+                      />
+                      <span className="text-xs font-medium text-amber-800">Jefe Inmediato (-1)</span>
+                    </label>
+                  </div>
                   <div className="max-h-48 overflow-y-auto border rounded p-2 space-y-1">
-                    {positions.map(p => (
-                      <label
-                        key={p.id}
-                        className="flex items-center gap-2 text-sm cursor-pointer hover:bg-gray-50 p-1 rounded"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={selectedCargos.includes(Number(p.id))}
-                          onChange={() => toggleCargo(Number(p.id))}
-                          className="rounded border-gray-300"
-                        />
-                        {p.nombre}
-                      </label>
-                    ))}
+                    {positions
+                      .filter(p => p.nombre.toLowerCase().includes(cargoSearch.toLowerCase()))
+                      .map(p => (
+                        <label
+                          key={p.id}
+                          className="flex items-center gap-2 text-sm cursor-pointer hover:bg-gray-50 p-1 rounded"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={selectedCargos.includes(Number(p.id))}
+                            onChange={() => toggleCargo(Number(p.id))}
+                            className="rounded text-brand-teal focus:ring-brand-teal"
+                          />
+                          {p.nombre}
+                        </label>
+                      ))}
                   </div>
                 </div>
               )}

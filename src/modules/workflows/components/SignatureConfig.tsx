@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { Button } from '../../../shared/components/Button';
 import { Input } from '../../../shared/components/Input';
@@ -12,7 +12,7 @@ interface SignatureConfigProps {
     firmas: StepSignature[];
     onChange: (firmas: StepSignature[]) => void;
     positions: Position[];
-    onOpenPdfPicker?: (initialCoords?: { coordX: number; coordY: number; pagina: number }) => void;
+    onOpenPdfPicker?: (initialCoords?: { coordX: number; coordY: number; pagina: number }, editingIndex?: number) => void;
 }
 
 export const SignatureConfig = ({ firmas, onChange, positions, onOpenPdfPicker }: SignatureConfigProps) => {
@@ -20,6 +20,17 @@ export const SignatureConfig = ({ firmas, onChange, positions, onOpenPdfPicker }
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
     const { register, handleSubmit, reset, setValue, control, watch } = useForm<StepSignature>();
+
+    // Sync form when firmas prop changes (e.g., after PDF picker updates coordinates)
+    useEffect(() => {
+        if (editingIndex !== null && firmas[editingIndex]) {
+            const firma = firmas[editingIndex];
+            setValue('coordX', firma.coordX || 0, { shouldValidate: false });
+            setValue('coordY', firma.coordY || 0, { shouldValidate: false });
+            setValue('pagina', firma.pagina || 1, { shouldValidate: false });
+            setValue('cargosIds', firma.cargosIds || [], { shouldValidate: false });
+        }
+    }, [firmas, editingIndex, setValue]);
 
     const onSubmit = (data: StepSignature) => {
         const selectedCargosIds = data.cargosIds ? data.cargosIds.map(Number).filter(n => !isNaN(n)) : undefined;
@@ -219,7 +230,7 @@ export const SignatureConfig = ({ firmas, onChange, positions, onOpenPdfPicker }
                                 className="mt-2"
                                 onClick={() => {
                                     const data = { coordX: Number(watch('coordX')) || 0, coordY: Number(watch('coordY')) || 0, pagina: Number(watch('pagina')) || 1 };
-                                    onOpenPdfPicker(data);
+                                    onOpenPdfPicker(data, editingIndex ?? undefined);
                                 }}
                             >
                                 <Icon name="edit" className="mr-1 text-[16px]" />
@@ -233,8 +244,37 @@ export const SignatureConfig = ({ firmas, onChange, positions, onOpenPdfPicker }
                         <div className="flex items-center gap-2 mb-2">
                             <Icon name="badge" className="text-green-600" style={{ fontSize: '16px' }} />
                             <span className="text-xs font-semibold text-gray-900">Cargos que Pueden Firmar</span>
-                            <Tooltip content="Seleccione los cargos habilitados para firmar" position="top" />
+                            <Tooltip content="Seleccione los cargos habilitados para firmar. Use -1 para jefe inmediato." position="top" />
                         </div>
+
+                        {/* Jefe Inmediato option */}
+                        <div className="mb-3 p-2 bg-amber-50 rounded border border-amber-200">
+                            <Controller
+                                name="cargosIds"
+                                control={control}
+                                defaultValue={[]}
+                                render={({ field }) => (
+                                    <label className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            checked={field.value?.includes(-1) || false}
+                                            onChange={(e) => {
+                                                const selected = field.value || [];
+                                                if (e.target.checked) {
+                                                    field.onChange([...selected, -1]);
+                                                } else {
+                                                    field.onChange(selected.filter((id: number) => id !== -1));
+                                                }
+                                            }}
+                                            className="rounded text-brand-teal focus:ring-brand-teal"
+                                        />
+                                        <span className="text-xs font-medium text-amber-800">Jefe Inmediato (-1)</span>
+                                        <Tooltip content="El jefe inmediato del usuario asignado puede firmar" position="right" />
+                                    </label>
+                                )}
+                            />
+                        </div>
+
                         <Controller
                             name="cargosIds"
                             control={control}
