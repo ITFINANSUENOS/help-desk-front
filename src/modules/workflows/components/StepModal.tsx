@@ -334,97 +334,128 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
             loading={isSubmitting}
             size="lg"
         >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4">
                 {/* Basic Info */}
-                <div className="col-span-1 md:col-span-2 space-y-4">
-                    <div className="grid grid-cols-4 gap-4">
-                        <div className="col-span-1">
-                            <Input
-                                label="Orden"
-                                type="number"
-                                {...register('orden', { required: 'Requerido' })}
-                            />
+                <div className="space-y-4">
+                        {/* Basic Info */}
+                        <div className="p-4 bg-white rounded-lg border-l-4 border-blue-500 shadow-sm">
+                        <div className="flex items-center gap-2 mb-3">
+                            <Icon name="info" className="text-blue-600" style={{ fontSize: '18px' }} />
+                            <span className="text-sm font-semibold text-gray-900">Información del Paso</span>
                         </div>
-                        <div className="col-span-3">
-                            <Input
-                                label="Nombre del Paso"
-                                {...register('nombre', { required: 'Requerido' })}
-                                placeholder="Ej. Aprobación de Liquidación, Verificación TH, Entrega de documento"
-                            />
-                        </div>
-                    </div>
-
-                    <div className="flex flex-col gap-1">
-                        <label className="text-sm font-semibold text-[#121617]">Descripción</label>
-                        <Controller
-                            control={control}
-                            name="descripcion"
-                            render={({ field }) => (
-                                <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
-                                    <RichTextEditor
-                                        value={field.value || ''}
-                                        onChange={field.onChange}
-                                        placeholder="Instrucciones para este paso..."
-                                        height={150}
+                        <div className="grid grid-cols-4 gap-4">
+                            <div className="col-span-1">
+                                <div className="flex items-center gap-1">
+                                    <Input
+                                        label="Orden"
+                                        type="number"
+                                        {...register('orden', { required: 'Requerido' })}
                                     />
+                                    <Tooltip content="Orden de ejecución del paso en el flujo" position="right" />
                                 </div>
-                            )}
-                        />
+                            </div>
+                            <div className="col-span-3">
+                                <div className="flex items-center gap-1">
+                                    <Input
+                                        label="Nombre del Paso"
+                                        {...register('nombre', { required: 'Requerido' })}
+                                        placeholder="Ej. Aprobación de Liquidación, Verificación TH, Entrega de documento"
+                                    />
+                                    <Tooltip content="Nombre descriptivo del paso" position="right" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex flex-col gap-1 mt-3">
+                            <div className="flex items-center gap-1">
+                                <label className="text-sm font-semibold text-[#121617]">Descripción</label>
+                                <Tooltip content="Instrucciones detalladas para quien ejecute este paso" position="right" />
+                            </div>
+                            <Controller
+                                control={control}
+                                name="descripcion"
+                                render={({ field }) => (
+                                    <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
+                                        <RichTextEditor
+                                            value={field.value || ''}
+                                            onChange={field.onChange}
+                                            placeholder="Instrucciones para este paso..."
+                                            height={150}
+                                        />
+                                    </div>
+                                )}
+                            />
+                        </div>
                     </div>
-                </div>
 
-                {/* Assignment & SLA */}
-                <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700">Cargo Asignado (Default)</label>
-                    <Controller
-                        name="cargoAsignadoId"
-                        control={control}
-                        render={({ field }) => (
-                            <Select
-                                {...field}
-                                disabled={!!watch('esPool')}
-                                options={positions.map(p => ({ value: p.id, label: p.nombre }))}
-                                onChange={(val) => field.onChange(val)}
-                                placeholder="-- Seleccionar --"
-                                description={watch('esPool') ? "Se ignora si es Pool" : "Cargo default para asignación automática"}
-                            />
-                        )}
-                    />
-                </div>
+                    {/* Assignment & SLA */}
+                    <div className="p-4 bg-white rounded-lg border-l-4 border-green-500 shadow-sm">
+                        <div className="flex items-center gap-2 mb-3">
+                            <Icon name="person_pin" className="text-green-600" style={{ fontSize: '18px' }} />
+                            <span className="text-sm font-semibold text-gray-900">Asignación y Tiempo</span>
+                            <Tooltip content="Configura cómo se asigna el trabajo y el tiempo límite" position="top" />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-1">
+                                <div className="flex items-center gap-1">
+                                    <label className="text-sm font-semibold text-[#121617]">Cargo Asignado (Default)</label>
+                                    <Tooltip content="Cargo al que se asignará el ticket por defecto" position="right" />
+                                </div>
+                                <Controller
+                                    name="cargoAsignadoId"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <Select
+                                            {...field}
+                                            disabled={!!watch('esPool')}
+                                            options={positions.map(p => ({ value: p.id, label: p.nombre }))}
+                                            onChange={(val) => field.onChange(val)}
+                                            placeholder="-- Seleccionar --"
+                                        />
+                                    )}
+                                />
+                                {watch('esPool') && <p className="text-xs text-amber-600 mt-1">Se ignora en modo Pool</p>}
+                            </div>
 
-                <div className="space-y-2">
-                    <Input
-                        label="Tiempo SLA (Días)"
-                        type="number"
-                        description="Días hábiles para completar. Afecta vencimientos."
-                        {...register('tiempoHabil')}
-                        placeholder="Ej. 1"
-                    />
-                </div>
+                            <div className="space-y-1">
+                                <div className="flex items-center gap-1">
+                                    <Input
+                                        label="Tiempo SLA (Días)"
+                                        type="number"
+                                        {...register('tiempoHabil')}
+                                        placeholder="Ej. 1"
+                                    />
+                                    <Tooltip content="Días hábiles para completar. Si se excede, el ticket se marca vencido." position="right" />
+                                </div>
+                            </div>
 
-                <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700">Campo Ref. Jefe (Opcional)</label>
-                    <Controller
-                        name="campoReferenciaJefeId"
-                        control={control}
-                        render={({ field }) => (
-                            <Select
-                                {...field}
-                                options={Array.isArray(templateFields) ? templateFields.map(f => ({ value: f.id, label: `${f.etiqueta} (${f.codigo})` })) : []}
-                                onChange={(val) => field.onChange(val)}
-                                placeholder="-- Seleccionar Campo --"
-                                description="Determina dinámicamente el jefe inmediato del asignado"
-                            />
-                        )}
-                    />
-                </div>
+                            <div className="space-y-1 col-span-2">
+                                <div className="flex items-center gap-1">
+                                    <label className="text-sm font-semibold text-[#121617]">Campo Ref. Jefe (Opcional)</label>
+                                    <Tooltip content="Campo de la plantilla que indica quién es el jefe del asignado" position="right" />
+                                </div>
+                                <Controller
+                                    name="campoReferenciaJefeId"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <Select
+                                            {...field}
+                                            options={Array.isArray(templateFields) ? templateFields.map(f => ({ value: f.id, label: `${f.etiqueta} (${f.codigo})` })) : []}
+                                            onChange={(val) => field.onChange(val)}
+                                            placeholder="-- Seleccionar Campo --"
+                                        />
+                                    )}
+                                />
+                            </div>
+                        </div>
+                    </div>
 
-                {/* Flags Section */}
-                <div className="col-span-1 md:col-span-2 pt-4 border-t border-gray-100">
-                    <h3 className="text-sm font-semibold text-gray-900 mb-3">Configuraciones Adicionales</h3>
+                    {/* Flags Section */}
+                    <div className="col-span-1 md:col-span-2 pt-4 border-t border-gray-100">
+                        <h3 className="text-sm font-semibold text-gray-900 mb-3">Configuraciones Adicionales</h3>
 
                     {/* Grupo 1: Asignación */}
-                    <div className="mb-4 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+                    <div className="p-4 bg-white rounded-lg border-l-4 border-blue-500 shadow-sm">
                         <div className="flex items-center gap-2 mb-3">
                             <Icon name="person_pin" className="text-blue-600" style={{ fontSize: '18px' }} />
                             <h4 className="text-sm font-semibold text-gray-900">Asignación</h4>
@@ -449,7 +480,7 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
                         </div>
                         {/* Show Specific Assignment Config when manual selection is enabled OR when esPool is used */}
                         {(!!watch('requiereSeleccionManual') || !!watch('esPool')) && (
-                            <div className="mt-4 p-4 bg-white rounded-lg border border-gray-200">
+                            <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
                                 <h5 className="text-sm font-semibold text-gray-900 mb-3">
                                     {watch('esPool') ? "Usuarios del Grupo (Pool)" : "Usuarios y Cargos Específicos"}
                                 </h5>
@@ -468,7 +499,7 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
                     </div>
 
                     {/* Grupo 2: Aprobación y Firma */}
-                    <div className="mb-4 p-4 bg-green-50 rounded-lg border-l-4 border-green-500">
+                    <div className="p-4 bg-white rounded-lg border-l-4 border-green-500 shadow-sm">
                         <div className="flex items-center gap-2 mb-3">
                             <Icon name="fact_check" className="text-green-600" style={{ fontSize: '18px' }} />
                             <h4 className="text-sm font-semibold text-gray-900">Aprobación y Firma</h4>
@@ -499,7 +530,7 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
                     </div>
 
                     {/* Grupo 3: Cierre y Finalización */}
-                    <div className="mb-4 p-4 bg-orange-50 rounded-lg border-l-4 border-orange-500">
+                    <div className="p-4 bg-white rounded-lg border-l-4 border-orange-500 shadow-sm">
                         <div className="flex items-center gap-2 mb-3">
                             <Icon name="task_alt" className="text-orange-600" style={{ fontSize: '18px' }} />
                             <h4 className="text-sm font-semibold text-gray-900">Cierre y Finalización</h4>
@@ -520,7 +551,7 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
                     </div>
 
                     {/* Grupo 4: Configuración Avanzada */}
-                    <div className="mb-4 p-4 bg-purple-50 rounded-lg border-l-4 border-purple-500">
+                    <div className="p-4 bg-white rounded-lg border-l-4 border-purple-500 shadow-sm">
                         <div className="flex items-center gap-2 mb-3">
                             <Icon name="settings" className="text-purple-600" style={{ fontSize: '18px' }} />
                             <h4 className="text-sm font-semibold text-gray-900">Configuración Avanzada</h4>
@@ -629,16 +660,23 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
                         </div>
                     )}
 
-                    <div className="flex flex-col gap-1 mt-4">
-                        <Input
-                            label="Nombre de Adjunto Requerido (Solo informativo)"
-                            {...register('nombreAdjunto')}
-                            placeholder="Si requiere archivo, nombre aquí..."
-                        />
+                    <div className="p-4 bg-white rounded-lg border-l-4 border-gray-400 shadow-sm mt-4">
+                        <div className="flex items-center gap-2">
+                            <Icon name="attach_file" className="text-gray-600" style={{ fontSize: '18px' }} />
+                            <span className="text-sm font-semibold text-gray-900">Configuración Adicional</span>
+                        </div>
+                        <div className="flex items-center gap-2 mt-3">
+                            <Input
+                                label="Nombre de Adjunto Requerido"
+                                {...register('nombreAdjunto')}
+                                placeholder="Si requiere archivo, nombre aquí..."
+                            />
+                            <Tooltip content="Nombre del archivo que se requiere adjuntar en este paso (solo informativo)" position="right" />
+                        </div>
                     </div>
                 </div>
+                </div>
             </div>
-
             <PdfPickerModal
                 isOpen={pickerOpen}
                 onClose={() => setPickerOpen(false)}
