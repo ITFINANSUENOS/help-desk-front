@@ -271,10 +271,6 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
 
     const onSubmit = async (data: CreateStepDto) => {
         try {
-            // DEBUG: Log form data to verify all fields are present
-
-
-
             data.orden = Number(data.orden);
             data.flujoId = Number(flujoId);
 
