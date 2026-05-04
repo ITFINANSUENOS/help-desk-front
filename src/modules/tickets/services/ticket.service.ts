@@ -421,8 +421,14 @@ export const ticketService = {
     },
 
     async downloadFile(url: string, filename: string): Promise<void> {
-        // If the URL is absolute, api.get should handle it.
-        const response = await api.get(url, { responseType: 'blob' });
+        let fullUrl = url;
+        if (url.startsWith('/')) {
+            // Relative URL - prepend baseURL from api instance
+            fullUrl = api.defaults.baseURL + url;
+        } else if (!url.startsWith('http')) {
+            fullUrl = `${import.meta.env.VITE_API_URL || ''}${url}`;
+        }
+        const response = await api.get(fullUrl, { responseType: 'blob' });
         const mimeType = response.headers['content-type'] || 'application/octet-stream';
         const blob = new Blob([response.data], { type: mimeType });
         const blobUrl = window.URL.createObjectURL(blob);

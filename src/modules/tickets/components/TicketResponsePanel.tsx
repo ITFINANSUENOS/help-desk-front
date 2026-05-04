@@ -35,6 +35,13 @@ interface TicketResponsePanelProps {
     stepDescription?: string;
 }
 
+export interface StepAttachment {
+    id: number;
+    nombreOriginal: string;
+    tamano: number;
+    tipoMime: string;
+}
+
 export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
     ticketId,
     assignedToId,

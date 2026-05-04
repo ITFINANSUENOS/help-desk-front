@@ -2,6 +2,8 @@ import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ticketService } from '../services/ticket.service';
 import type { TicketDetail, TicketTimelineItem, TicketStatus, TicketPriority, ParallelTask } from '../interfaces/Ticket';
+import { stepService } from '../../workflows/services/step.service';
+import type { StepAttachment } from '../components/TicketResponsePanel';
 import { Button } from '../../../shared/components/Button';
 import { TicketWorkflow } from '../components/TicketWorkflow';
 import { TicketTimeline } from '../components/TicketTimeline';
@@ -28,6 +30,7 @@ export default function TicketDetailPage() {
     const [isTagModalOpen, setIsTagModalOpen] = useState(false);
     const [isReassignModalOpen, setIsReassignModalOpen] = useState(false);
     const [parallelTasks, setParallelTasks] = useState<ParallelTask[]>([]);
+    const [stepAttachments, setStepAttachments] = useState<StepAttachment[]>([]);
     const [reassignLoading, setReassignLoading] = useState(false);
     const [pdfUrl, setPdfUrl] = useState<string | null>(null);
 
@@ -45,6 +48,18 @@ export default function TicketDetailPage() {
             ]);
             setTicket(ticketData);
             setTimeline(timelineData);
+
+            // Load step attachments if ticket has a pasoId
+            const pasoId = ticketData.pasoActual?.id || ticketData.workflowStepId;
+            if (pasoId) {
+                try {
+                    const attachments = await stepService.getStepAttachments(pasoId);
+                    setStepAttachments(attachments);
+                } catch (err) {
+                    console.error('Error loading step attachments:', err);
+                    setStepAttachments([]);
+                }
+            }
         } catch (error) {
             console.error("Error fetching ticket details:", error);
         } finally {
@@ -281,6 +296,37 @@ export default function TicketDetailPage() {
             <div className="mb-4">
                 <TicketAttachmentsPanel attachments={creationAttachments} />
             </div>
+
+            {/* Step Attachments - Templates for this step */}
+            {stepAttachments.length > 0 && (
+                <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="flex items-center gap-2 mb-3">
+                        <Icon name="folder_open" className="text-blue-600" />
+                        <span className="text-sm font-semibold text-blue-800">Plantillas / Archivos del Paso</span>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        {stepAttachments.map(attachment => (
+                            <button
+                                key={attachment.id}
+                                type="button"
+                                onClick={() => {
+                                    const pasoId = ticket.workflowStepId;
+                                    toast.info(`Descargando: paso=${pasoId}, attachment=${attachment.id}`);
+                                    ticketService.downloadFile(`/workflows/steps/${pasoId}/attachments/${attachment.id}/download`, attachment.nombreOriginal);
+                                }}
+                                className="flex items-center gap-2 p-2 bg-white border border-blue-200 rounded hover:bg-blue-100 transition-colors w-full text-left"
+                            >
+                                <Icon name="description" className="text-blue-600 text-lg" />
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-medium text-gray-800 truncate">{attachment.nombreOriginal}</p>
+                                    <p className="text-xs text-gray-500">{(attachment.tamano / 1024).toFixed(1)} KB</p>
+                                </div>
+                                <Icon name="download" className="text-blue-500 text-lg" />
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
 
 
             {/* Main Content Grid - Remove grid for print to allow natural flow */}

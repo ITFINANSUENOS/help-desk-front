@@ -65,6 +65,26 @@ export const stepService = {
         return response.data;
     },
 
+    async getStepAttachments(stepId: number): Promise<any[]> {
+        const response = await api.get<any[]>(`/workflows/steps/${stepId}/attachments`);
+        return response.data;
+    },
+
+    async uploadStepAttachment(stepId: number, file: File): Promise<any> {
+        const formData = new FormData();
+        formData.append('file', file);
+        const response = await api.post(`/workflows/steps/${stepId}/attachments`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        return response.data;
+    },
+
+    async deleteStepAttachment(stepId: number, attachmentId: number): Promise<void> {
+        await api.delete(`/workflows/steps/${stepId}/attachments/${attachmentId}`);
+    },
+
     async uploadFile(id: number, file: File): Promise<void> {
         const formData = new FormData();
         formData.append('file', file);

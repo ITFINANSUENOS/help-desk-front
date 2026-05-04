@@ -55,6 +55,9 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
     const [pickerMode, setPickerMode] = useState<'firma' | 'campo'>('firma');
     const [pickerTarget, setPickerTarget] = useState<'firmas' | 'campos'>('firmas');
     const [pickerEditingIndex, setPickerEditingIndex] = useState<number | null>(null);
+    const [attachments, setAttachments] = useState<any[]>([]);
+    const [uploadingAttachment, setUploadingAttachment] = useState(false);
+    const attachmentInputRef = useRef<HTMLInputElement>(null);
 
 
 
@@ -135,6 +138,24 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
     const loadCatalogs = () => {
         positionService.getAllActive().then(setPositions).catch(console.error);
         companyService.getCompanies({ limit: 100 }).then(res => setCompanies(res.data || [])).catch(console.error);
+    };
+
+    // Load attachments when editing a step
+    useEffect(() => {
+        if (isEdit && step?.id) {
+            loadAttachments(step.id);
+        } else {
+            setAttachments([]);
+        }
+    }, [isEdit, step?.id]);
+
+    const loadAttachments = async (stepId: number) => {
+        try {
+            const data = await stepService.getStepAttachments(stepId);
+            setAttachments(data);
+        } catch (err) {
+            console.error('Error loading attachments:', err);
+        }
     };
 
     // Load plantillas when empresaId changes
@@ -260,6 +281,36 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
             coordY: c.coordY,
             pagina: c.pagina || 1,
         }));
+    };
+
+    const handleAttachmentUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file || !step?.id) return;
+
+        setUploadingAttachment(true);
+        try {
+            const newAttachment = await stepService.uploadStepAttachment(step.id, file);
+            setAttachments(prev => [...prev, newAttachment]);
+            toast.success('Archivo subido');
+        } catch (err) {
+            console.error('Error uploading attachment:', err);
+            toast.error('Error al subir archivo');
+        } finally {
+            setUploadingAttachment(false);
+            if (attachmentInputRef.current) attachmentInputRef.current.value = '';
+        }
+    };
+
+    const handleDeleteAttachment = async (attachmentId: number) => {
+        if (!step?.id) return;
+        try {
+            await stepService.deleteStepAttachment(step.id, attachmentId);
+            setAttachments(prev => prev.filter(a => a.id !== attachmentId));
+            toast.success('Archivo eliminado');
+        } catch (err) {
+            console.error('Error deleting attachment:', err);
+            toast.error('Error al eliminar archivo');
+        }
     };
 
     const isPool = watch('esPool');
@@ -639,11 +690,67 @@ export const StepModal = ({ isOpen, onClose, onSuccess, step, flujoId }: StepMod
                     )}
 
                     <div className="p-4 bg-white rounded-lg border-l-4 border-gray-400 shadow-sm mt-4">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 mb-3">
                             <Icon name="attach_file" className="text-gray-600" style={{ fontSize: '18px' }} />
-                            <span className="text-sm font-semibold text-gray-900">Configuración Adicional</span>
+                            <span className="text-sm font-semibold text-gray-900">Plantillas / Archivos del Paso</span>
                         </div>
-                        <div className="flex items-center gap-2 mt-3">
+
+                        {isEdit && attachments.length > 0 && (
+                            <div className="mb-3 space-y-2">
+                                {attachments.map(attachment => (
+                                    <div key={attachment.id} className="flex items-center justify-between p-2 bg-gray-50 rounded border border-gray-200">
+                                        <div className="flex items-center gap-2">
+                                            <Icon name="description" className="text-blue-600" />
+                                            <div>
+                                                <p className="text-sm font-medium text-gray-800">{attachment.nombreOriginal}</p>
+                                                <p className="text-xs text-gray-500">{(attachment.tamano / 1024).toFixed(1)} KB</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <a
+                                                href={`/api/workflows/steps/${step.id}/attachments/${attachment.id}/download`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-gray-400 hover:text-brand-blue"
+                                            >
+                                                <Icon name="download" className="text-lg" />
+                                            </a>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleDeleteAttachment(attachment.id)}
+                                                className="text-gray-400 hover:text-red-600"
+                                            >
+                                                <Icon name="delete" className="text-lg" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        <div className="flex items-center gap-3">
+                            <input
+                                type="file"
+                                ref={attachmentInputRef}
+                                onChange={handleAttachmentUpload}
+                                className="hidden"
+                            />
+                            <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                onClick={() => attachmentInputRef.current?.click()}
+                                disabled={!isEdit || uploadingAttachment}
+                            >
+                                <Icon name="add" className="mr-1 text-[16px]" />
+                                {uploadingAttachment ? 'Subiendo...' : 'Agregar Archivo'}
+                            </Button>
+                            {!isEdit && (
+                                <span className="text-xs text-gray-500">Guarde el paso primero para subir archivos</span>
+                            )}
+                        </div>
+
+                        <div className="flex items-center gap-2 mt-4">
                             <Input
                                 label="Nombre de Adjunto Requerido"
                                 {...register('nombreAdjunto')}
