@@ -19,7 +19,7 @@ export const ProfileSignatureUpload: React.FC = () => {
     const loadSignature = async () => {
         if (!user?.id) return;
         try {
-            const url = userService.getProfileSignatureUrl(user.id);
+            const url = userService.getProfileSignatureUrl(user.id) + `?t=${Date.now()}`;
             const token = localStorage.getItem('token');
             const response = await fetch(url, {
                 headers: {
@@ -56,7 +56,13 @@ export const ProfileSignatureUpload: React.FC = () => {
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (!file) return;
+        if (!file) {
+            console.log('No file selected');
+            return;
+        }
+
+        console.log('File selected:', file.name, file.size, file.type);
+        toast.info(`Archivo seleccionado: ${file.name}`);
 
         if (!['image/png', 'image/jpeg'].includes(file.type)) {
             toast.error('Solo se permiten archivos PNG o JPG');
@@ -72,9 +78,11 @@ export const ProfileSignatureUpload: React.FC = () => {
 
         setIsUploading(true);
         try {
+            console.log('Uploading signature for user:', user.id, file);
+            toast.info('Subiendo firma...');
             await userService.uploadProfileSignature(user.id, file);
             toast.success('Firma actualizada correctamente');
-            loadSignature(); // Reload preview
+            await loadSignature(); // Reload preview
         } catch (error) {
             console.error('Error uploading signature:', error);
             toast.error('Error al subir la firma');
@@ -119,6 +127,7 @@ export const ProfileSignatureUpload: React.FC = () => {
                         onClick={() => fileInputRef.current?.click()}
                         disabled={isUploading}
                         variant="secondary"
+                        type="button"
                     >
                         {isUploading ? 'Subiendo...' : (previewUrl ? 'Cambiar Firma' : 'Subir Firma')}
                     </Button>

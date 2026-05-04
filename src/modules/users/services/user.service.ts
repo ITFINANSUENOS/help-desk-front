@@ -105,6 +105,6 @@ export const userService = {
      * Obtiene la URL de la firma de perfil del usuario
      */
     getProfileSignatureUrl(userId: number): string {
-        return `${import.meta.env.VITE_API_URL}/users/${userId}/profile/signature`;
+        return `/users/${userId}/profile/signature`;
     }
 };

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import SignatureCanvas from 'react-signature-canvas';
 import { Button } from './Button';
 import { userService } from '../../modules/users/services/user.service';
@@ -53,12 +53,27 @@ export const UnifiedSignatureModal: React.FC<UnifiedSignatureModalProps> = ({
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { user } = useAuth();
 
-    if (!isOpen) return null;
-
-    const handleClear = () => {
+    const resetCanvas = () => {
         sigCanvas.current?.clear();
         setHasImage(false);
         setIsEmpty(true);
+    };
+
+    // Clear canvas and auto-load profile signature when modal opens
+    useEffect(() => {
+        if (isOpen) {
+            resetCanvas();
+            setComment('');
+            if (enableProfileSignature) {
+                handleLoadProfileSignatureSilently();
+            }
+        }
+    }, [isOpen]);
+
+    if (!isOpen) return null;
+
+    const handleClear = () => {
+        resetCanvas();
     };
 
     const handleConfirm = () => {
@@ -171,6 +186,34 @@ export const UnifiedSignatureModal: React.FC<UnifiedSignatureModalProps> = ({
             toast.error('No se encontró firma guardada en su perfil');
         } finally {
             setIsLoadingSignature(false);
+        }
+    };
+
+    const handleLoadProfileSignatureSilently = async () => {
+        if (!user?.id) return;
+
+        try {
+            const signatureUrl = userService.getProfileSignatureUrl(user.id);
+            const response = await fetch(signatureUrl, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+
+            if (!response.ok) return;
+
+            const blob = await response.blob();
+            const img = new Image();
+            const objectUrl = URL.createObjectURL(blob);
+
+            img.onload = () => {
+                drawImageOnCanvas(img);
+                URL.revokeObjectURL(objectUrl);
+            };
+
+            img.src = objectUrl;
+        } catch {
+            // Silent fail - user can just draw or upload
         }
     };
 
