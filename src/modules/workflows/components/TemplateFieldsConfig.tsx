@@ -38,7 +38,7 @@ const ExcelQueryConfig = ({ control, flujoId, setValue }: { control: Control<Ste
             setLoadingFiles(true);
             try {
                 const data = await excelDataService.getByFlow(flujoId);
-                setExcelFiles(data);
+                setExcelFiles(Array.isArray(data) ? data : []);
             } catch (err) {
                 console.error(err);
                 toast.error('Error cargando archivos Excel');
@@ -58,7 +58,7 @@ const ExcelQueryConfig = ({ control, flujoId, setValue }: { control: Control<Ste
             setLoadingCols(true);
             try {
                 const data = await excelDataService.getColumns(Number(currentFileId));
-                setColumns(data);
+                setColumns(Array.isArray(data) ? data : []);
             } catch (err) {
                 console.error(err);
             } finally {
