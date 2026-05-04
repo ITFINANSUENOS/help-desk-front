@@ -238,36 +238,71 @@ export const TemplateFieldsConfig = ({ campos, onChange, flujoId, onOpenPdfPicke
             {/* Lista de campos existentes */}
             {activeCampos.length > 0 && (
                 <div className="space-y-2 mb-4">
-                    {activeCampos.map((campo, index) => (
-                        <div key={index} className="flex items-center justify-between bg-white p-3 rounded border border-gray-200">
-                            <div className="flex-1">
-                                <p className="font-medium text-sm text-gray-900">{campo.nombre}</p>
-                                <p className="text-xs text-gray-500">
-                                    Código: {campo.codigo} | Tipo: {campo.tipo} | Pág: {campo.pagina}
-                                    {campo.etiqueta ? <span className="ml-2 text-blue-600 bg-blue-50 px-1 rounded">🏷️ {campo.etiqueta}</span> : ` | X: ${campo.coordX}, Y: ${campo.coordY}`}
-                                </p>
-                                {campo.campoQuery && (
-                                    <p className="text-xs text-gray-400 mt-1 font-mono">{campo.campoQuery}</p>
-                                )}
+                    {activeCampos.map((campo, index) => {
+                        const sourceLabel = campo.campoQuery?.startsWith('EXCEL:')
+                            ? 'Excel'
+                            : campo.campoQuery === 'PRESET_FECHA_ACTUAL'
+                                ? 'Fecha Actual'
+                                : campo.campoQuery
+                                    ? 'Custom SQL'
+                                    : 'Ninguna';
+                        return (
+                            <div key={index} className="bg-white p-3 rounded border border-gray-200">
+                                <div className="flex items-start justify-between">
+                                    <div className="flex-1 space-y-1">
+                                        <div className="flex items-center gap-2">
+                                            <span className="font-semibold text-gray-900">{campo.nombre}</span>
+                                            <span className={`text-xs px-2 py-0.5 rounded ${campo.tipo === 'text' ? 'bg-gray-100 text-gray-600' : campo.tipo === 'number' ? 'bg-blue-100 text-blue-700' : campo.tipo === 'date' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>
+                                                {campo.tipo}
+                                            </span>
+                                            {campo.campoTrigger === 1 && (
+                                                <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded">Trigger</span>
+                                            )}
+                                            {campo.mostrarDiasTranscurridos ? (
+                                                <span className="text-xs bg-cyan-100 text-cyan-700 px-2 py-0.5 rounded">Días</span>
+                                            ) : null}
+                                        </div>
+                                        <p className="text-xs text-gray-500 font-mono">Código: {campo.codigo}</p>
+                                        <div className="flex items-center gap-3 text-xs text-gray-500">
+                                            <span>Pág: {campo.pagina}</span>
+                                            <span>X: {campo.coordX}</span>
+                                            <span>Y: {campo.coordY}</span>
+                                            <span>Font: {campo.fontSize}px</span>
+                                        </div>
+                                        {campo.etiqueta && (
+                                            <p className="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded inline-block mt-1">
+                                                🏷️ {campo.etiqueta}
+                                            </p>
+                                        )}
+                                        <div className="flex items-center gap-2">
+                                            <span className={`text-xs px-2 py-0.5 rounded ${sourceLabel !== 'Ninguna' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                                                📊 {sourceLabel}
+                                            </span>
+                                            {sourceLabel === 'Ninguna' ? null : (
+                                                <span className="text-xs text-gray-400 font-mono">{campo.campoQuery}</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => handleEdit(index)}
+                                            className="text-gray-400 hover:text-brand-blue"
+                                        >
+                                            <Icon name="edit" className="text-[20px]" />
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleDelete(index)}
+                                            className="text-gray-400 hover:text-red-600"
+                                        >
+                                            <Icon name="delete" className="text-[20px]" />
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
-                            <div className="flex gap-2">
-                                <button
-                                    type="button"
-                                    onClick={() => handleEdit(index)}
-                                    className="text-gray-400 hover:text-brand-blue"
-                                >
-                                    <Icon name="edit" className="text-[20px]" />
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => handleDelete(index)}
-                                    className="text-gray-400 hover:text-red-600"
-                                >
-                                    <Icon name="delete" className="text-[20px]" />
-                                </button>
-                            </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             )}
 
