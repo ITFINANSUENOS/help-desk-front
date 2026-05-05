@@ -219,7 +219,7 @@ export default function CreateTicketPage() {
                 initialTransitionKey: selectedDecision ? selectedDecision.decisionId : undefined,
                 initialTargetStepId: selectedDecision ? selectedDecision.targetStepId : undefined,
                 templateValues: Object.entries(templateValues).map(([key, val]) => ({
-                    campoId: Number(key),
+                    flujoPlantillaCampoCoordId: Number(key),
                     valor: val
                 }))
             };
@@ -243,10 +243,10 @@ export default function CreateTicketPage() {
         navigate('/tickets');
     };
 
-    const handleTemplateChange = useCallback((values: { campoId: number; valor: string }[]) => {
+    const handleTemplateChange = useCallback((values: { flujoPlantillaCampoCoordId: number; valor: string }[]) => {
         const newValues: Record<number, string> = {};
         values.forEach(v => {
-            newValues[v.campoId] = v.valor;
+            newValues[v.flujoPlantillaCampoCoordId] = v.valor;
         });
         setTemplateValues(newValues);
     }, []);

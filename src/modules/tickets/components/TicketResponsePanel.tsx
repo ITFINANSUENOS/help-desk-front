@@ -60,7 +60,7 @@ export const TicketResponsePanel: React.FC<TicketResponsePanelProps> = ({
     const { user } = useAuth();
     const [comment, setComment] = useState('');
     const [files, setFiles] = useState<File[]>([]);
-    const [dynamicValues, setDynamicValues] = useState<{ campoId: number; valor: string }[]>([]);
+    const [dynamicValues, setDynamicValues] = useState<{ flujoPlantillaCampoCoordId: number; valor: string }[]>([]);
     const [originalStepDescription, setOriginalStepDescription] = useState<string>('');
 
     // Pre-load step description into comment editor

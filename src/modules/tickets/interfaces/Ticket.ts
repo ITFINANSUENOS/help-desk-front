@@ -69,7 +69,7 @@ export interface CreateTicketDto {
     usuarioAsignadoId?: number;
     initialTransitionKey?: string;
     initialTargetStepId?: number;
-    templateValues?: { campoId: number; valor: string }[];
+    templateValues?: { flujoPlantillaCampoCoordId: number; valor: string }[];
 }
 
 export interface UpdateTicketDto {
@@ -229,7 +229,7 @@ export interface SignParallelTaskResponse {
 }
 
 export interface TemplateField {
-    id: number;
+    id: number; // This is now flujoPlantillaCampoCoordId
     nombre: string;
     codigo: string;
     tipo: 'text' | 'number' | 'date' | 'select' | 'textarea' | 'checkbox' | 'file' | 'regional' | 'cargo' | string;
@@ -240,7 +240,7 @@ export interface TemplateField {
 }
 
 export interface TemplateFieldValue {
-    campoId: number;
+    flujoPlantillaCampoCoordId: number;
     valor: string;
 }
 

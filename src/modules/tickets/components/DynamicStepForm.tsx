@@ -7,7 +7,7 @@ import { templateService } from '../../templates/services/template.service';
 
 interface DynamicStepFormProps {
     fields: TemplateField[]; // Schema
-    onChange: (values: { campoId: number; valor: string }[]) => void;
+    onChange: (values: { flujoPlantillaCampoCoordId: number; valor: string }[]) => void;
 }
 
 export const DynamicStepForm: React.FC<DynamicStepFormProps> = ({ fields, onChange }) => {
@@ -24,12 +24,12 @@ export const DynamicStepForm: React.FC<DynamicStepFormProps> = ({ fields, onChan
             if (key.startsWith('field_')) {
                 const fieldId = parseInt(key.replace('field_', ''), 10);
                 return {
-                    campoId: fieldId,
+                    flujoPlantillaCampoCoordId: fieldId,
                     valor: String(value || '')
                 };
             }
             return null;
-        }).filter((v): v is { campoId: number; valor: string } => v !== null && v.valor !== '');
+        }).filter((v): v is { flujoPlantillaCampoCoordId: number; valor: string } => v !== null && v.valor !== '');
 
         const stringified = JSON.stringify(formattedValues);
         if (stringified !== prevValuesRef.current) {
