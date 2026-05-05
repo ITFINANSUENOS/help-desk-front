@@ -49,8 +49,8 @@ export default function TicketDetailPage() {
             setTicket(ticketData);
             setTimeline(timelineData);
 
-            // Load step attachments if ticket has a pasoId
-            const pasoId = ticketData.pasoActual?.id || ticketData.workflowStepId;
+            // Load step attachments if ticket has a workflowStepId
+            const pasoId = ticketData.workflowStepId;
             if (pasoId) {
                 try {
                     const attachments = await stepService.getStepAttachments(pasoId);
