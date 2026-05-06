@@ -19,7 +19,8 @@ export const ProfileSignatureUpload: React.FC = () => {
     const loadSignature = async () => {
         if (!user?.id) return;
         try {
-            const url = userService.getProfileSignatureUrl(user.id) + `?t=${Date.now()}`;
+            const apiUrl = import.meta.env.VITE_API_URL || '';
+            const url = `${apiUrl}${userService.getProfileSignatureUrl(user.id)}?t=${Date.now()}`;
             const token = localStorage.getItem('token');
             const response = await fetch(url, {
                 headers: {
