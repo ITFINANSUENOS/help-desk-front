@@ -38,6 +38,10 @@ const RegionalesPage = lazy(() => import('../modules/reports/pages/Regionales'))
 const MapaCalorPage = lazy(() => import('../modules/reports/pages/MapaCalor'));
 const CategoriasPage = lazy(() => import('../modules/reports/pages/Categorias'));
 const CuellosBottleneckPage = lazy(() => import('../modules/reports/pages/CuellosBottleneck'));
+const ViaticosPage = lazy(() => import('../modules/viaticos/pages/ViaticosPage'));
+const CreateViaticoPage = lazy(() => import('../modules/viaticos/pages/CreateViaticoPage'));
+const ViaticoDetailPage = lazy(() => import('../modules/viaticos/pages/ViaticoDetailPage'));
+const ViaticoConfigPage = lazy(() => import('../modules/viaticos/pages/ViaticoConfigPage'));
 const DistribucionTiemposPage = lazy(() => import('../modules/reports/pages/DistribucionTiempos'));
 const NovedadesPage = lazy(() => import('../modules/reports/pages/Novedades'));
 const DetalleUsuarioPage = lazy(() => import('../modules/reports/pages/DetalleUsuario'));
@@ -360,6 +364,38 @@ export const appRoutes: RouteObject[] = [
                         element: (
                             <Suspense fallback={<PageLoader />}>
                                 <FlowOpenTicketsPage />
+                            </Suspense>
+                        )
+                    },
+                    {
+                        path: '/viaticos',
+                        element: (
+                            <Suspense fallback={<PageLoader />}>
+                                <ViaticosPage />
+                            </Suspense>
+                        )
+                    },
+                    {
+                        path: '/viaticos/nuevo',
+                        element: (
+                            <Suspense fallback={<PageLoader />}>
+                                <CreateViaticoPage />
+                            </Suspense>
+                        )
+                    },
+                    {
+                        path: '/viaticos/:id',
+                        element: (
+                            <Suspense fallback={<PageLoader />}>
+                                <ViaticoDetailPage />
+                            </Suspense>
+                        )
+                    },
+                    {
+                        path: '/viaticos/config',
+                        element: (
+                            <Suspense fallback={<PageLoader />}>
+                                <ViaticoConfigPage />
                             </Suspense>
                         )
                     },

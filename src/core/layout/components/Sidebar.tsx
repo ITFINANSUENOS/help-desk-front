@@ -100,6 +100,7 @@ export function Sidebar({ isCollapsed, toggleCollapse, isMobileOpen, closeMobile
     const menuItems: MenuItem[] = [
         { to: '/', icon: 'dashboard', label: 'Dashboard' },
         { to: '/tickets', icon: 'confirmation_number', label: 'Tickets', subject: 'Ticket' },
+        { to: '/viaticos', icon: 'flight_takeoff', label: 'Viáticos', subject: 'Viatico' },
         { to: '/users', icon: 'group', label: 'Usuarios', subject: 'User', action: 'manage' },
         { to: '/roles', icon: 'admin_panel_settings', label: 'Roles y Permisos', subject: 'Role', action: 'manage' },
         { to: '/permissions', icon: 'lock_open', label: 'Catálogo Permisos', subject: 'Permission', action: 'manage' },
