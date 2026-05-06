@@ -152,7 +152,8 @@ export const UnifiedSignatureModal: React.FC<UnifiedSignatureModalProps> = ({
 
         setIsLoadingSignature(true);
         try {
-            const signatureUrl = userService.getProfileSignatureUrl(user.id);
+            const apiUrl = import.meta.env.VITE_API_URL || '';
+            const signatureUrl = `${apiUrl}${userService.getProfileSignatureUrl(user.id)}`;
 
             // Fetch the image and load it into the canvas
             const response = await fetch(signatureUrl, {
@@ -193,7 +194,8 @@ export const UnifiedSignatureModal: React.FC<UnifiedSignatureModalProps> = ({
         if (!user?.id) return;
 
         try {
-            const signatureUrl = userService.getProfileSignatureUrl(user.id);
+            const apiUrl = import.meta.env.VITE_API_URL || '';
+            const signatureUrl = `${apiUrl}${userService.getProfileSignatureUrl(user.id)}`;
             const response = await fetch(signatureUrl, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
