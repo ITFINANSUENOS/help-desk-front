@@ -50,7 +50,9 @@ export const UnifiedSignatureModal: React.FC<UnifiedSignatureModalProps> = ({
     const [hasImage, setHasImage] = useState(false);
     const [comment, setComment] = useState('');
     const [isLoadingSignature, setIsLoadingSignature] = useState(false);
+    const [hasProfileSignature, setHasProfileSignature] = useState(true);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const loadGenRef = useRef(0);
     const { user } = useAuth();
 
     const resetCanvas = () => {
@@ -64,8 +66,10 @@ export const UnifiedSignatureModal: React.FC<UnifiedSignatureModalProps> = ({
         if (isOpen) {
             resetCanvas();
             setComment('');
+            setHasProfileSignature(true);
             if (enableProfileSignature) {
-                handleLoadProfileSignatureSilently();
+                loadGenRef.current += 1;
+                handleLoadProfileSignatureSilently(loadGenRef.current);
             }
         }
     }, [isOpen]);
@@ -167,6 +171,14 @@ export const UnifiedSignatureModal: React.FC<UnifiedSignatureModalProps> = ({
             }
 
             const blob = await response.blob();
+            if (blob.size === 0) {
+                setHasProfileSignature(false);
+                toast.warning('No tienes firma configurada en tu perfil. Sube una imagen PNG o contacta a soporte.');
+                setIsLoadingSignature(false);
+                return;
+            }
+
+            setHasProfileSignature(true);
             const img = new Image();
             const objectUrl = URL.createObjectURL(blob);
 
@@ -190,9 +202,10 @@ export const UnifiedSignatureModal: React.FC<UnifiedSignatureModalProps> = ({
         }
     };
 
-    const handleLoadProfileSignatureSilently = async () => {
+    const handleLoadProfileSignatureSilently = async (gen: number) => {
         if (!user?.id) return;
 
+        setIsLoadingSignature(true);
         try {
             const apiUrl = import.meta.env.VITE_API_URL || '';
             const signatureUrl = `${apiUrl}${userService.getProfileSignatureUrl(user.id)}`;
@@ -205,17 +218,30 @@ export const UnifiedSignatureModal: React.FC<UnifiedSignatureModalProps> = ({
             if (!response.ok) return;
 
             const blob = await response.blob();
+            if (blob.size === 0) {
+                setHasProfileSignature(false);
+                setIsLoadingSignature(false);
+                return;
+            }
+
+            setHasProfileSignature(true);
             const img = new Image();
             const objectUrl = URL.createObjectURL(blob);
 
             img.onload = () => {
+                if (gen !== loadGenRef.current) {
+                    URL.revokeObjectURL(objectUrl);
+                    return; // Stale load, discard
+                }
                 drawImageOnCanvas(img);
                 URL.revokeObjectURL(objectUrl);
+                setIsLoadingSignature(false);
             };
 
             img.src = objectUrl;
         } catch {
             // Silent fail - user can just draw or upload
+            setIsLoadingSignature(false);
         }
     };
 
@@ -299,7 +325,7 @@ export const UnifiedSignatureModal: React.FC<UnifiedSignatureModalProps> = ({
                                             Limpiar
                                         </button>
 
-                                        {enableProfileSignature && (
+                                        {enableProfileSignature && hasProfileSignature && (
                                             <button
                                                 type="button"
                                                 onClick={handleLoadProfileSignature}
