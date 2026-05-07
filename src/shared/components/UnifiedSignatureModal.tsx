@@ -47,30 +47,27 @@ export const UnifiedSignatureModal: React.FC<UnifiedSignatureModalProps> = ({
 }) => {
     const sigCanvas = useRef<SignatureCanvas>(null);
     const [isEmpty, setIsEmpty] = useState(true);
-    const [hasImage, setHasImage] = useState(false);
+    const [hasUploadedImage, setHasUploadedImage] = useState(false);
     const [comment, setComment] = useState('');
     const [isLoadingSignature, setIsLoadingSignature] = useState(false);
-    const [hasProfileSignature, setHasProfileSignature] = useState(true);
+    const [forceManual, setForceManual] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const loadGenRef = useRef(0);
     const { user } = useAuth();
+    const canUseProfileSignature = enableProfileSignature && !!user?.id && !forceManual;
+    const isCanvasDisabled = canUseProfileSignature && isEmpty;
 
     const resetCanvas = () => {
         sigCanvas.current?.clear();
-        setHasImage(false);
+        setHasUploadedImage(false);
         setIsEmpty(true);
     };
 
-    // Clear canvas and auto-load profile signature when modal opens
+    // Clear canvas when modal opens
     useEffect(() => {
         if (isOpen) {
             resetCanvas();
             setComment('');
-            setHasProfileSignature(true);
-            if (enableProfileSignature) {
-                loadGenRef.current += 1;
-                handleLoadProfileSignatureSilently(loadGenRef.current);
-            }
+            setForceManual(false);
         }
     }, [isOpen]);
 
@@ -78,11 +75,51 @@ export const UnifiedSignatureModal: React.FC<UnifiedSignatureModalProps> = ({
 
     const handleClear = () => {
         resetCanvas();
+        setForceManual(true);
     };
 
-    const handleConfirm = () => {
-        // Use local state 'isEmpty' because sigCanvas.isEmpty() ignores drawImage (manual uploads)
-        if (!sigCanvas.current || isEmpty) {
+    const handleConfirm = async () => {
+        if (!sigCanvas.current) return;
+
+        let dataUrl: string | null = null;
+
+        if (!isEmpty) {
+            // User drew or uploaded an image — use canvas content
+            dataUrl = sigCanvas.current.toDataURL('image/png');
+        }
+
+        // Canvas is empty but user has a saved profile signature — use it directly
+        if (!dataUrl && enableProfileSignature && user?.id) {
+            setIsLoadingSignature(true);
+            try {
+                const apiUrl = import.meta.env.VITE_API_URL || '';
+                const signatureUrl = `${apiUrl}${userService.getProfileSignatureUrl(user.id)}`;
+                const response = await fetch(signatureUrl, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    if (blob.size > 0) {
+                        dataUrl = await new Promise<string>((resolve, reject) => {
+                            const reader = new FileReader();
+                            reader.onload = () => resolve(reader.result as string);
+                            reader.onerror = reject;
+                            reader.readAsDataURL(blob);
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading profile signature:', error);
+            } finally {
+                setIsLoadingSignature(false);
+            }
+        }
+
+        if (!dataUrl) {
+            toast.error('Debe dibujar su firma, subir una imagen o tener una firma guardada en su perfil');
             return;
         }
 
@@ -91,7 +128,6 @@ export const UnifiedSignatureModal: React.FC<UnifiedSignatureModalProps> = ({
             return;
         }
 
-        const dataUrl = sigCanvas.current.toDataURL('image/png');
         onConfirm({
             signature: dataUrl,
             comment: showCommentField ? comment : undefined
@@ -101,7 +137,7 @@ export const UnifiedSignatureModal: React.FC<UnifiedSignatureModalProps> = ({
     const handleEnd = () => {
         if (sigCanvas.current) {
             // Check if empty (no strokes) AND no custom image
-            setIsEmpty(sigCanvas.current.isEmpty() && !hasImage);
+            setIsEmpty(sigCanvas.current.isEmpty() && !hasUploadedImage);
         }
     };
 
@@ -144,105 +180,8 @@ export const UnifiedSignatureModal: React.FC<UnifiedSignatureModalProps> = ({
         const y = (canvas.height - h) / 2;
 
         ctx.drawImage(img, x, y, w, h);
-        setHasImage(true);
+        setHasUploadedImage(true);
         setIsEmpty(false);
-    };
-
-    const handleLoadProfileSignature = async () => {
-        if (!user?.id) {
-            toast.error('No se pudo identificar al usuario');
-            return;
-        }
-
-        setIsLoadingSignature(true);
-        try {
-            const apiUrl = import.meta.env.VITE_API_URL || '';
-            const signatureUrl = `${apiUrl}${userService.getProfileSignatureUrl(user.id)}`;
-
-            // Fetch the image and load it into the canvas
-            const response = await fetch(signatureUrl, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error('Firma de perfil no encontrada');
-            }
-
-            const blob = await response.blob();
-            if (blob.size === 0) {
-                setHasProfileSignature(false);
-                toast.warning('No tienes firma configurada en tu perfil. Sube una imagen PNG o contacta a soporte.');
-                setIsLoadingSignature(false);
-                return;
-            }
-
-            setHasProfileSignature(true);
-            const img = new Image();
-            const objectUrl = URL.createObjectURL(blob);
-
-            img.onload = () => {
-                drawImageOnCanvas(img);
-                URL.revokeObjectURL(objectUrl);
-                toast.success('Firma de perfil cargada');
-            };
-
-            img.onerror = () => {
-                URL.revokeObjectURL(objectUrl);
-                toast.error('Error al cargar la imagen de la firma');
-            };
-
-            img.src = objectUrl;
-        } catch (error) {
-            console.error('Error loading profile signature:', error);
-            toast.error('No se encontró firma guardada en su perfil');
-        } finally {
-            setIsLoadingSignature(false);
-        }
-    };
-
-    const handleLoadProfileSignatureSilently = async (gen: number) => {
-        if (!user?.id) return;
-
-        setIsLoadingSignature(true);
-        try {
-            const apiUrl = import.meta.env.VITE_API_URL || '';
-            const signatureUrl = `${apiUrl}${userService.getProfileSignatureUrl(user.id)}`;
-            const response = await fetch(signatureUrl, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
-            });
-
-            if (!response.ok) return;
-
-            const blob = await response.blob();
-            if (blob.size === 0) {
-                setHasProfileSignature(false);
-                setIsLoadingSignature(false);
-                return;
-            }
-
-            setHasProfileSignature(true);
-            const img = new Image();
-            const objectUrl = URL.createObjectURL(blob);
-
-            img.onload = () => {
-                if (gen !== loadGenRef.current) {
-                    URL.revokeObjectURL(objectUrl);
-                    return; // Stale load, discard
-                }
-                drawImageOnCanvas(img);
-                URL.revokeObjectURL(objectUrl);
-                setIsLoadingSignature(false);
-            };
-
-            img.src = objectUrl;
-        } catch {
-            // Silent fail - user can just draw or upload
-            setIsLoadingSignature(false);
-        }
     };
 
     const handleImageUploadClick = () => {
@@ -301,7 +240,14 @@ export const UnifiedSignatureModal: React.FC<UnifiedSignatureModalProps> = ({
                                 </p>
 
                                 {/* Signature Pad */}
-                                <div className="border-2 border-dashed border-gray-300 rounded-lg bg-gray-50 mb-2">
+                                <div className={`relative border-2 border-dashed rounded-lg bg-gray-50 mb-2 ${isCanvasDisabled ? 'border-brand-teal opacity-75 pointer-events-none' : 'border-gray-300'}`}>
+                                    {isCanvasDisabled && (
+                                        <div className="absolute inset-0 z-10 flex items-center justify-center">
+                                            <div className="bg-brand-teal text-white px-4 py-2 rounded-md shadow-lg text-sm font-medium">
+                                                ✓ Firma de perfil cargada
+                                            </div>
+                                        </div>
+                                    )}
                                     <SignatureCanvas
                                         ref={sigCanvas}
                                         penColor="black"
@@ -314,7 +260,11 @@ export const UnifiedSignatureModal: React.FC<UnifiedSignatureModalProps> = ({
                                 </div>
 
                                 <div className="flex justify-between items-center mb-4">
-                                    <span className="text-xs text-gray-400">Dibuje su firma arriba *</span>
+                                    <span className="text-xs text-gray-400">
+                                        {isCanvasDisabled
+                                            ? 'Su firma guardada se usará automáticamente al confirmar'
+                                            : 'Dibuje su firma arriba *'}
+                                    </span>
                                     <div className="flex gap-3">
                                         <button
                                             type="button"
@@ -322,28 +272,19 @@ export const UnifiedSignatureModal: React.FC<UnifiedSignatureModalProps> = ({
                                             className="text-xs text-brand-blue hover:underline"
                                             disabled={isLoading || isLoadingSignature}
                                         >
-                                            Limpiar
+                                            {isCanvasDisabled ? 'Dibujar manualmente' : 'Limpiar'}
                                         </button>
 
-                                        {enableProfileSignature && hasProfileSignature && (
+                                        {!isCanvasDisabled && (
                                             <button
                                                 type="button"
-                                                onClick={handleLoadProfileSignature}
-                                                className="text-xs text-brand-teal hover:underline font-medium"
+                                                onClick={handleImageUploadClick}
+                                                className="text-xs text-brand-blue hover:underline font-medium"
                                                 disabled={isLoading || isLoadingSignature}
                                             >
-                                                {isLoadingSignature ? 'Cargando...' : 'Usar mi firma guardada'}
+                                                Subir Imagen
                                             </button>
                                         )}
-
-                                        <button
-                                            type="button"
-                                            onClick={handleImageUploadClick}
-                                            className="text-xs text-brand-blue hover:underline font-medium"
-                                            disabled={isLoading || isLoadingSignature}
-                                        >
-                                            Subir Imagen
-                                        </button>
 
                                         <input
                                             type="file"
@@ -379,14 +320,14 @@ export const UnifiedSignatureModal: React.FC<UnifiedSignatureModalProps> = ({
                         <Button
                             variant="brand"
                             onClick={handleConfirm}
-                            disabled={isEmpty || isLoading || (showCommentField && commentRequired && !comment.trim())}
+                            disabled={(isEmpty && !canUseProfileSignature) || isLoading || isLoadingSignature || (showCommentField && commentRequired && !comment.trim())}
                         >
-                            {isLoading ? 'Procesando...' : 'Confirmar Firma'}
+                            {isLoadingSignature ? 'Cargando firma...' : isLoading ? 'Procesando...' : 'Confirmar Firma'}
                         </Button>
                         <Button
                             variant="ghost"
                             onClick={onClose}
-                            disabled={isLoading}
+                            disabled={isLoading || isLoadingSignature}
                         >
                             Cancelar
                         </Button>
